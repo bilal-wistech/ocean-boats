@@ -116,7 +116,7 @@
                     @foreach($boat->details as $key=>$value)
                         <div class="card m-1">
                             <div class="card-body text-center">
-                                <p><b>{{$value->slug->ltitle}}: </b>{{$value->slug->parent ? $value->slug->parent->ltitle : ''}}</p>
+                                <p><b>{{$value->slug->ltitle}}: </b>{{$value->slug->parent ? $value->ltitle : ''}}</p>
                                 <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
                             </div>
                         </div>

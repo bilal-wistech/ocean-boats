@@ -38,6 +38,8 @@ use RvMedia;
 use SeoHelper;
 use Theme;
 use DB;
+
+use NaeemAwan\PredefinedLists\Models\PredefinedList;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiryDetail;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
@@ -790,16 +792,23 @@ class PublicController extends Controller
     }
 
     public function getViewSavedBoat($id){
-        $boat = $this->boatenquiryRepository->getFirstBy(
-            [
-                'id' => $id,
-                'user_id' => auth('customer')->id(),
-            ],
-            ['boat_enquiries.*']
-        );
+
+        $boat = BoatEnquiry::where(['boat_enquiries.id'=> $id, 'boat_enquiries.user_id' =>auth('customer')->id() ])
+        ->join('predefined_list as p', 'p.id', '=', 'boat_enquiries.boat_id') 
+        ->select('boat_enquiries.*', 'p.ltitle')    
+        ->with('details')    
+        ->first();
 
         if (! $boat) {
             abort(404);
+        }
+
+       // dd($boat->toArray());
+
+        foreach( $boat->details as $details){    
+            
+            $opt = PredefinedList::where(['id'=> $details->option_id])->select('predefined_list.ltitle')->first()->toArray();
+            $details['ltitle'] =$opt['ltitle'];
         }
 
         $result = BoatEnquiryDetail::join('predefined_list as c', 'boat_enquiry_details.subcat_slug', '=', 'c.type')
@@ -810,6 +819,8 @@ class PublicController extends Controller
         ->select('c.id', 'boat_enquiry_details.option_id', 'c.ltitle','c.image', 'boat_enquiry_details.subcat_slug')
         ->with('enquiry_option')
         ->get();
+
+//dd($boat->toArray(), $result->toArray());
 
 
         SeoHelper::setTitle(__('Saved Boat details'));
