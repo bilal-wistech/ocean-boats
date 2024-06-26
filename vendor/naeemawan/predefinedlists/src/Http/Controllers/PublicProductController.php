@@ -41,6 +41,8 @@ use Theme;
 use OrderHelper;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiryDetail;
+use App\Models\BoatView;
+
 
 class PublicProductController
 {
@@ -110,15 +112,25 @@ class PublicProductController
     }
 
     public function getProduct($id,Request $request)
-    {
+    {        
         $product = $this->productRepository->findOrFail($id);
-
+        $this->addViewCount($product->id, 'boat');
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
             ->add(__('Build a Boat'), route('public.customize-boat'))
             ->add($product->ltitle, route('public.customize-boat.id',$product->id));
             
         return Theme::scope('ecommerce.boat',compact('product'),'plugins/ecommerce::themes.boat')->render();
+    }
+    public function addViewCount($id, $type){        
+        if(empty($id)) return response()->json(['message' => 'Please provide ID ', 'id' => ''], 400);;
+        $boatView = BoatView::firstOrNew(['entity_id' => $id, 'entity_type' => $type]);
+        // Increment the total_count
+        $boatView->total_count++;
+        
+        // Save the record
+        $boatView->save();
+        return response()->json(['message' => 'View added successfully', 'id' => $id], 200);
     }
 
     public function getTypeContent(Request $request){
