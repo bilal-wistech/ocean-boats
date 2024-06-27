@@ -266,7 +266,16 @@
 </div>
 </div>
    
-
+<!-- scrolling -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+jQuery(function($) {
+    var offset = $('#custom-boat-container').offset().top - 50; 
+    $('html, body').animate({
+        scrollTop: offset
+    }, 'slow');
+});
+</script>
 
 
 

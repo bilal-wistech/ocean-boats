@@ -85,7 +85,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
  <div id="fullpage">
     @foreach($videoBackground as $key=>$value)
     <div class="section hero">
-        <video class="w-100 h-100" autoplay muted loop>
+        <video class="bg-video" autoplay muted loop>
             <source src="{{ RvMedia::getImageUrl($value->image) }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>

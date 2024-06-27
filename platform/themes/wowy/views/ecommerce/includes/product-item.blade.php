@@ -1,5 +1,5 @@
 @if ($product)
-    <div class="product-cart-wrap mb-30">
+    <div class="product-cart-wrap mb-30" id="product-item">
         <div class="product-img-action-wrap">
             <div class="product-img product-img-zoom">
                 <a href="{{ $product->url }}">
@@ -72,3 +72,13 @@
         </div>
     </div>
 @endif
+<!-- scrolling -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+jQuery(function($) {
+    var offset = $('#product-item').offset().top - 50; 
+    $('html, body').animate({
+        scrollTop: offset
+    }, 'slow');
+});
+</script>
