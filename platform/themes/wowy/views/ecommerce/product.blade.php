@@ -8,7 +8,7 @@
         ->add('lightGallery-js', 'plugins/lightGallery/js/lightgallery.min.js', ['jquery']);
 @endphp
 
-<div class="product-detail accordion-detail">
+<div class="product-detail accordion-detail" id="product-detail">
     <div class="row mb-50">
         <div class="col-md-6 col-sm-12 col-xs-12">
             <div class="detail-gallery">
@@ -351,3 +351,13 @@
         <related-products-component url="{{ route('public.ajax.related-products', $product->id) }}" :limit="{{ $layout == 'product-full-width' ? 4 : 3 }}"></related-products-component>
     </div>
 </div>
+<!-- scrolling -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+jQuery(function($) {
+    var offset = $('#product-detail').offset().top - 50; 
+    $('html, body').animate({
+        scrollTop: offset
+    }, 'slow');
+});
+</script>
