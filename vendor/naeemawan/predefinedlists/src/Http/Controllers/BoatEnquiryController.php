@@ -4,6 +4,7 @@ namespace NaeemAwan\PredefinedLists\Http\Controllers;
 use Botble\Base\Http\Controllers\BaseController;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
 use NaeemAwan\PredefinedLists\Tables\BoatEnquiryTable;
+use NaeemAwan\PredefinedLists\Tables\BoatViewsTable;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
@@ -24,6 +25,10 @@ class BoatEnquiryController extends BaseController{
 
     public function index(BoatEnquiryTable $table)
     {
+        return $table->renderTable();
+    }
+    public function botViews(BoatViewsTable $table)
+    {    
         return $table->renderTable();
     }
 

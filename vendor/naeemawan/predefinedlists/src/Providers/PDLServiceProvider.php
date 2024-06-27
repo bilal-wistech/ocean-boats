@@ -6,15 +6,19 @@ use Illuminate\Support\ServiceProvider;
 use NaeemAwan\PredefinedLists\Models\PredefinedList;
 use NaeemAwan\PredefinedLists\Models\PredefinedCategory;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
+use NaeemAwan\PredefinedLists\Models\BoatView;
 use NaeemAwan\PredefinedLists\Repositories\Eloquent\PredefinedListRepository;
 use NaeemAwan\PredefinedLists\Repositories\Eloquent\PredefinedCategoryRepository;
 use NaeemAwan\PredefinedLists\Repositories\Eloquent\BoatEnquiryRepository;
+use NaeemAwan\PredefinedLists\Repositories\Eloquent\BoatViewRepository;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\PredefinedListInterface;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\PredefinedCategoryInterface;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
+use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatViewInterface;
 use NaeemAwan\PredefinedLists\Repositories\Caches\PredefinedListCacheDecorator;
 use NaeemAwan\PredefinedLists\Repositories\Caches\PredefinedCategoryCacheDecorator;
 use NaeemAwan\PredefinedLists\Repositories\Caches\BoatEnquiryCacheDecorator;
+use NaeemAwan\PredefinedLists\Repositories\Caches\BoatViewCacheDecorator;
 use NaeemAwan\PredefinedLists\Observers\PredefinedListObserver;
 
 class PDLServiceProvider extends ServiceProvider
@@ -54,6 +58,9 @@ class PDLServiceProvider extends ServiceProvider
     });
     $this->app->bind(BoatEnquiryInterface::class, function () {
       return new BoatEnquiryCacheDecorator(new BoatEnquiryRepository(new BoatEnquiry()));
+    });
+    $this->app->bind(BoatViewInterface::class, function () {
+      return new BoatViewCacheDecorator(new BoatViewRepository(new BoatView()));
     });
     $this->mergeConfigFrom(
       __DIR__.'/../../config/predefinedlists.php',
