@@ -748,6 +748,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['plugins.ecommerce'],
                 ])
                 ->registerItem([
+                    'id' => 'cms-packages-custom-boat-views',
+                    'priority' => 1,
+                    'parent_id' => "cms-packages-build-boat",
+                    'name' => 'Boat Views',
+                    'icon' => 'fa fa-list-alt',
+                    'url' => route('custom-boat-views'),
+                    'permissions' => ['plugins.ecommerce'],
+                ])
+                ->registerItem([
                     'id' => 'cms-plugins-ecommerce-report',
                     'priority' => 0,
                     'parent_id' => 'cms-plugins-ecommerce',

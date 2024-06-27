@@ -148,6 +148,9 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'uses' => 'PredefinedCategoryController@deletes',
           'permission' => 'plugins.ecommerce',
         ]);
+
+        
+
     });
 
     //enquiries
@@ -157,6 +160,7 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'uses' => 'BoatEnquiryController@index',
           'permission' => 'plugins.ecommerce',
         ]);
+        
         Route::match(['post','get'],'/edit/{id}', [
           'as' => 'custom-boat-enquiries.edit',
           'uses' => 'BoatEnquiryController@edit',
@@ -178,6 +182,12 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'permission' => 'plugins.ecommerce',
         ]);
     });
-
+    Route::group(['prefix' => BaseHelper::getAdminPrefix(). '/custom-boat-views' , 'middleware' => 'auth'], function () {
+    Route::match(['post','get'],'/', [
+          'as' => 'custom-boat-views',
+          'uses' => 'BoatEnquiryController@botViews',
+          'permission' => 'plugins.ecommerce',
+        ]);
+});
 });
 
