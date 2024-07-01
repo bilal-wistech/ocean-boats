@@ -130,8 +130,8 @@
   <div class="col-lg-4 col-12">
     <form id="submit-form" action="{{ route('public.customize-boat.submit') }}" method="post">
       @csrf
-      <input type="hidden" name="boat_id" value="{{$product->id}}" > 
-      <input type="hidden" name="total_price" value="0" > 
+      <input type="hidden" name="boat_id" value="{{$product->id}}" >
+      <input type="hidden" name="total_price" value="0" >
       @forelse($categories as $key=>$value)
       <?php
       $i=$key+1;
@@ -155,7 +155,7 @@
                       <div class="tick-icon"> <img src="{{ asset('/storage/check_circle.png') }}"></div>
                       <div class="color-name">{{$option->ltitle}}</div>
                      </label>
-                    
+
                     @elseif($option->side_layout=='toggle')
                     <div class="form-check">
                       @if($value->multi_select!=3)

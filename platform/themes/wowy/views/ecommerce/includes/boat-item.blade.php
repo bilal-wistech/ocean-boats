@@ -32,7 +32,7 @@
             </div>
 
             <div class="justify-content-center mt-20 mb-20">
-                <a href="{{url('/customize-boat/'.$product->id)}}"><button type="button" class="btn boat">Build Your Boat</button></a>
+                <a href="{{url('/customize-boat/'.$product->ltitle)}}"><button type="button" class="btn boat">Build Your Boat</button></a>
             </div>
 
         </div>
