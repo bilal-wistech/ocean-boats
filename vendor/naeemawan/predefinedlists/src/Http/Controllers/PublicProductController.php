@@ -112,15 +112,17 @@ class PublicProductController
     }
 
     public function getProduct($id,Request $request)
-    {        
-        $product = $this->productRepository->findOrFail($id);
-        $this->addViewCount($product->id, 'boat');
-        Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
-            ->add(__('Build a Boat'), route('public.customize-boat'))
-            ->add($product->ltitle, route('public.customize-boat.id',$product->id));
-            
-        return Theme::scope('ecommerce.boat',compact('product'),'plugins/ecommerce::themes.boat')->render();
+    {
+        $product = $this->productRepository->getByWhereIn('ltitle',[$id]);
+        $product = $product[0];
+        if ($product->count() > 0) {
+            $this->addViewCount($product->id, 'boat');
+            Theme::breadcrumb()
+                ->add(__('Home'), route('public.index'))
+                ->add(__('Build a Boat'), route('public.customize-boat'))
+                ->add($product->ltitle, route('public.customize-boat.id',$product->id));
+            return Theme::scope('ecommerce.boat',compact('product'),'plugins/ecommerce::themes.boat')->render();return redirect()->route('public.customize-boat');
+        }
     }
     public function addViewCount($id, $type){        
         if(empty($id)) return response()->json(['message' => 'Please provide ID ', 'id' => ''], 400);;
