@@ -2,7 +2,7 @@
     <div class="product-cart-wrap boat-custom mb-30">
         <div class="product-img-action-wrap">
             <div class="product-img product-img-zoom">
-                <a href="{{url('/customize-boat/'.$product->id)}}">
+                <a href="{{url('/customize-boat/'.$product->ltitle)}}">
                     <img class="default-img" src="{{ RvMedia::getImageUrl($product->main_image, '', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
                     <!-- <img class="hover-img" src="{{ RvMedia::getImageUrl($product->image[1] ?? $product->image, 'product-thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}"> -->
                 </a>
