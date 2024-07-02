@@ -168,7 +168,6 @@
                       </label>
                       <div class="collapse" id="color-details-{{$option->id}}">
                         <div class="content-boat">
-                        <!--<p>{{$option->preview_enabled ? '' : '(Nothing to preview)'}}</p>-->
                         <img class="img-fluid img-thumbnail landscape" src="{{ RvMedia::getImageUrl($option->main_image) }}">
                         </div>
                       </div>
@@ -179,9 +178,28 @@
                   </div>
                 @empty
                 @endforelse
-                <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span></p>
+                
+                 <div class="row">
+                  <div class="col-8">
+                  <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span></p>
                 <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span class="vat-price">{{ format_price(($product->price * 5)/100) }}</span></p>
                 <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span class="vat-total">{{ format_price($product->price + (($product->price * 5)/100)) }}</span></p>
+                  </div>
+                <div class="col-4">
+                <div class="currency-dropdown dropdown">
+                <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                AED
+               </button>
+              <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
+              <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
+              <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
+              <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
+              </ul>
+             </div>
+
+                  </div>
+                 </div>
+              
             </div>
             <div class="customboat-card-footer d-flex justify-content-between flex-row">
               @if(isset($categories[$key+1]))
@@ -255,11 +273,25 @@
     </div>
     <div class="card-footer">
       <div class="row m-2">
-        <div class="col text-end">
+        <div class="col-9 text-end">
           <p><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span></p>
           <p><b>VAT 5%</b>: <span class="vat-price">{{ format_price(($product->price * 5)/100) }}</span></p>
           <p><b>Total</b>: <span class="vat-total">{{ format_price($product->price + (($product->price * 5)/100)) }}</span></p>
+          </div>
+          <div class="col-3">
+           <div class="currency-dropdown dropdown">
+                <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                AED
+               </button>
+              <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
+              <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
+              <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
+              <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
+              </ul>
+             </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -276,6 +308,4 @@ jQuery(function($) {
     }, 'slow');
 });
 </script>
-
-
 

@@ -91,7 +91,18 @@
                        <i class="fa fa-search"></i></button>
                        </form></li>
                     </ul>
-                    <ul class="header-navbar-nav-right header-navbar-nav">
+                    <ul class="header-navbar-nav-right header-navbar-nav d-flex">
+                        
+                <!-- Currency Dropdown -->
+                    <div class="dropdown my-dropdown currency">
+                    <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    AED
+                    </button>
+                      <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
+                        <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
+                        <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
+                        <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
+                    </div>
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                             @if (count($socialLink) == 4)
                                 <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i class="{{ $socialLink[1]['value'] }}"></i></a></li>
@@ -365,12 +376,29 @@
                 </div>
                 @if (is_plugin_active('ecommerce'))
                     <div class="mobile-header-content-area">
-                    <div class="mobile-search search-style-3 mobile-header-border">
+                        <div class="row search-currency">
+                            <div class="col-8">
+                            <div class="mobile-search search-style-3 mobile-header-border">
                         <form action="{{ route('public.products') }}">
                             <input type="text" name="q" placeholder="{{ __('Search...') }}">
                             <button type="submit"> <i class="far fa-search"></i> </button>
                         </form>
                     </div>
+                            </div>
+                            <div class="col-4">
+                                  <!-- Custom Currency Dropdown -->
+                                  <div class="dropdown currency">
+                                    <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                AED
+                               </button>
+                              <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
+                              <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
+                              <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
+                              <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
+                                    </div>
+                            </div>
+                        </div>
+
                     <!-- maryam -->
                     <div class="mobile-menu-wrap mobile-header-border">
                     <!-- mobile menu start -->
