@@ -421,6 +421,21 @@ footer .btn.subscribe:hover {
     }
 }
 
+@media only screen and (min-width: 1050px) {
+    .mobile-header-wrapper-style.sidebar-visible {
+        opacity: 0;
+        transform: translate(200px);
+        visibility: hidden
+    }
+
+}
+@media only screen and (max-width: 1000px) {
+    .currency {
+        top: 8px !important
+    }
+}
+
+
 @media only screen and (min-width: 1000px) and (max-width: 1380px) {
     #header-top1 .logo1 {
         padding: 12px 0px 0px 12px;
@@ -497,6 +512,9 @@ footer .btn.subscribe:hover {
         display: none
     }
 
+    .header-navbar-nav>li a .fab {
+        font-size: 16px;
+    }
 }
 
 @media only screen and (min-width: 1000px) and (max-width: 1100px) {
@@ -546,7 +564,19 @@ footer .btn.subscribe:hover {
 
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1050px) {
+    .mobile-header-wrapper-style {
+        width: 300px
+    }
+
+    .mobile-header-wrapper-style .mobile-header-wrapper-inner .mobile-header-top {
+        padding: 20px
+    }
+
+    .mobile-header-wrapper-style .mobile-header-wrapper-inner .mobile-header-content-area {
+        padding: 30px 20px
+    }
+
     .bg-video {
         height: 100vh;
     }
@@ -780,7 +810,7 @@ footer .btn.subscribe:hover {
     }
 
     .header-navbar-nav-right {
-        display: none;
+        display: none !important;
     }
 
     .breadcrumb {
@@ -1664,10 +1694,6 @@ ul.testimonial-wrapper li .testimonial-content {
     overflow: hidden;
 }
 
-/* added at 5/6/2023 */
-a:hover {
-    color: black;
-}
 
 .landscape {
     width: 150px;
@@ -1760,10 +1786,49 @@ label.form-check-label.color-box:not(:first-child) {
     list-style: initial !important;
     margin-left: 1rem;
 }
-@media only screen and (min-width: 1000px){
-    .bg-video{
-     width:100%;
-     height: 100%;
- }
-    
- }
+
+@media only screen and (min-width: 1000px) {
+    .bg-video {
+        width: 100%;
+        height: 100%;
+    }
+
+}
+
+.dropdown-item {
+    color: black !important
+}
+
+.currency {
+    top: -7px
+}
+
+.currency .dropdown-toggle {
+    background-color: transparent;
+    font-size: 15px;
+    padding: 4px 8px 4px 8px;
+    border-radius: 5px;
+    border: 1px solid white !important;
+    color: white !important
+}
+.dropdown-menu{
+    font-size: 14px;
+    min-width: 7rem;
+}
+.currency-dropdown.dropdown .dropdown-toggle{
+    font-size: 15px;
+    padding: 4px 8px 4px 8px;
+    border-radius: 5px;
+    border: 1px solid black;
+    width: 70px;
+    color: black
+}
+.dropdown{
+    list-style: none;
+}
+.dropdown-menu.show {
+    display: block;
+}  
+.dropdown-item.active{
+    background-color: rgb(228, 226, 226);
+}
