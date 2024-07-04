@@ -31,11 +31,17 @@ class PredefinedListForm extends FormAbstract
                     'data-counter' => 255,
                 ],
             ]);
+            // if(currentPDLLevel($parent,1)!=2 && currentPDLLevel($parent,1)!=3){
+            //     $this->add('image[]', 'mediaImages', [
+            //         'label' => 'Slider Images',
+            //         'label_attr' => ['class' => 'control-label'],
+            //         'values' => $this->getModel()->image!=null ? $this->getModel()->image: [],
+            //     ]);
+            // }
             if(currentPDLLevel($parent,1)!=2 && currentPDLLevel($parent,1)!=3){
-                $this->add('image[]', 'mediaImages', [
-                    'label' => 'Slider Images',
+                $this->add('file', 'mediaFile', [
+                    'label' => '3d Model',
                     'label_attr' => ['class' => 'control-label'],
-                    'values' => $this->getModel()->image!=null ? $this->getModel()->image: [],
                 ]);
             }
             $this->add('parent_id', 'hidden', [

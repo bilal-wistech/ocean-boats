@@ -36,7 +36,9 @@ class UploadsManager
         if (File::extension($path) == 'jfif') {
             return 'image/jpeg';
         }
-
+        if (File::extension($path) == 'glb') {
+            return 'application/octet-stream';
+        }
         return $this->mimeType->getMimeType(File::extension(RvMedia::getRealPath($path)));
     }
 
