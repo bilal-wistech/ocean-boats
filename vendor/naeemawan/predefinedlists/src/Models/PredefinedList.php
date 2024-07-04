@@ -28,6 +28,7 @@ class PredefinedList extends BaseModel
         'multi_select',
         'side_layout',
         'sort_order',
+        'is_standard_option'
     ];
 
     protected $casts = [
