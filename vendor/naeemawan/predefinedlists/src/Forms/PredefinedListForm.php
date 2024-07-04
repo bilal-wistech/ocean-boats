@@ -42,6 +42,7 @@ class PredefinedListForm extends FormAbstract
                 $this->add('file', 'mediaFile', [
                     'label' => '3d Model',
                     'label_attr' => ['class' => 'control-label'],
+                    'values' => $this->getModel()->file!=null ? $this->getModel()->file: [],
                 ]);
             }
             $this->add('parent_id', 'hidden', [
