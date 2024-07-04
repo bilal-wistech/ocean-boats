@@ -22,8 +22,15 @@
                 <a class="customboat-nav-link" data-value="{{$product->id}}" data-type="summary">Summary</a>
             </li>
         </ul>
+        @php
+            $modelPath = $product->file;
+        @endphp
         <div class="row">
-            <div id="carouselExampleControls" class="custom-boat carousel slide">
+            {{-- here we will be rendering the 3d model --}}
+            <div id="3d-model">
+                3d model
+            </div>
+            {{-- <div id="carouselExampleControls" class="custom-boat carousel slide">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         @foreach($product->childitems_sorted() as $category)
@@ -134,7 +141,7 @@
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
-            </div>
+            </div> --}}
         </div>
 
         <input type="hidden" name="boat_price" value="{{$product->price}}">
@@ -365,6 +372,7 @@
 </div>
 
 <!-- scrolling -->
+<!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     jQuery(function ($) {
@@ -375,3 +383,45 @@
     });
 </script>
 
+<!-- Load Three.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Load GLTFLoader after Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('3d-model');
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+        
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5).normalize();
+        scene.add(light);
+        
+        const modelPath = '{{ asset("storage/" . $modelPath) }}';
+        console.log('Loading model from: ', modelPath);
+
+        const loader = new THREE.GLTFLoader();
+        loader.load(modelPath, function(gltf) {
+            scene.add(gltf.scene);
+            renderer.render(scene, camera);
+        }, undefined, function(error) {
+            console.error('Error loading the model:', error);
+        });
+        
+        camera.position.z = 5;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    });
+</script>
