@@ -97,7 +97,7 @@ class PredefinedListForm extends FormAbstract
             ],
             'choices' => getStatusArr(),
         ]);
-        if ($parent != 0) {
+        if ($parent != 0 && currentPDLLevel($parent, 1) != 2 && currentPDLLevel($parent, 1) != 3) {
             $this->add('is_standard_option', 'customSelect', [
                 'label' => trans('Is Standard Option'),
                 'label_attr' => ['class' => 'control-label required'],
