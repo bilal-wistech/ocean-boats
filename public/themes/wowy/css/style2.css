@@ -443,7 +443,7 @@ footer .btn.subscribe:hover {
     }
 
     #header-top1 .logo1 img {
-        width: 80%;
+        width: 85%;
     }
 
     .header-navbar-nav>li a {
@@ -629,7 +629,7 @@ footer .btn.subscribe:hover {
     }
 
     .logo1 img {
-        width: 100px;
+        width: 145px;
     }
 
     #header-top1 {
@@ -1614,6 +1614,9 @@ ul.testimonial-wrapper li .testimonial-content {
         padding-top: 20px !important;
         padding-bottom: 20px !important;
     }
+    .logo1 img{
+        width:115px;
+    }
 }
 
 @media only screen and (min-width: 787px) and (max-width: 980px) {
@@ -1832,3 +1835,48 @@ label.form-check-label.color-box:not(:first-child) {
 .dropdown-item.active{
     background-color: rgb(228, 226, 226);
 }
+.bg-blue{
+    background-color: rgb(213, 233, 247);
+}
+.discount-card{
+    padding: 15px 0 15px 0;
+}
+.discount-card .form-control {
+    font-size: 12px;
+    height: 40px;
+}
+.discount-area .card{
+    width: 520px;
+}
+.discount-card .btn{
+    font-size: 12px;
+    padding: 10px 25px;
+}
+.discount-area .price p{
+    margin-top: -3px;
+}
+.discount p{
+    margin-left: 1px;
+    font-size: 12px;
+    margin-top: -6px;
+    color: green;
+}
+.discount h4{
+    color: green
+}
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50% !important;
+    margin-top: 8px;
+}
+.btn-primary:focus{
+    background-color: var(--color-brand);
+}
+.original-price {
+    text-decoration: line-through;
+    margin-right: 10px;
+    color:grey;
+}
+
+

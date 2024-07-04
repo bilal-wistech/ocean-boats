@@ -270,6 +270,87 @@
         <h4>Included:</h4>
       {!! $product->detail->standard_options !!}
       </div>
+
+      {{-- Discount --}}
+      <div class="card-body discount-area bg-blue">
+        <h4>Discount:</h4>
+        <div class="row mt-20">
+            <div class="col-12 mb-10">
+                <div class="card mx-auto">
+                    <div class="discount-card d-flex justify-content-center">
+                        <div class="row">
+                            <div class="col-5 align-items-center d-flex">
+                                <div class="access-name">
+                                    <h5>Flip Up Cleats</h5>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="promo">
+                                    <div class="discount d-flex">
+                                        <h4>20%</h4>
+                                        <p>OFF</p>
+                                    </div>
+                                    <div class="d-flex mt-10 mb-10">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control promoCode" placeholder="Promo Code">
+                                            <button class="btn btn-primary applyPromo" type="button">Apply</button>
+                                            <div class="spinner-border text-primary ms-2 d-none" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price d-flex">
+                                        <h5>Price: &nbsp;</h5>
+                                        <p class="original-price">2100AED</p>
+                                        <p class="discounted-price ms-2"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-10">
+                <div class="card mx-auto">
+                    <div class="discount-card d-flex justify-content-center">
+                        <div class="row">
+                            <div class="col-5 align-items-center d-flex">
+                                <div class="access-name">
+                                    <h5>Insulated Fish Box</h5>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="promo">
+                                    <div class="discount d-flex">
+                                        <h4>20%</h4>
+                                        <p>OFF</p>
+                                    </div>
+                                    <div class="d-flex mt-10 mb-10">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control promoCode" placeholder="Promo Code">
+                                            <button class="btn btn-primary applyPromo" type="button">Apply</button>
+                                            <div class="spinner-border text-primary ms-2 d-none" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price d-flex">
+                                        <h5>Price: &nbsp;</h5>
+                                        <p class="original-price">700AED</p>
+                                        <p class="discounted-price ms-2"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+      {{-- end --}}
+
+
     </div>
     <div class="card-footer">
       <div class="row m-2">
