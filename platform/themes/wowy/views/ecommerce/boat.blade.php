@@ -73,13 +73,13 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                                {{--                                                @dd($value,$value1,$option)--}}
                                                 <input class="form-check-input cat-item-check"
                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
                                                        value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                       data-parent="{{ $option->parent_id }}" data-model="{{ asset('storage/' . $option->file) }}"
+                                                       data-parent="{{ $option->parent_id }}"
+                                                       data-model="{{ asset('storage/' . $option->file) }}"
                                                        id="collapse-{{ $option->id }}">
                                             @endif
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -99,7 +99,12 @@
                                                 </div>
                                             </div>
                                         </div>
-                                
+                                        {{--color options--}}
+                                        @elseif($option->side_layout == 'color')
+{{--                                        <label for="{{ $option->id }}"--}}
+{{--                                               class="control-label {{ $option->type }}">{{ $option->ltitle }}</label>--}}
+{{--                                        <input type="color" name="{{ 'option[' . $option->type . ']' }}" value="{{ old($option->type) }}"--}}
+{{--                                               class="form-control color-picker" placeholder="">--}}
                                     @endif
                                 @empty
                                 @endforelse
@@ -278,101 +283,107 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
-
+<script>
+    $('.color-picker').colorpicker();
+</script>
 
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-    const modelPath = '{{ asset('storage/' . $modelPath) }}';
-    const container = document.getElementById('3d-model');
+    document.addEventListener('DOMContentLoaded', function () {
+        const modelPath = '{{ asset('storage/' . $modelPath) }}';
+        const container = document.getElementById('3d-model');
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 6);
-    camera.lookAt(scene.position);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 6);
+        camera.lookAt(scene.position);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.gammaOutput = true;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2;
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.gammaOutput = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 2;
 
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0xffffff);
-    container.appendChild(renderer.domElement);
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0xffffff);
+        container.appendChild(renderer.domElement);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight.position.set(5, 5, 5).normalize();
-    scene.add(directionalLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(5, 5, 5).normalize();
+        scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight2.position.set(-5, -5, -5).normalize();
-    scene.add(directionalLight2);
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight2.position.set(-5, -5, -5).normalize();
+        scene.add(directionalLight2);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-    scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
 
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
 
-    const loader = new THREE.GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+        const loader = new THREE.GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
 
-    let baseModel, additionalModels = [];
+        let baseModel, additionalModels = [];
 
-    function loadModel(path, scaleFactor = 0.01, callback) {
-        loader.load(path, function(gltf) {
-            const model = gltf.scene;
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            model.userData.path = path;
-            callback(model);
-        }, undefined, function(error) {
-            console.error('Error loading model:', path, error); 
-        });
-    }
-
-    // Load base model
-    loadModel(modelPath, 0.01, function(model) {
-        baseModel = model;
-        scene.add(baseModel);
-    });
-
-    function toggleAdditionalModel(path, add) {
-        if (add) {
-            loadModel(path, 0.01, function(model) {
-                additionalModels.push(model);
-                scene.add(model);
+        function loadModel(path, scaleFactor = 0.01, callback) {
+            loader.load(path, function (gltf) {
+                const model = gltf.scene;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                model.userData.path = path;
+                callback(model);
+            }, undefined, function (error) {
+                console.error('Error loading model:', path, error);
             });
-        } else {
-            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-            if (modelIndex !== -1) {
-                scene.remove(additionalModels[modelIndex]);
-                additionalModels.splice(modelIndex, 1);
+        }
+
+        // Load base model
+        loadModel(modelPath, 0.01, function (model) {
+            baseModel = model;
+            scene.add(baseModel);
+        });
+
+        function toggleAdditionalModel(path, add) {
+            if (add) {
+                loadModel(path, 0.01, function (model) {
+                    additionalModels.push(model);
+                    scene.add(model);
+                });
+            } else {
+                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+                if (modelIndex !== -1) {
+                    scene.remove(additionalModels[modelIndex]);
+                    additionalModels.splice(modelIndex, 1);
+                }
             }
         }
-    }
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = false;
-    controls.minDistance = 3;
-    controls.maxDistance = 13;
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = false;
+        controls.minDistance = 3;
+        controls.maxDistance = 13;
 
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-        controls.update();
-    }
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            controls.update();
+        }
 
-    animate();
+        animate();
 
-    document.querySelectorAll('.cat-item-check').forEach(input => {
-        input.addEventListener('change', function() {
-            const modelPath = this.dataset.model;
-            const checked = this.checked;
-            console.log('Toggling model:', modelPath, 'Checked:', checked); 
-            toggleAdditionalModel(modelPath, checked);
+        // Check initial state of inputs and load/remove corresponding models
+        document.querySelectorAll('.cat-item-check').forEach(input => {
+            if (input.checked) {
+                const modelPath = input.dataset.model;
+                toggleAdditionalModel(modelPath, true);
+            }
+
+            input.addEventListener('change', function () {
+                const modelPath = this.dataset.model;
+                const checked = this.checked;
+                console.log('Toggling model:', modelPath, 'Checked:', checked);
+                toggleAdditionalModel(modelPath, checked);
+            });
         });
     });
-});
-
-
 </script>
 
