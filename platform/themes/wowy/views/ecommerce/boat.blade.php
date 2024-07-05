@@ -25,9 +25,9 @@
         @php
             $modelPath = $product->file;
         @endphp
-       <div class="row">
-        <div id="3d-model" style="width: 100%; height: 500px;"></div>
-    </div>
+        <div class="row">
+            <div id="3d-model" style="width: 100%; height: 500px;"></div>
+        </div>
 
         <input type="hidden" name="boat_price" value="{{ $product->price }}">
 
@@ -39,9 +39,9 @@
             <input type="hidden" name="boat_id" value="{{ $product->id }}">
             <input type="hidden" name="total_price" value="0">
             @forelse($categories as $key=>$value)
-                <?php
-                $i = $key + 1;
-                ?>
+                    <?php
+                    $i = $key + 1;
+                    ?>
                 <div class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
                     <div class="customboat-card-header">
                         <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
@@ -49,7 +49,7 @@
                     <div class="customboat-card-body cat-body">
                         @forelse($value->childitems() as $key1 => $value1)
                             <div class="col btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
-                                href="#collapse{{ $key1 }}" aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                                 href="#collapse{{ $key1 }}" aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
                                 <div class="title">{{ $value1->ltitle }}</div>
                             </div>
                             <div class="collapse {{ $key1 == 0 ? 'show' : '' }}" id="collapse{{ $key1 }}">
@@ -57,15 +57,15 @@
                                     @if ($option->side_layout == 'radio')
                                         @if ($value->multi_select != 3)
                                             <input class="form-check-input visually-hidden cat-item-check"
-                                                type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                id="{{ $option->id }}" value="{{ $option->id }}"
-                                                data-typename="{{ $value1->ltitle }}"
-                                                data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                data-parent="{{ $option->parent_id }}" data-waschecked="false">
+                                                   type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                   id="{{ $option->id }}" value="{{ $option->id }}"
+                                                   data-typename="{{ $value1->ltitle }}"
+                                                   data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                   name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                   data-parent="{{ $option->parent_id }}" data-waschecked="false">
                                         @endif
                                         <label class="form-check-label color-box" for="{{ $option->id }}"
-                                            style="background-image: url({{ RvMedia::getImageUrl($option->main_image) }});">
+                                               style="background-image: url({{ RvMedia::getImageUrl($option->main_image) }});">
                                             <div class="tick-icon"><img src="{{ asset('/storage/check_circle.png') }}">
                                             </div>
                                             <div class="color-name">{{ $option->ltitle }}</div>
@@ -73,6 +73,7 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
+                                                {{--                                                @dd($value,$value1,$option)--}}
                                                 <input class="form-check-input cat-item-check"
                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
@@ -90,6 +91,7 @@
                                                     {{ $option->ltitle }} ({{ format_price($option->price) }})
                                                 </div>
                                             </label>
+                                            {{--Image to be show if we add then there will be a dropdown on which on clicking image is shown--}}
                                             <div class="collapse" id="color-details-{{ $option->id }}">
                                                 <div class="content-boat">
                                                     <img class="img-fluid img-thumbnail landscape"
@@ -108,11 +110,11 @@
                         <div class="row">
                             <div class="col-8">
                                 <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span
-                                        class="sub-total">{{ format_price($product->price) }}</span></p>
+                                            class="sub-total">{{ format_price($product->price) }}</span></p>
                                 <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span
-                                        class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span></p>
+                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span></p>
                                 <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span
-                                        class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                            class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                 </p>
                             </div>
                             <div class="col-4">
@@ -123,7 +125,7 @@
 
                                 <div class="currency-dropdown dropdown">
                                     <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                            data-bs-toggle="dropdown" aria-expanded="false">
                                         {{ $selectedCurrency }}
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -131,7 +133,7 @@
                                             @if ($currency->id !== get_application_currency_id())
                                                 <li>
                                                     <a class="dropdown-item"
-                                                        href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                                       href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
                                                 </li>
                                             @endif
                                         @endforeach
@@ -146,20 +148,21 @@
                         @if (isset($categories[$key + 1]))
                             @if ($key > 0)
                                 <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="{{ $categories[$key - 1]->type }}" type="button">Back
+                                        data-value="{{ $categories[$key - 1]->type }}" type="button">Back
                                 </button>
                             @endif
                             <button class="btn card-btn" type="button" data-curval="{{ $categories[$key]->type }}"
-                                data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">Next
+                                    data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
+                                Next
                                 Step
                             </button>
                         @else
                             <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
-                                type="button">Back
+                                    data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
+                                    type="button">Back
                             </button>
                             <button class="btn card-btn" data-curval="{{ $categories[$key]->type }}"
-                                data-value="summary" type="button">Next Step
+                                    data-value="summary" type="button">Next Step
                             </button>
                         @endif
                     </div>
@@ -180,7 +183,7 @@
                 <input type="hidden" name="redirect_url_pay" value="0">
                 <div class="mt-10 customboat-card-footer d-flex flex-row flex-wrap">
                     <button type="button" class="btn card-btn prv" data-curval="summary"
-                        data-value="{{ lastitem($product->id)->type }}">Back
+                            data-value="{{ lastitem($product->id)->type }}">Back
                     </button>
                     <button type="submit" class="btn card-btn" style="border-radius: unset;">Save & Exit</button>
                     <button type="button" class="btn view-summary">View Your Summary</button>
@@ -235,13 +238,13 @@
                         <p><b>VAT 5%</b>: <span class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                         </p>
                         <p><b>Total</b>: <span
-                                class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                    class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                         </p>
                     </div>
                     <div class="col-3">
                         <div class="currency-dropdown dropdown">
                             <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                                    data-bs-toggle="dropdown" aria-expanded="false">
                                 AED
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -263,7 +266,7 @@
 <!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    jQuery(function($) {
+    jQuery(function ($) {
         var offset = $('#custom-boat-container').offset().top - 50;
         $('html, body').animate({
             scrollTop: offset

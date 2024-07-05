@@ -137,7 +137,7 @@ class PredefinedListForm extends FormAbstract
                 'attr' => [
                     'class' => 'form-control select-full',
                 ],
-                'choices' => ['radio' => 'Radio Select', 'toggle' => 'Toggle Select'],
+                'choices' => ['radio' => 'Radio Select', 'toggle' => 'Toggle Select','color' => 'Color Picker'],
             ]);
         }
         if (currentPDLLevel($parent, 1) != 2 && currentPDLLevel($parent, 1) != 3) {
