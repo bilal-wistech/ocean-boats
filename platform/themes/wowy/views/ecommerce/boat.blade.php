@@ -74,29 +74,30 @@
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
                                                 <input class="form-check-input cat-item-check"
-                                                    name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                    type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                    value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                                    data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                    data-parent="{{ $option->parent_id }}" data-waschecked="false"
-                                                    id="collapse-{{ $option->id }}">
+                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                       value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                       data-parent="{{ $option->parent_id }}" data-model="{{ asset('storage/' . $option->file) }}"
+                                                       id="collapse-{{ $option->id }}">
                                             @endif
-                                            <label class="form-check-label" for="collapse-{{ $value->id }}">
+                                            <label class="form-check-label" for="collapse-{{ $option->id }}">
                                                 <div data-bs-toggle="{{ $option->main_image ? 'collapse' : '' }}"
-                                                    data-bs-target="#color-details-{{ $option->id }}"
-                                                    aria-expanded="false"
-                                                    aria-controls="color-details-{{ $option->id }}"
-                                                    class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
+                                                     data-bs-target="#color-details-{{ $option->id }}"
+                                                     aria-expanded="false"
+                                                     aria-controls="color-details-{{ $option->id }}"
+                                                     class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
                                                     {{ $option->ltitle }} ({{ format_price($option->price) }})
                                                 </div>
                                             </label>
                                             <div class="collapse" id="color-details-{{ $option->id }}">
                                                 <div class="content-boat">
                                                     <img class="img-fluid img-thumbnail landscape"
-                                                        src="{{ RvMedia::getImageUrl($option->main_image) }}">
+                                                         src="{{ RvMedia::getImageUrl($option->main_image) }}">
                                                 </div>
                                             </div>
                                         </div>
+                                
                                     @endif
                                 @empty
                                 @endforelse
@@ -277,66 +278,98 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modelPath = '{{ asset('storage/' . $modelPath) }}';
-        const container = document.getElementById('3d-model');
+   document.addEventListener('DOMContentLoaded', function() {
+    const modelPath = '{{ asset('storage/' . $modelPath) }}';
+    const container = document.getElementById('3d-model');
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            container.clientWidth / container.clientHeight,
-            0.1,
-            1000
-        );
-        camera.position.set(0, 0, 6); // Initial camera position further from the scene
-        camera.lookAt(scene.position);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0, 6);
+    camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.gammaOutput = true;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping; 
-        renderer.toneMappingExposure = 2; 
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.gammaOutput = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 2;
 
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setClearColor(0xffffff);
-        container.appendChild(renderer.domElement);
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0xffffff);
+    container.appendChild(renderer.domElement);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(5, 5, 5).normalize();
-        scene.add(directionalLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight.position.set(5, 5, 5).normalize();
+    scene.add(directionalLight);
 
-        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight2.position.set(-5, -5, -5).normalize();
-        scene.add(directionalLight2);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight2.position.set(-5, -5, -5).normalize();
+    scene.add(directionalLight2);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-        scene.add(ambientLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    scene.add(ambientLight);
 
-        const dracoLoader = new THREE.DRACOLoader();
-        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
 
-        const loader = new THREE.GLTFLoader();
-        loader.setDRACOLoader(dracoLoader);
+    const loader = new THREE.GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
 
-        loader.load(modelPath, function (gltf) {
+    let baseModel, additionalModels = [];
+
+    function loadModel(path, scaleFactor = 0.01, callback) {
+        loader.load(path, function(gltf) {
             const model = gltf.scene;
-            const scaleFactor = 0.01;
             model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            scene.add(model);
-            animate();
-        }, undefined, function (error) {
-            console.error(error);
+            model.userData.path = path;
+            callback(model);
+        }, undefined, function(error) {
+            console.error('Error loading model:', path, error); 
         });
+    }
 
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = false; 
-        controls.minDistance = 3; // Allow zooming in closer
-        controls.maxDistance = 13; // Adjust max distance accordingly
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            controls.update();
-        }
+    // Load base model
+    loadModel(modelPath, 0.01, function(model) {
+        baseModel = model;
+        scene.add(baseModel);
     });
+
+    function toggleAdditionalModel(path, add) {
+        if (add) {
+            loadModel(path, 0.01, function(model) {
+                additionalModels.push(model);
+                scene.add(model);
+            });
+        } else {
+            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+            if (modelIndex !== -1) {
+                scene.remove(additionalModels[modelIndex]);
+                additionalModels.splice(modelIndex, 1);
+            }
+        }
+    }
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = false;
+    controls.minDistance = 3;
+    controls.maxDistance = 13;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+        controls.update();
+    }
+
+    animate();
+
+    document.querySelectorAll('.cat-item-check').forEach(input => {
+        input.addEventListener('change', function() {
+            const modelPath = this.dataset.model;
+            const checked = this.checked;
+            console.log('Toggling model:', modelPath, 'Checked:', checked); 
+            toggleAdditionalModel(modelPath, checked);
+        });
+    });
+});
+
+
 </script>
 
