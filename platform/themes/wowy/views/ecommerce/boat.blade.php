@@ -100,11 +100,14 @@
                                             </div>
                                         </div>
                                         {{--color options--}}
-                                        @elseif($option->side_layout == 'color')
+                                    @elseif($option->side_layout == 'color')
                                         <label for="{{ $option->id }}"
                                                class="control-label {{ $option->type }}">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="{{ 'option[' . $option->type . ']' }}" value=""
-                                               class="form-control color-picker" data-color-option-id="{{ $option->id }}" >
+                                               class="form-control color-picker"
+                                               data-color-option-id="{{ $option->id }}"
+                                               data-color-option-type="{{ $option->type }}"
+                                        >
                                     @endif
                                 @empty
                                 @endforelse
@@ -323,9 +326,15 @@
         pickr.on('save', (color, instance) => {
             const colorPickerElement = document.querySelector('.color-picker');
             const colorOptionId = colorPickerElement.getAttribute('data-color-option-id');
+            const colorType = colorPickerElement.getAttribute('data-color-option-type');
             const colorSelected = color.toHEXA().toString()
-            // Update the input field with the picked color
-            document.querySelector('input[name="option[color-picker]"]').value = colorOptionId+'-'+colorSelected;
+            const inputName = `option[${colorType}]`;
+
+            // Select the input element dynamically using the constructed name
+            const inputElement = document.querySelector(`input[name="${inputName}"]`);
+
+            ``// Set the value of the input element
+            inputElement.value = colorOptionId + '-' + colorSelected;
         });
 
 
@@ -337,7 +346,7 @@
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.gammaOutput = true;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
