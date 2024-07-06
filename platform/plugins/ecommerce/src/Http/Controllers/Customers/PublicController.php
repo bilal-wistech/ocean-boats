@@ -103,30 +103,45 @@ class PublicController extends Controller
 
     public function getOverview()
     {
-        if(cache()->has('boat_data')){
+        if (cache()->has('boat_data')) {
             $boatData = cache()->get('boat_data');
-            $enquiry=new BoatEnquiry;
-            $enquiry->user_id=auth('customer')->id();
-            $enquiry->message=$boatData['message'];
-            $enquiry->boat_id=$boatData['boat_id'];
-            $enquiry->status='unread';
-            $enquiry->total_price=$boatData['total_price'];
-            $enquiry->vat_total = $boatData['total_price'] + (($boatData['total_price'] * 5)/100);
+            $enquiry = new BoatEnquiry;
+            $enquiry->user_id = auth('customer')->id();
+            $enquiry->message = $boatData['message'];
+            $enquiry->boat_id = $boatData['boat_id'];
+            $enquiry->status = 'unread';
+            $enquiry->total_price = $boatData['total_price'];
+            $enquiry->vat_total = $boatData['total_price'] + (($boatData['total_price'] * 5) / 100);
             $enquiry->save();
-
-            foreach($boatData['option'] as $key => $value){
-                $detail=new BoatEnquiryDetail;
+            foreach ($boatData['option'] as $key => $value) {
+                $detail = new BoatEnquiryDetail;
                 $detail->enquiry_id = $enquiry->id;
                 $detail->subcat_slug = $key;
-                $detail->option_id = $value;
+
+                // Splitting option value for 'color-picker' to save 'option_id' and 'color_picker'
+                if ($key === 'color-picker') {
+                    $splitValue = explode('-', $value);
+                    if (count($splitValue) === 2) {
+                        $detail->option_id = $splitValue[0]; // Assigning the integer part as option_id
+                        $detail->color_picker = $splitValue[1]; // Assigning the hash value to color_picker field
+                    } else {
+                        // Handle error case where value format is unexpected
+                        // You might want to log this or handle it differently based on your application logic
+                        // For example:
+                        \Log::error('Unexpected format for color-picker option value: ' . $value);
+                        continue; // Skip saving this detail and continue with next iteration
+                    }
+                } else {
+                    $detail->option_id = $value; // For other options, assuming they directly represent option_id
+                }
+
                 $detail->save();
             }
 
-
-            if($boatData['redirect_url_pay']){
+            if ($boatData['redirect_url_pay']) {
                 cache()->forget('boat_data');
                 //return redirect to payment page directly
-                return redirect()->route('ngenius.transaction.id',['id'=>$enquiry->id]);
+                return redirect()->route('ngenius.transaction.id', ['id' => $enquiry->id]);
             }
         }
 
@@ -139,6 +154,7 @@ class PublicController extends Controller
         return Theme::scope('ecommerce.customers.overview', [], 'plugins/ecommerce::themes.customers.overview')
             ->render();
     }
+
 
     public function getEditAccount()
     {
