@@ -119,17 +119,15 @@ class PublicController extends Controller
                 $detail->enquiry_id = $enquiry->id;
                 $detail->subcat_slug = $key;
 
-                // Splitting option value for 'color-picker' to save 'option_id' and 'color_picker'
-                if ($key === 'color-picker') {
+                // Check if the key contains 'color-picker'
+                if (strpos($key, 'color-picker') !== false) {
                     $splitValue = explode('-', $value);
                     if (count($splitValue) === 2) {
                         $detail->option_id = $splitValue[0]; // Assigning the integer part as option_id
                         $detail->color_picker = $splitValue[1]; // Assigning the hash value to color_picker field
                     } else {
                         // Handle error case where value format is unexpected
-                        // You might want to log this or handle it differently based on your application logic
-                        // For example:
-                        \Log::error('Unexpected format for color-picker option value: ' . $value);
+                        \Log::error("Unexpected format for color-picker option value: $key => $value");
                         continue; // Skip saving this detail and continue with next iteration
                     }
                 } else {
