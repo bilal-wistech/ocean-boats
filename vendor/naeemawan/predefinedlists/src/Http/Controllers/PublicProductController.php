@@ -161,6 +161,7 @@ class PublicProductController
 
 
     public function SubmitBoat(Request $request){
+//        dd($request);
         $request->validate([
             "boat_id"    => "required",
             // "total_price"  => "gt:0",

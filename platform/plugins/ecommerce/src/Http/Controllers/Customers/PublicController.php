@@ -105,6 +105,7 @@ class PublicController extends Controller
     {
         if (cache()->has('boat_data')) {
             $boatData = cache()->get('boat_data');
+//            dd($boatData);
             $enquiry = new BoatEnquiry;
             $enquiry->user_id = auth('customer')->id();
             $enquiry->message = $boatData['message'];
