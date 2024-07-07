@@ -73,13 +73,13 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                                {{--                                                @dd($value,$value1,$option)--}}
                                                 <input class="form-check-input cat-item-check"
                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
                                                        value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                       data-parent="{{ $option->parent_id }}" data-model="{{ asset('storage/' . $option->file) }}"
+                                                       data-parent="{{ $option->parent_id }}"
+                                                       data-model="{{ asset('storage/' . $option->file) }}"
                                                        id="collapse-{{ $option->id }}">
                                             @endif
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -99,7 +99,18 @@
                                                 </div>
                                             </div>
                                         </div>
-                                
+                                        {{--color options--}}
+                                    @elseif($option->side_layout == 'color')
+                                        <label for="{{ $option->id }}"
+                                               class="control-label color-picker {{ $option->type }}"
+                                               data-color-option-id="{{ $option->id }}"
+                                               data-color-option-type="{{ $option->type }}"
+                                               data-color-picker="true">{{ $option->ltitle }}</label>
+                                        <input type="hidden" name="option[{{ $option->type }}]" value=""
+                                               class="form-control color-picker"
+                                               data-color-option-id="{{ $option->id }}"
+                                               data-color-option-type="{{ $option->type }}"
+                                        >
                                     @endif
                                 @empty
                                 @endforelse
@@ -278,101 +289,171 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-    const modelPath = '{{ asset('storage/' . $modelPath) }}';
-    const container = document.getElementById('3d-model');
+    document.addEventListener('DOMContentLoaded', function () {
+        const modelPath = '{{ asset('storage/' . $modelPath) }}';
+        const container = document.getElementById('3d-model');
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 6);
-    camera.lookAt(scene.position);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 6);
+        camera.lookAt(scene.position);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.gammaOutput = true;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2;
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.gammaOutput = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 2;
 
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0xffffff);
-    container.appendChild(renderer.domElement);
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0xffffff);
+        container.appendChild(renderer.domElement);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight.position.set(5, 5, 5).normalize();
-    scene.add(directionalLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(5, 5, 5).normalize();
+        scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight2.position.set(-5, -5, -5).normalize();
-    scene.add(directionalLight2);
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight2.position.set(-5, -5, -5).normalize();
+        scene.add(directionalLight2);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-    scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
 
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
 
-    const loader = new THREE.GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+        const loader = new THREE.GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
 
-    let baseModel, additionalModels = [];
+        let baseModel, additionalModels = [];
 
-    function loadModel(path, scaleFactor = 0.01, callback) {
-        loader.load(path, function(gltf) {
-            const model = gltf.scene;
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            model.userData.path = path;
-            callback(model);
-        }, undefined, function(error) {
-            console.error('Error loading model:', path, error); 
-        });
-    }
-
-    // Load base model
-    loadModel(modelPath, 0.01, function(model) {
-        baseModel = model;
-        scene.add(baseModel);
-    });
-
-    function toggleAdditionalModel(path, add) {
-        if (add) {
-            loadModel(path, 0.01, function(model) {
-                additionalModels.push(model);
-                scene.add(model);
+        function loadModel(path, scaleFactor = 0.01, callback) {
+            loader.load(path, function (gltf) {
+                const model = gltf.scene;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                model.userData.path = path;
+                callback(model);
+            }, undefined, function (error) {
+                console.error('Error loading model:', path, error);
             });
-        } else {
-            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-            if (modelIndex !== -1) {
-                scene.remove(additionalModels[modelIndex]);
-                additionalModels.splice(modelIndex, 1);
+        }
+
+        // Load base model
+        loadModel(modelPath, 0.01, function (model) {
+            baseModel = model;
+            scene.add(baseModel);
+        });
+
+        function toggleAdditionalModel(path, add) {
+            if (add) {
+                loadModel(path, 0.01, function (model) {
+                    additionalModels.push(model);
+                    scene.add(model);
+                });
+            } else {
+                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+                if (modelIndex !== -1) {
+                    scene.remove(additionalModels[modelIndex]);
+                    additionalModels.splice(modelIndex, 1);
+                }
             }
         }
-    }
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = false;
-    controls.minDistance = 3;
-    controls.maxDistance = 13;
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = false;
+        controls.minDistance = 3;
+        controls.maxDistance = 13;
 
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-        controls.update();
-    }
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            controls.update();
+        }
 
-    animate();
+        animate();
 
-    document.querySelectorAll('.cat-item-check').forEach(input => {
-        input.addEventListener('change', function() {
-            const modelPath = this.dataset.model;
-            const checked = this.checked;
-            console.log('Toggling model:', modelPath, 'Checked:', checked); 
-            toggleAdditionalModel(modelPath, checked);
+        // Check initial state of inputs and load/remove corresponding models
+        document.querySelectorAll('.cat-item-check').forEach(input => {
+            if (input.checked) {
+                const modelPath = input.dataset.model;
+                toggleAdditionalModel(modelPath, true);
+            }
+
+            input.addEventListener('change', function () {
+                const modelPath = this.dataset.model;
+                const checked = this.checked;
+                console.log('Toggling model:', modelPath, 'Checked:', checked);
+                toggleAdditionalModel(modelPath, checked);
+            });
         });
     });
-});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const colorPickers = document.querySelectorAll('[data-color-picker="true"]');
 
+        colorPickers.forEach(pickerElement => {
+            const pickr = Pickr.create({
+                el: pickerElement,
+                theme: 'classic',
+                swatches: [
+                    'rgba(244, 67, 54, 1)',
+                    'rgba(233, 30, 99, 0.95)',
+                    'rgba(156, 39, 176, 0.9)',
+                    'rgba(103, 58, 183, 0.85)',
+                    'rgba(63, 81, 181, 0.8)',
+                    'rgba(33, 150, 243, 0.75)',
+                    'rgba(3, 169, 244, 0.7)',
+                    'rgba(0, 188, 212, 0.7)',
+                    'rgba(0, 150, 136, 0.75)',
+                    'rgba(76, 175, 80, 0.8)',
+                    'rgba(139, 195, 74, 0.85)',
+                    'rgba(205, 220, 57, 0.9)',
+                    'rgba(255, 235, 59, 0.95)',
+                    'rgba(255, 193, 7, 1)'
+                ],
+                components: {
+                    preview: true,
+                    opacity: true,
+                    hue: true,
+                    interaction: {
+                        hex: true,
+                        rgba: true,
+                        input: true,
+                        clear: true,
+                        save: true
+                    }
+                }
+            });
+
+            pickr.on('save', (color, instance) => {
+                // console.log('color picker element: ', pickerElement);
+                const colorOptionId = pickerElement.getAttribute('data-color-option-id');
+                const colorType = pickerElement.getAttribute('data-color-option-type');
+                // console.log('color option id: ', colorOptionId);
+                // console.log('color type: ', colorType);
+
+                if (colorOptionId && colorType) {
+                    const colorSelected = color.toHEXA().toString();
+                    // console.log('color selected: ', colorSelected);
+                    const inputName = `option[${colorType}]`;
+                    // console.log('input name: ', inputName);
+
+                    const inputElement = document.querySelector(`input[name="${inputName}"]`);
+                    // console.log('input element: ', inputElement);
+
+                    if (inputElement) {``
+                        inputElement.value = `${colorOptionId}-${colorSelected}`;
+                    } else {
+                        console.error(`Input element with name ${inputName} not found.`);
+                    }
+                } else {
+                    console.error('Color option ID or type not found.');
+                }
+            });
+        });
+    });
 
 </script>
-

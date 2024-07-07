@@ -13,7 +13,9 @@
           href="{{ $fontURL = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net') }}">
     <link href="{{ $fontURL }}/css2?family={{ urlencode(theme_option('font_text', 'Poppins')) }}:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
           rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/> <!-- 'classic' theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css"/> <!-- 'monolith' theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/> <!-- 'nano' theme -->
     <style>
         :root {
             --font-text: {{ theme_option('font_text', 'Poppins') }}, sans-serif;
