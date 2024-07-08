@@ -37,7 +37,7 @@
         <form id="submit-form" action="{{ route('public.customize-boat.submit') }}" method="post">
             @csrf
             <input type="hidden" name="boat_id" value="{{ $product->id }}">
-            <input type="hidden" name="total_price" value="0">
+            <input type="hidden" name="total_price" value="{{ $product->price ?? 0 }}">
             @forelse($categories as $key=>$value)
                     <?php
                     $i = $key + 1;
@@ -106,11 +106,13 @@
                                                class="control-label color-picker {{ $option->type }}"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
-                                               data-color-picker="true">{{ $option->ltitle }}</label>
+                                               data-color-picker="true"
+                                               data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="option[{{ $option->type }}]" value=""
                                                class="form-control color-picker"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
+                                               data-color-price="{{ $option->price }}"
                                         >
                                     @endif
                                 @empty
@@ -119,12 +121,13 @@
                         @empty
                         @endforelse
 
-                        <div class="row">
+                        <div class=" row">
                             <div class="col-8">
                                 <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span
                                             class="sub-total">{{ format_price($product->price) }}</span></p>
                                 <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span
-                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span></p>
+                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                </p>
                                 <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span
                                             class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                 </p>
