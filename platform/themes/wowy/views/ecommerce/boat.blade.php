@@ -79,6 +79,7 @@
                                                        value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
                                                        data-parent="{{ $option->parent_id }}"
+                                                       data-waschecked="false"
                                                        data-model="{{ asset('storage/' . $option->file) }}"
                                                        id="collapse-{{ $option->id }}">
                                             @endif
@@ -374,20 +375,23 @@
 
         animate();
 
-        // Check initial state of inputs and load/remove corresponding models
-        document.querySelectorAll('.cat-item-check').forEach(input => {
-            if (input.checked) {
-                const modelPath = input.dataset.model;
-                toggleAdditionalModel(modelPath, true);
-            }
+      
+document.querySelectorAll('.cat-item-check').forEach(input => {
+    input.addEventListener('click', function () {
+        const modelPath = this.dataset.model;
+        const wasChecked = this.getAttribute('data-waschecked') === 'false';
+        if (wasChecked) {
+            toggleAdditionalModel(modelPath, true);
+           
+        } else {
+            toggleAdditionalModel(modelPath, false);
+           
+        }
+    });
+});
 
-            input.addEventListener('change', function () {
-                const modelPath = this.dataset.model;
-                const checked = this.checked;
-                console.log('Toggling model:', modelPath, 'Checked:', checked);
-                toggleAdditionalModel(modelPath, checked);
-            });
-        });
+
+       
     });
 </script>
 <script>
