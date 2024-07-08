@@ -1,3 +1,4 @@
+@php use NaeemAwan\PredefinedLists\Models\PredefinedList; @endphp
 @extends(Theme::getThemeNamespace() . '::views.ecommerce.customers.master')
 @section('content')
     <div class="card">
@@ -41,133 +42,142 @@
                             </div>
                         </div>
 
-                        <h4 class="mt-3 mb-1">{{ __('Final Image') }}</h4>
+                        <h4 class="mt-3 mb-1">{{ __('Final Model') }}</h4>
                         <div class="row">
-                            <div id="carouselExampleControls" class="custom-boat carousel slide">
-                                <div class="carousel-inner">
-                                    <div class="carousel-item active">
-                                        @foreach($result as $key=>$value)
-                                            @if(isset($value->enquiry_option->image[1]))
-                                                <div style="position:absolute;">
-                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[1], '', false, RvMedia::getDefaultImage()) }}"
-                                                         class="d-block w-100" alt="...">
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                        <div class="" style="z-index:0">
-                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[1] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"
-                                                 class="d-block w-100" alt="...">
-                                        </div>
-                                    </div>
+                            {{--                            <div id="carouselExampleControls" class="custom-boat carousel slide">--}}
+                            {{--                                <div class="carousel-inner">--}}
+                            {{--                                    <div class="carousel-item active">--}}
+                            {{--                                        @foreach($result as $key=>$value)--}}
+                            {{--                                            @if(isset($value->enquiry_option->image[1]))--}}
+                            {{--                                                <div style="position:absolute;">--}}
+                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[1], '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                         class="d-block w-100" alt="...">--}}
+                            {{--                                                </div>--}}
+                            {{--                                            @endif--}}
+                            {{--                                        @endforeach--}}
+                            {{--                                        <div class="" style="z-index:0">--}}
+                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[1] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                 class="d-block w-100" alt="...">--}}
+                            {{--                                        </div>--}}
+                            {{--                                    </div>--}}
 
-                                    <div class="carousel-item">
-                                        @foreach($result as $key=>$value)
-                                            @if(isset($value->enquiry_option->image[2]))
-                                                <div style="position:absolute;">
-                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[2], '', false, RvMedia::getDefaultImage()) }}"
-                                                         class="d-block w-100" alt="...">
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                        <div class="" style="z-index:0">
-                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[2] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"
-                                                 class="d-block w-100" alt="...">
-                                        </div>
-                                    </div>
+                            {{--                                    <div class="carousel-item">--}}
+                            {{--                                        @foreach($result as $key=>$value)--}}
+                            {{--                                            @if(isset($value->enquiry_option->image[2]))--}}
+                            {{--                                                <div style="position:absolute;">--}}
+                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[2], '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                         class="d-block w-100" alt="...">--}}
+                            {{--                                                </div>--}}
+                            {{--                                            @endif--}}
+                            {{--                                        @endforeach--}}
+                            {{--                                        <div class="" style="z-index:0">--}}
+                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[2] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                 class="d-block w-100" alt="...">--}}
+                            {{--                                        </div>--}}
+                            {{--                                    </div>--}}
 
-                                    <div class="carousel-item">
-                                        @foreach($result as $key=>$value)
-                                            @if(isset($value->enquiry_option->image[3]))
-                                                <div style="position:absolute;">
-                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[3], '', false, RvMedia::getDefaultImage()) }}"
-                                                         class="d-block w-100" alt="...">
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                        <div class="" style="z-index:0">
-                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[3] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"
-                                                 class="d-block w-100" alt="...">
-                                        </div>
-                                    </div>
+                            {{--                                    <div class="carousel-item">--}}
+                            {{--                                        @foreach($result as $key=>$value)--}}
+                            {{--                                            @if(isset($value->enquiry_option->image[3]))--}}
+                            {{--                                                <div style="position:absolute;">--}}
+                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[3], '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                         class="d-block w-100" alt="...">--}}
+                            {{--                                                </div>--}}
+                            {{--                                            @endif--}}
+                            {{--                                        @endforeach--}}
+                            {{--                                        <div class="" style="z-index:0">--}}
+                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[3] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                 class="d-block w-100" alt="...">--}}
+                            {{--                                        </div>--}}
+                            {{--                                    </div>--}}
 
-                                    @if(isset($boat->boat->image[4]))
-                                        <div class="carousel-item">
-                                            @foreach($result as $key=>$value)
-                                                @if(isset($value->enquiry_option->image[4]))
-                                                    <div style="position:absolute;">
-                                                        <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[4], '', false, RvMedia::getDefaultImage()) }}"
-                                                             class="d-block w-100" alt="...">
-                                                    </div>
+                            {{--                                    @if(isset($boat->boat->image[4]))--}}
+                            {{--                                        <div class="carousel-item">--}}
+                            {{--                                            @foreach($result as $key=>$value)--}}
+                            {{--                                                @if(isset($value->enquiry_option->image[4]))--}}
+                            {{--                                                    <div style="position:absolute;">--}}
+                            {{--                                                        <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[4], '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                             class="d-block w-100" alt="...">--}}
+                            {{--                                                    </div>--}}
+                            {{--                                                @endif--}}
+                            {{--                                            @endforeach--}}
+                            {{--                                            <div class="" style="z-index:0">--}}
+                            {{--                                                <img src="{{ RvMedia::getImageUrl($boat->boat->image[4] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
+                            {{--                                                     class="d-block w-100" alt="...">--}}
+                            {{--                                            </div>--}}
+                            {{--                                        </div>--}}
+                            {{--                                    @endif--}}
+
+                            {{--                                </div>--}}
+                            {{--                                <button class="carousel-control-prev" type="button"--}}
+                            {{--                                        data-bs-target="#carouselExampleControls" data-bs-slide="prev">--}}
+                            {{--                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>--}}
+                            {{--                                    <span class="visually-hidden">Previous</span>--}}
+                            {{--                                </button>--}}
+                            {{--                                <button class="carousel-control-next" type="button"--}}
+                            {{--                                        data-bs-target="#carouselExampleControls" data-bs-slide="next">--}}
+                            {{--                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>--}}
+                            {{--                                    <span class="visually-hidden">Next</span>--}}
+                            {{--                                </button>--}}
+                            {{--                            </div>--}}
+                            {{--                            <div>--}}
+
+                            <h4 class="mt-3 mt-50">{{ __('Options Selected') }}</h4>
+                            <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
+                                @foreach($boat->details as $key=>$value)
+                                    @php
+                                        $data = PredefinedList::where('id',$value->option_id)
+                                        /*->where('type',$value->subcat_slug)*/
+                                        ->first();
+                                        $parent = PredefinedList::where('id',$data->parent_id)->first();
+                                    @endphp
+                                    <div class="card m-1">
+                                        <div class="card-body text-center">
+                                            <p><b>{{$value->color_picker ? $parent->ltitle : ''}}</b>
+                                            </p>
+                                            <p>
+                                                <b>
+                                                    {{$value->slug->ltitle}}:
+                                                </b>
+                                                @if($value->slug->parent)
+                                                    {{$value->ltitle}}
+                                                @else
+                                                    <span style="background-color: {{$value->color_picker}};">{{$value->color_picker}}</span>
                                                 @endif
-                                            @endforeach
-                                            <div class="" style="z-index:0">
-                                                <img src="{{ RvMedia::getImageUrl($boat->boat->image[4] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"
-                                                     class="d-block w-100" alt="...">
-                                            </div>
+                                            </p>
+                                            <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
                                         </div>
-                                    @endif
-
-                                </div>
-                                <button class="carousel-control-prev" type="button"
-                                        data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button"
-                                        data-bs-target="#carouselExampleControls" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div>
-
-                                <h4 class="mt-3 mt-50">{{ __('Options Selected') }}</h4>
-                                <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
-                                    @foreach($boat->details as $key=>$value)
-                                        @php
-                                            $data = \NaeemAwan\PredefinedLists\Models\PredefinedList::where('id',$value->option_id)
-                                            /*->where('type',$value->subcat_slug)*/
-                                            ->first();
-                                            $parent = \NaeemAwan\PredefinedLists\Models\PredefinedList::where('id',$data->parent_id)->first();
-                                        @endphp
-                                        <div class="card m-1">
-                                            <div class="card-body text-center">
-                                                <p><b>{{$value->color_picker ? $parent->ltitle : ''}}</b>
-                                                </p>
-                                                <p><b>{{$value->slug->ltitle}}
-                                                        : </b>{{$value->slug->parent ? $value->ltitle : $value->color_picker}}
-                                                </p>
-                                                <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
+                            @if($boat->boat->detail->standard_options)
                                 <div class="card-body list-style">
                                     <h4>Standard Options</h4>
                                     {!! $boat->boat->detail->standard_options !!}
                                 </div>
-                            </div>
-                            <h4 class="mt-3 mb-1">{{ __('Total') }}</h4>
+                            @endif
+                        </div>
+                        <h4 class="mt-3 mb-1">{{ __('Total') }}</h4>
+                        <div>
                             <div>
+                                <span class="d-inline-block">{{ __('Total Price Included Vat') }}:</span>
+                                <strong class="order-detail-value">{{ format_price($boat->vat_total) }}</strong>
+                            </div>
+                            @if($boat->is_finished)
+                                <hr/>
                                 <div>
-                                    <span class="d-inline-block">{{ __('Total Price Included Vat') }}:</span>
-                                    <strong class="order-detail-value">{{ format_price($boat->vat_total) }}</strong>
+                                    <span class="d-inline-block">{{ __('Paid') }}:</span>
+                                    <strong class="order-detail-value">{{ format_price($boat->paid_amount) }}</strong>
                                 </div>
-                                @if($boat->is_finished)
-                                    <hr/>
-                                    <div>
-                                        <span class="d-inline-block">{{ __('Paid') }}:</span>
-                                        <strong class="order-detail-value">{{ format_price($boat->paid_amount) }}</strong>
-                                    </div>
-                                    <div>
-                                        <span class="d-inline-block">{{ __('Remaining') }}:</span>
-                                        <strong class="order-detail-value">{{ format_price($boat->vat_total - $boat->paid_amount) }}</strong>
-                                    </div>
-                                @endif
+                                <div>
+                                    <span class="d-inline-block">{{ __('Remaining') }}:</span>
+                                    <strong class="order-detail-value">{{ format_price($boat->vat_total - $boat->paid_amount) }}</strong>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
