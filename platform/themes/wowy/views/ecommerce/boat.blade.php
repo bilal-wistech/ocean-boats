@@ -330,55 +330,55 @@
 
         let baseModel, additionalModels = [];
 
-    function loadModel(path, targetSize = 8, callback) {
-       loader.load(path, function (gltf) {
-        const model = gltf.scene;
-        model.userData.path = path;
-        const bbox = new THREE.Box3().setFromObject(model);
-        const size = new THREE.Vector3();
-        bbox.getSize(size);
-        const maxDimension = Math.max(size.x, size.y, size.z);
-        const scaleFactor = targetSize / maxDimension;
-        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        bbox.setFromObject(model);
-        const center = new THREE.Vector3();
-        bbox.getCenter(center);
-        
-        model.position.x -= center.x;
-        model.position.y -= center.y;
-        model.position.z -= center.z;
+        function loadModel(path, targetSize = 8, callback) {
+            loader.load(path, function (gltf) {
+                const model = gltf.scene;
+                model.userData.path = path;
+                const bbox = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                const scaleFactor = targetSize / maxDimension;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                bbox.setFromObject(model);
+                const center = new THREE.Vector3();
+                bbox.getCenter(center);
 
-        callback(model);
-    }, undefined, function (error) {
-        console.error('Error loading model:', path, error);
-    });
-}
+                model.position.x -= center.x;
+                model.position.y -= center.y;
+                model.position.z -= center.z;
+
+                callback(model);
+            }, undefined, function (error) {
+                console.error('Error loading model:', path, error);
+            });
+        }
 
 // Load base model
-loadModel(modelPath, 8, function (model) {
-    baseModel = model;
-    scene.add(baseModel);
-});
-
-
-function toggleAdditionalModel(path, add) {
-    if (add) {
-        loadModel(path, 4, function (model) {
-            additionalModels.push(model);
-            model.position.copy(baseModel.position); 
-            model.scale.copy(baseModel.scale); 
-
-
-            scene.add(model);
+        loadModel(modelPath, 8, function (model) {
+            baseModel = model;
+            scene.add(baseModel);
         });
-    } else {
-        const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-        if (modelIndex !== -1) {
-            scene.remove(additionalModels[modelIndex]);
-            additionalModels.splice(modelIndex, 1);
+
+
+        function toggleAdditionalModel(path, add) {
+            if (add) {
+                loadModel(path, 4, function (model) {
+                    additionalModels.push(model);
+                    model.position.copy(baseModel.position);
+                    model.scale.copy(baseModel.scale);
+
+
+                    scene.add(model);
+                });
+            } else {
+                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+                if (modelIndex !== -1) {
+                    scene.remove(additionalModels[modelIndex]);
+                    additionalModels.splice(modelIndex, 1);
+                }
+            }
         }
-    }
-}
 
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -394,26 +394,26 @@ function toggleAdditionalModel(path, add) {
 
         animate();
 
-      
-document.querySelectorAll('.cat-item-check').forEach(input => {
-    input.addEventListener('click', function () {
-        const modelPath = this.dataset.model;
-        const wasChecked = this.getAttribute('data-waschecked') === 'false';
-        if (wasChecked) {
-            toggleAdditionalModel(modelPath, true);
-           
-        } else {
-            toggleAdditionalModel(modelPath, false);
-           
-        }
-    });
-});
+
+        document.querySelectorAll('.cat-item-check').forEach(input => {
+            input.addEventListener('click', function () {
+                const modelPath = this.dataset.model;
+                const wasChecked = this.getAttribute('data-waschecked') === 'false';
+                if (wasChecked) {
+                    toggleAdditionalModel(modelPath, true);
+
+                } else {
+                    toggleAdditionalModel(modelPath, false);
+
+                }
+            });
+        });
 
 
-       
     });
 </script>
-<script>
+{{--no need of this script. It is now in boat-footer.blade.php --}}
+{{--<script>
     document.addEventListener('DOMContentLoaded', function () {
         const colorPickers = document.querySelectorAll('[data-color-picker="true"]');
 
@@ -479,4 +479,4 @@ document.querySelectorAll('.cat-item-check').forEach(input => {
         });
     });
 
-</script>
+</script>--}}
