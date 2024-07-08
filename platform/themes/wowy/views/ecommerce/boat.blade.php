@@ -37,7 +37,7 @@
         <form id="submit-form" action="{{ route('public.customize-boat.submit') }}" method="post">
             @csrf
             <input type="hidden" name="boat_id" value="{{ $product->id }}">
-            <input type="hidden" name="total_price" value="{{ $product->price }}">
+            <input type="hidden" name="total_price" value="0">
             @forelse($categories as $key=>$value)
                     <?php
                     $i = $key + 1;
@@ -106,13 +106,11 @@
                                                class="control-label color-picker {{ $option->type }}"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
-                                               data-color-picker="true"
-                                               data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
+                                               data-color-picker="true">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="option[{{ $option->type }}]" value=""
                                                class="form-control color-picker"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
-                                               data-color-price="{{ $option->price }}"
                                         >
                                     @endif
                                 @empty
@@ -332,37 +330,56 @@
 
         let baseModel, additionalModels = [];
 
-        function loadModel(path, scaleFactor = 0.01, callback) {
-            loader.load(path, function (gltf) {
-                const model = gltf.scene;
-                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                model.userData.path = path;
-                callback(model);
-            }, undefined, function (error) {
-                console.error('Error loading model:', path, error);
-            });
-        }
+    function loadModel(path, targetSize = 8, callback) {
+       loader.load(path, function (gltf) {
+        const model = gltf.scene;
+        model.userData.path = path;
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const maxDimension = Math.max(size.x, size.y, size.z);
+        const scaleFactor = targetSize / maxDimension;
+        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        bbox.setFromObject(model);
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+        
+        model.position.x -= center.x;
+        model.position.y -= center.y;
+        model.position.z -= center.z;
 
-        // Load base model
-        loadModel(modelPath, 0.01, function (model) {
-            baseModel = model;
-            scene.add(baseModel);
+        callback(model);
+    }, undefined, function (error) {
+        console.error('Error loading model:', path, error);
+    });
+}
+
+// Load base model
+loadModel(modelPath, 8, function (model) {
+    baseModel = model;
+    scene.add(baseModel);
+});
+
+
+function toggleAdditionalModel(path, add) {
+    if (add) {
+        loadModel(path, 4, function (model) {
+            additionalModels.push(model);
+            model.position.copy(baseModel.position); 
+            model.scale.copy(baseModel.scale); 
+
+
+            scene.add(model);
         });
-
-        function toggleAdditionalModel(path, add) {
-            if (add) {
-                loadModel(path, 0.01, function (model) {
-                    additionalModels.push(model);
-                    scene.add(model);
-                });
-            } else {
-                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-                if (modelIndex !== -1) {
-                    scene.remove(additionalModels[modelIndex]);
-                    additionalModels.splice(modelIndex, 1);
-                }
-            }
+    } else {
+        const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+        if (modelIndex !== -1) {
+            scene.remove(additionalModels[modelIndex]);
+            additionalModels.splice(modelIndex, 1);
         }
+    }
+}
+
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = false;
@@ -377,21 +394,89 @@
 
         animate();
 
-        document.querySelectorAll('.cat-item-check').forEach(input => {
-            input.addEventListener('click', function () {
-                const modelPath = this.dataset.model;
-                const wasChecked = this.getAttribute('data-waschecked') === 'false';
-                if (wasChecked) {
-                    toggleAdditionalModel(modelPath, true);
+      
+document.querySelectorAll('.cat-item-check').forEach(input => {
+    input.addEventListener('click', function () {
+        const modelPath = this.dataset.model;
+        const wasChecked = this.getAttribute('data-waschecked') === 'false';
+        if (wasChecked) {
+            toggleAdditionalModel(modelPath, true);
+           
+        } else {
+            toggleAdditionalModel(modelPath, false);
+           
+        }
+    });
+});
 
+
+       
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const colorPickers = document.querySelectorAll('[data-color-picker="true"]');
+
+        colorPickers.forEach(pickerElement => {
+            const pickr = Pickr.create({
+                el: pickerElement,
+                theme: 'classic',
+                swatches: [
+                    'rgba(244, 67, 54, 1)',
+                    'rgba(233, 30, 99, 0.95)',
+                    'rgba(156, 39, 176, 0.9)',
+                    'rgba(103, 58, 183, 0.85)',
+                    'rgba(63, 81, 181, 0.8)',
+                    'rgba(33, 150, 243, 0.75)',
+                    'rgba(3, 169, 244, 0.7)',
+                    'rgba(0, 188, 212, 0.7)',
+                    'rgba(0, 150, 136, 0.75)',
+                    'rgba(76, 175, 80, 0.8)',
+                    'rgba(139, 195, 74, 0.85)',
+                    'rgba(205, 220, 57, 0.9)',
+                    'rgba(255, 235, 59, 0.95)',
+                    'rgba(255, 193, 7, 1)'
+                ],
+                components: {
+                    preview: true,
+                    opacity: true,
+                    hue: true,
+                    interaction: {
+                        hex: true,
+                        rgba: true,
+                        input: true,
+                        clear: true,
+                        save: true
+                    }
+                }
+            });
+
+            pickr.on('save', (color, instance) => {
+                // console.log('color picker element: ', pickerElement);
+                const colorOptionId = pickerElement.getAttribute('data-color-option-id');
+                const colorType = pickerElement.getAttribute('data-color-option-type');
+                // console.log('color option id: ', colorOptionId);
+                // console.log('color type: ', colorType);
+
+                if (colorOptionId && colorType) {
+                    const colorSelected = color.toHEXA().toString();
+                    // console.log('color selected: ', colorSelected);
+                    const inputName = `option[${colorType}]`;
+                    // console.log('input name: ', inputName);
+
+                    const inputElement = document.querySelector(`input[name="${inputName}"]`);
+                    // console.log('input element: ', inputElement);
+
+                    if (inputElement) {``
+                        inputElement.value = `${colorOptionId}-${colorSelected}`;
+                    } else {
+                        console.error(`Input element with name ${inputName} not found.`);
+                    }
                 } else {
-                    toggleAdditionalModel(modelPath, false);
-
+                    console.error('Color option ID or type not found.');
                 }
             });
         });
-
-
     });
-</script>
 
+</script>
