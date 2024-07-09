@@ -73,17 +73,17 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                                <input class="form-check-input cat-item-check"
-                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                       value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                       data-parent="{{ $option->parent_id }}"
-                                                       data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                                       data-model="{{ asset('storage/' . $option->file) }}"
-                                                       id="collapse-{{ $option->id }}"
-                                                        {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
-
+                                            <input class="form-check-input cat-item-check"
+                                            name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                            type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                            value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                            data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                            data-parent="{{ $option->parent_id }}"
+                                            data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                            data-model="{{ asset('storage/' . $option->file) }}"
+                                            id="collapse-{{ $option->id }}"
+                                            {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
+                                     
                                             @endif
 
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -110,14 +110,12 @@
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
                                                data-color-picker="true"
-                                               data-color-price="{{ $option->price }}"
-                                               data-color-model="{{ $option->file ?? '' }}">{{ $option->ltitle }}</label>
+                                               data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="option[{{ $option->type }}]" value=""
                                                class="form-control color-picker"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
                                                data-color-price="{{ $option->price }}"
-                                               data-model-color="{{ $option->file ?? '' }}"
                                         >
                                     @endif
                                 @empty
@@ -299,7 +297,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const modelPath = '{{ asset('storage/' . $modelPath) }}';
@@ -310,7 +307,7 @@
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({antialias: true});
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.gammaOutput = true;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
@@ -414,12 +411,8 @@
         }
 
         animate();
-    });
 
-</script>
-{{--no need of this script. It is now in boat-footer.blade.php --}}
-{{--<script>
-    document.addEventListener('DOMContentLoaded', function () {
+        // Color picker setup
         const colorPickers = document.querySelectorAll('[data-color-picker="true"]');
 
         colorPickers.forEach(pickerElement => {
@@ -457,23 +450,34 @@
             });
 
             pickr.on('save', (color, instance) => {
-                // console.log('color picker element: ', pickerElement);
                 const colorOptionId = pickerElement.getAttribute('data-color-option-id');
                 const colorType = pickerElement.getAttribute('data-color-option-type');
-                // console.log('color option id: ', colorOptionId);
-                // console.log('color type: ', colorType);
+                const colorPrice = parseFloat(pickerElement.getAttribute('data-color-price'));
 
                 if (colorOptionId && colorType) {
                     const colorSelected = color.toHEXA().toString();
-                    // console.log('color selected: ', colorSelected);
                     const inputName = `option[${colorType}]`;
-                    // console.log('input name: ', inputName);
-
                     const inputElement = document.querySelector(`input[name="${inputName}"]`);
-                    // console.log('input element: ', inputElement);
 
-                    if (inputElement) {``
+                    if (inputElement) {
                         inputElement.value = `${colorOptionId}-${colorSelected}`;
+                        updateTotalPrice(colorPrice); // Update total price function
+
+                        const firstWord = colorType.split('-')[0]; // Extract "top" from "top-color"
+
+                        additionalModels.forEach(model => {
+                            const modelLabel = model.userData.path.toLowerCase();
+                            if (modelLabel.includes(firstWord)) {
+                                console.log(`Applying color ${colorSelected} to model at path: ${model.userData.path}`);
+                                // Apply color to model's material or texture
+                                // Example assuming model has a material with a 'color' property
+                                model.traverse(child => {
+                                    if (child.isMesh) {
+                                        child.material.color.set(colorSelected);
+                                    }
+                                });
+                            }
+                        });
                     } else {
                         console.error(`Input element with name ${inputName} not found.`);
                     }
@@ -482,6 +486,19 @@
                 }
             });
         });
-    });
 
-</script>--}}
+        function updateTotalPrice(colorPrice) {
+            let totalPrice = parseFloat($('input[name="total_price"]').val());
+            totalPrice += parseFloat(colorPrice);
+
+            const currency = "<?php echo get_application_currency()['symbol']; ?>";
+            const vatPrice = (totalPrice * 5) / 100;
+            const vatTotal = totalPrice + vatPrice;
+
+            $('.sub-total').text(totalPrice.toLocaleString('en-US') + currency);
+            $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
+            $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
+            $('input[name="total_price"]').val(totalPrice);
+        }
+    });
+</script>
