@@ -73,17 +73,17 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                            <input class="form-check-input cat-item-check"
-                                            name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                            type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                            value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                            data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                            data-parent="{{ $option->parent_id }}"
-                                            data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                            data-model="{{ asset('storage/' . $option->file) }}"
-                                            id="collapse-{{ $option->id }}"
-                                            {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
-                                     
+                                                <input class="form-check-input cat-item-check"
+                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                       value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                       data-parent="{{ $option->parent_id }}"
+                                                       data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                                       data-model="{{ asset('storage/' . $option->file) }}"
+                                                       id="collapse-{{ $option->id }}"
+                                                        {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
+
                                             @endif
 
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -307,7 +307,7 @@
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.gammaOutput = true;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
@@ -470,7 +470,6 @@
                             if (modelLabel.includes(firstWord)) {
                                 console.log(`Applying color ${colorSelected} to model at path: ${model.userData.path}`);
                                 // Apply color to model's material or texture
-                                // Example assuming model has a material with a 'color' property
                                 model.traverse(child => {
                                     if (child.isMesh) {
                                         child.material.color.set(colorSelected);
