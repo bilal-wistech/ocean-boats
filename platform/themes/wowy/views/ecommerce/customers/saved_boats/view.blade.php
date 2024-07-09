@@ -43,84 +43,13 @@
                         </div>
 
                         <h4 class="mt-3 mb-1">{{ __('Final Model') }}</h4>
+                        @php
+                            $modelPath = $boat->boat->file;
+                        @endphp
                         <div class="row">
-                            {{--                            <div id="carouselExampleControls" class="custom-boat carousel slide">--}}
-                            {{--                                <div class="carousel-inner">--}}
-                            {{--                                    <div class="carousel-item active">--}}
-                            {{--                                        @foreach($result as $key=>$value)--}}
-                            {{--                                            @if(isset($value->enquiry_option->image[1]))--}}
-                            {{--                                                <div style="position:absolute;">--}}
-                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[1], '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                         class="d-block w-100" alt="...">--}}
-                            {{--                                                </div>--}}
-                            {{--                                            @endif--}}
-                            {{--                                        @endforeach--}}
-                            {{--                                        <div class="" style="z-index:0">--}}
-                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[1] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                 class="d-block w-100" alt="...">--}}
-                            {{--                                        </div>--}}
-                            {{--                                    </div>--}}
-
-                            {{--                                    <div class="carousel-item">--}}
-                            {{--                                        @foreach($result as $key=>$value)--}}
-                            {{--                                            @if(isset($value->enquiry_option->image[2]))--}}
-                            {{--                                                <div style="position:absolute;">--}}
-                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[2], '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                         class="d-block w-100" alt="...">--}}
-                            {{--                                                </div>--}}
-                            {{--                                            @endif--}}
-                            {{--                                        @endforeach--}}
-                            {{--                                        <div class="" style="z-index:0">--}}
-                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[2] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                 class="d-block w-100" alt="...">--}}
-                            {{--                                        </div>--}}
-                            {{--                                    </div>--}}
-
-                            {{--                                    <div class="carousel-item">--}}
-                            {{--                                        @foreach($result as $key=>$value)--}}
-                            {{--                                            @if(isset($value->enquiry_option->image[3]))--}}
-                            {{--                                                <div style="position:absolute;">--}}
-                            {{--                                                    <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[3], '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                         class="d-block w-100" alt="...">--}}
-                            {{--                                                </div>--}}
-                            {{--                                            @endif--}}
-                            {{--                                        @endforeach--}}
-                            {{--                                        <div class="" style="z-index:0">--}}
-                            {{--                                            <img src="{{ RvMedia::getImageUrl($boat->boat->image[3] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                 class="d-block w-100" alt="...">--}}
-                            {{--                                        </div>--}}
-                            {{--                                    </div>--}}
-
-                            {{--                                    @if(isset($boat->boat->image[4]))--}}
-                            {{--                                        <div class="carousel-item">--}}
-                            {{--                                            @foreach($result as $key=>$value)--}}
-                            {{--                                                @if(isset($value->enquiry_option->image[4]))--}}
-                            {{--                                                    <div style="position:absolute;">--}}
-                            {{--                                                        <img src="{{ RvMedia::getImageUrl($value->enquiry_option->image[4], '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                             class="d-block w-100" alt="...">--}}
-                            {{--                                                    </div>--}}
-                            {{--                                                @endif--}}
-                            {{--                                            @endforeach--}}
-                            {{--                                            <div class="" style="z-index:0">--}}
-                            {{--                                                <img src="{{ RvMedia::getImageUrl($boat->boat->image[4] ?? $boat->boat->image, '', false, RvMedia::getDefaultImage()) }}"--}}
-                            {{--                                                     class="d-block w-100" alt="...">--}}
-                            {{--                                            </div>--}}
-                            {{--                                        </div>--}}
-                            {{--                                    @endif--}}
-
-                            {{--                                </div>--}}
-                            {{--                                <button class="carousel-control-prev" type="button"--}}
-                            {{--                                        data-bs-target="#carouselExampleControls" data-bs-slide="prev">--}}
-                            {{--                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>--}}
-                            {{--                                    <span class="visually-hidden">Previous</span>--}}
-                            {{--                                </button>--}}
-                            {{--                                <button class="carousel-control-next" type="button"--}}
-                            {{--                                        data-bs-target="#carouselExampleControls" data-bs-slide="next">--}}
-                            {{--                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>--}}
-                            {{--                                    <span class="visually-hidden">Next</span>--}}
-                            {{--                                </button>--}}
-                            {{--                            </div>--}}
-                            {{--                            <div>--}}
+                            {{--3d model div starts --}}
+                            <div id="3d-model" style="width: 100%; height: 500px;"></div>
+                            {{--3d model div ends --}}
 
                             <h4 class="mt-3 mt-50">{{ __('Options Selected') }}</h4>
                             <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
