@@ -73,17 +73,17 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                            <input class="form-check-input cat-item-check"
-                                            name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                            type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                            value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                            data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                            data-parent="{{ $option->parent_id }}"
-                                            data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                            data-model="{{ asset('storage/' . $option->file) }}"
-                                            id="collapse-{{ $option->id }}"
-                                            {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
-                                     
+                                                <input class="form-check-input cat-item-check"
+                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                       value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                       data-parent="{{ $option->parent_id }}"
+                                                       data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                                       data-model="{{ asset('storage/' . $option->file) }}"
+                                                       id="collapse-{{ $option->id }}"
+                                                        {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
+
                                             @endif
 
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -110,12 +110,14 @@
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
                                                data-color-picker="true"
-                                               data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
+                                               data-color-price="{{ $option->price }}"
+                                               data-color-model="{{ $option->file ?? '' }}">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="option[{{ $option->type }}]" value=""
                                                class="form-control color-picker"
                                                data-color-option-id="{{ $option->id }}"
                                                data-color-option-type="{{ $option->type }}"
                                                data-color-price="{{ $option->price }}"
+                                               data-model-color="{{ $option->file ?? '' }}"
                                         >
                                     @endif
                                 @empty
@@ -307,120 +309,120 @@
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 
 <script>
- document.addEventListener('DOMContentLoaded', function () {
-    const modelPath = '{{ asset('storage/' . $modelPath) }}';
-    const container = document.getElementById('3d-model');
+    document.addEventListener('DOMContentLoaded', function () {
+        const modelPath = '{{ asset('storage/' . $modelPath) }}';
+        const container = document.getElementById('3d-model');
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 6);
-    camera.lookAt(scene.position);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 6);
+        camera.lookAt(scene.position);
 
-    const renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.gammaOutput = true;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2;
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.gammaOutput = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 2;
 
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0xffffff);
-    container.appendChild(renderer.domElement);
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0xffffff);
+        container.appendChild(renderer.domElement);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight.position.set(5, 5, 5).normalize();
-    scene.add(directionalLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(5, 5, 5).normalize();
+        scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight2.position.set(-5, -5, -5).normalize();
-    scene.add(directionalLight2);
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight2.position.set(-5, -5, -5).normalize();
+        scene.add(directionalLight2);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-    scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
 
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
 
-    const loader = new THREE.GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+        const loader = new THREE.GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
 
-    let baseModel, additionalModels = [];
+        let baseModel, additionalModels = [];
 
-    function loadModel(path, targetSize = 8, callback) {
-        loader.load(path, function (gltf) {
-            const model = gltf.scene;
-            model.userData.path = path;
-            const bbox = new THREE.Box3().setFromObject(model);
-            const size = new THREE.Vector3();
-            bbox.getSize(size);
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = targetSize / maxDimension;
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            bbox.setFromObject(model);
-            const center = new THREE.Vector3();
-            bbox.getCenter(center);
+        function loadModel(path, targetSize = 8, callback) {
+            loader.load(path, function (gltf) {
+                const model = gltf.scene;
+                model.userData.path = path;
+                const bbox = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                const scaleFactor = targetSize / maxDimension;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                bbox.setFromObject(model);
+                const center = new THREE.Vector3();
+                bbox.getCenter(center);
 
-            model.position.x -= center.x;
-            model.position.y -= center.y;
-            model.position.z -= center.z;
+                model.position.x -= center.x;
+                model.position.y -= center.y;
+                model.position.z -= center.z;
 
-            callback(model);
-        }, undefined, function (error) {
-            console.error('Error loading model:', path, error);
-        });
-    }
+                callback(model);
+            }, undefined, function (error) {
+                console.error('Error loading model:', path, error);
+            });
+        }
 
-    loadModel(modelPath, 8, function (model) {
-        baseModel = model;
-        scene.add(baseModel);
+        loadModel(modelPath, 8, function (model) {
+            baseModel = model;
+            scene.add(baseModel);
 
-        document.querySelectorAll('.cat-item-check').forEach(input => {
-            if (input.getAttribute('data-waschecked') === 'true') {
-                const modelPath = input.dataset.model;
-                toggleAdditionalModel(modelPath, true);
-            }
-            input.addEventListener('click', function () {
-                const modelPath = this.dataset.model;
-                const wasChecked = this.getAttribute('data-waschecked') === 'false';
-                if (wasChecked) {
+            document.querySelectorAll('.cat-item-check').forEach(input => {
+                if (input.getAttribute('data-waschecked') === 'true') {
+                    const modelPath = input.dataset.model;
                     toggleAdditionalModel(modelPath, true);
-                } else {
-                    toggleAdditionalModel(modelPath, false);
                 }
+                input.addEventListener('click', function () {
+                    const modelPath = this.dataset.model;
+                    const wasChecked = this.getAttribute('data-waschecked') === 'false';
+                    if (wasChecked) {
+                        toggleAdditionalModel(modelPath, true);
+                    } else {
+                        toggleAdditionalModel(modelPath, false);
+                    }
+                });
             });
         });
-    });
 
-    function toggleAdditionalModel(path, add) {
-        if (add) {
-            loadModel(path, 4, function (model) {
-                additionalModels.push(model);
-                if (baseModel) {
-                    model.position.copy(baseModel.position);
-                    model.scale.copy(baseModel.scale);
+        function toggleAdditionalModel(path, add) {
+            if (add) {
+                loadModel(path, 4, function (model) {
+                    additionalModels.push(model);
+                    if (baseModel) {
+                        model.position.copy(baseModel.position);
+                        model.scale.copy(baseModel.scale);
+                    }
+                    scene.add(model);
+                });
+            } else {
+                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+                if (modelIndex !== -1) {
+                    scene.remove(additionalModels[modelIndex]);
+                    additionalModels.splice(modelIndex, 1);
                 }
-                scene.add(model);
-            });
-        } else {
-            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-            if (modelIndex !== -1) {
-                scene.remove(additionalModels[modelIndex]);
-                additionalModels.splice(modelIndex, 1);
             }
         }
-    }
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = false;
-    controls.minDistance = 3;
-    controls.maxDistance = 13;
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = false;
+        controls.minDistance = 3;
+        controls.maxDistance = 13;
 
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-        controls.update();
-    }
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            controls.update();
+        }
 
-    animate();
-});
+        animate();
+    });
 
 </script>
 {{--no need of this script. It is now in boat-footer.blade.php --}}
