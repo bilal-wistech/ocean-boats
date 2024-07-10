@@ -39,9 +39,9 @@
             <input type="hidden" name="boat_id" value="{{ $product->id }}">
             <input type="hidden" name="total_price" value="{{ $product->price ?? 0 }}">
             @forelse($categories as $key=>$value)
-                    <?php
-                    $i = $key + 1;
-                    ?>
+                <?php
+                $i = $key + 1;
+                ?>
                 <div class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
                     <div class="customboat-card-header">
                         <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
@@ -49,7 +49,8 @@
                     <div class="customboat-card-body cat-body">
                         @forelse($value->childitems() as $key1 => $value1)
                             <div class="col btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
-                                 href="#collapse{{ $key1 }}" aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                                href="#collapse{{ $key1 }}"
+                                aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
                                 <div class="title">{{ $value1->ltitle }}</div>
                             </div>
                             <div class="collapse {{ $key1 == 0 ? 'show' : '' }}" id="collapse{{ $key1 }}">
@@ -57,15 +58,15 @@
                                     @if ($option->side_layout == 'radio')
                                         @if ($value->multi_select != 3)
                                             <input class="form-check-input visually-hidden cat-item-check"
-                                                   type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                   id="{{ $option->id }}" value="{{ $option->id }}"
-                                                   data-typename="{{ $value1->ltitle }}"
-                                                   data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                   name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                   data-parent="{{ $option->parent_id }}" data-waschecked="false">
+                                                type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                id="{{ $option->id }}" value="{{ $option->id }}"
+                                                data-typename="{{ $value1->ltitle }}"
+                                                data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                data-parent="{{ $option->parent_id }}" data-waschecked="false">
                                         @endif
                                         <label class="form-check-label color-box" for="{{ $option->id }}"
-                                               style="background-image: url({{ RvMedia::getImageUrl($option->main_image) }});">
+                                            style="background-image: url({{ RvMedia::getImageUrl($option->main_image) }});">
                                             <div class="tick-icon"><img src="{{ asset('/storage/check_circle.png') }}">
                                             </div>
                                             <div class="color-name">{{ $option->ltitle }}</div>
@@ -73,50 +74,46 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                            <input class="form-check-input cat-item-check"
-                                            name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                            type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                            value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                            data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                            data-parent="{{ $option->parent_id }}"
-                                            data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                            data-model="{{ asset('storage/' . $option->file) }}"
-                                            id="collapse-{{ $option->id }}"
-                                            {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
-                                     
+                                                <input class="form-check-input cat-item-check"
+                                                    name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                    type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                    value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                    data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                    data-parent="{{ $option->parent_id }}"
+                                                    data-model="{{ asset('storage/' . $option->file) }}"
+                                                    id="collapse-{{ $option->id }}"
+                                                    {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
                                             @endif
 
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
                                                 <div data-bs-toggle="{{ $option->main_image ? 'collapse' : '' }}"
-                                                     data-bs-target="#color-details-{{ $option->id }}"
-                                                     aria-expanded="false"
-                                                     aria-controls="color-details-{{ $option->id }}"
-                                                     class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
+                                                    data-bs-target="#color-details-{{ $option->id }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="color-details-{{ $option->id }}"
+                                                    class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
                                                     {{ $option->ltitle }} ({{ format_price($option->price) }})
                                                 </div>
                                             </label>
-                                            {{--Image to be show if we add then there will be a dropdown on which on clicking image is shown--}}
+                                            {{-- Image to be show if we add then there will be a dropdown on which on clicking image is shown --}}
                                             <div class="collapse" id="color-details-{{ $option->id }}">
                                                 <div class="content-boat">
                                                     <img class="img-fluid img-thumbnail landscape"
-                                                         src="{{ RvMedia::getImageUrl($option->main_image) }}">
+                                                        src="{{ RvMedia::getImageUrl($option->main_image) }}">
                                                 </div>
                                             </div>
                                         </div>
-                                        {{--color options--}}
+                                        {{-- color options --}}
                                     @elseif($option->side_layout == 'color')
                                         <label for="{{ $option->id }}"
-                                               class="control-label color-picker {{ $option->type }}"
-                                               data-color-option-id="{{ $option->id }}"
-                                               data-color-option-type="{{ $option->type }}"
-                                               data-color-picker="true"
-                                               data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
+                                            class="control-label color-picker {{ $option->type }}"
+                                            data-color-option-id="{{ $option->id }}"
+                                            data-color-option-type="{{ $option->type }}" data-color-picker="true"
+                                            data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label>
                                         <input type="hidden" name="option[{{ $option->type }}]" value=""
-                                               class="form-control color-picker"
-                                               data-color-option-id="{{ $option->id }}"
-                                               data-color-option-type="{{ $option->type }}"
-                                               data-color-price="{{ $option->price }}"
-                                        >
+                                            class="form-control color-picker"
+                                            data-color-option-id="{{ $option->id }}"
+                                            data-color-option-type="{{ $option->type }}"
+                                            data-color-price="{{ $option->price }}">
                                     @endif
                                 @empty
                                 @endforelse
@@ -127,12 +124,12 @@
                         <div class=" row">
                             <div class="col-8">
                                 <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span
-                                            class="sub-total">{{ format_price($product->price) }}</span></p>
+                                        class="sub-total">{{ format_price($product->price) }}</span></p>
                                 <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span
-                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                        class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                                 </p>
                                 <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span
-                                            class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                        class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                 </p>
                             </div>
                             <div class="col-4">
@@ -143,7 +140,7 @@
 
                                 <div class="currency-dropdown dropdown">
                                     <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         {{ $selectedCurrency }}
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -151,7 +148,7 @@
                                             @if ($currency->id !== get_application_currency_id())
                                                 <li>
                                                     <a class="dropdown-item"
-                                                       href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                                        href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
                                                 </li>
                                             @endif
                                         @endforeach
@@ -166,21 +163,21 @@
                         @if (isset($categories[$key + 1]))
                             @if ($key > 0)
                                 <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                        data-value="{{ $categories[$key - 1]->type }}" type="button">Back
+                                    data-value="{{ $categories[$key - 1]->type }}" type="button">Back
                                 </button>
                             @endif
                             <button class="btn card-btn" type="button" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
+                                data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
                                 Next
                                 Step
                             </button>
                         @else
                             <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
-                                    type="button">Back
+                                data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
+                                type="button">Back
                             </button>
                             <button class="btn card-btn" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="summary" type="button">Next Step
+                                data-value="summary" type="button">Next Step
                             </button>
                         @endif
                     </div>
@@ -201,7 +198,7 @@
                 <input type="hidden" name="redirect_url_pay" value="0">
                 <div class="mt-10 customboat-card-footer d-flex flex-row flex-wrap">
                     <button type="button" class="btn card-btn prv" data-curval="summary"
-                            data-value="{{ lastitem($product->id)->type }}">Back
+                        data-value="{{ lastitem($product->id)->type }}">Back
                     </button>
                     <button type="submit" class="btn card-btn" style="border-radius: unset;">Save & Exit</button>
                     <button type="button" class="btn view-summary">View Your Summary</button>
@@ -253,16 +250,17 @@
                 <div class="row m-2">
                     <div class="col-9 text-end">
                         <p><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span></p>
-                        <p><b>VAT 5%</b>: <span class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                        <p><b>VAT 5%</b>: <span
+                                class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                         </p>
                         <p><b>Total</b>: <span
-                                    class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                         </p>
                     </div>
                     <div class="col-3">
                         <div class="currency-dropdown dropdown">
                             <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 AED
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -284,7 +282,7 @@
 <!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    jQuery(function ($) {
+    jQuery(function($) {
         var offset = $('#custom-boat-container').offset().top - 50;
         $('html, body').animate({
             scrollTop: offset
@@ -298,16 +296,19 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const modelPath = '{{ asset('storage/' . $modelPath) }}';
         const container = document.getElementById('3d-model');
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
+            1000);
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
         renderer.gammaOutput = true;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
@@ -336,7 +337,7 @@
         let baseModel, additionalModels = [];
 
         function loadModel(path, targetSize = 8, callback) {
-            loader.load(path, function (gltf) {
+            loader.load(path, function(gltf) {
                 const model = gltf.scene;
                 model.userData.path = path;
                 const bbox = new THREE.Box3().setFromObject(model);
@@ -354,27 +355,53 @@
                 model.position.z -= center.z;
 
                 callback(model);
-            }, undefined, function (error) {
+            }, undefined, function(error) {
                 console.error('Error loading model:', path, error);
             });
         }
 
-        loadModel(modelPath, 8, function (model) {
+        loadModel(modelPath, 8, function(model) {
             baseModel = model;
             scene.add(baseModel);
 
+
+            function handleCheckboxClick(input) {
+                const modelPath = input.dataset.model;
+                const isChecked = input.checked;
+                toggleAdditionalModel(modelPath, isChecked);
+            }
+
+            let previousSelectedRadio = {};
+
+function handleRadioClick(input) {
+    const modelPath = input.dataset.model;
+    const radioGroupName = input.name;
+    document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
+        const otherModelPath = radio.dataset.model;
+        const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
+        if (modelIndex !== -1) {
+            scene.remove(additionalModels[modelIndex]);
+            additionalModels.splice(modelIndex, 1);
+        }
+    });
+
+    if (input.checked) {
+        toggleAdditionalModel(modelPath, true);
+        previousSelectedRadio[radioGroupName] = input;
+    }
+}
+
             document.querySelectorAll('.cat-item-check').forEach(input => {
-                if (input.getAttribute('data-waschecked') === 'true') {
-                    const modelPath = input.dataset.model;
-                    toggleAdditionalModel(modelPath, true);
+                if (input.type === 'checkbox') {
+                    handleCheckboxClick(input);
+                } else if (input.type === 'radio') {
+                    handleRadioClick(input);
                 }
-                input.addEventListener('click', function () {
-                    const modelPath = this.dataset.model;
-                    const wasChecked = this.getAttribute('data-waschecked') === 'false';
-                    if (wasChecked) {
-                        toggleAdditionalModel(modelPath, true);
-                    } else {
-                        toggleAdditionalModel(modelPath, false);
+                input.addEventListener('click', function() {
+                    if (this.type === 'checkbox') {
+                        handleCheckboxClick(this);
+                    } else if (this.type === 'radio') {
+                        handleRadioClick(this);
                     }
                 });
             });
@@ -382,7 +409,7 @@
 
         function toggleAdditionalModel(path, add) {
             if (add) {
-                loadModel(path, 4, function (model) {
+                loadModel(path, 4, function(model) {
                     additionalModels.push(model);
                     if (baseModel) {
                         model.position.copy(baseModel.position);
@@ -463,21 +490,65 @@
                         inputElement.value = `${colorOptionId}-${colorSelected}`;
                         updateTotalPrice(colorPrice); // Update total price function
 
-                        const firstWord = colorType.split('-')[0]; // Extract "top" from "top-color"
+                        const firstWord = colorType.split('-')[
+                        0]; // Extract "top" from "top-color"
+
+                        let colorApplied = false;
 
                         additionalModels.forEach(model => {
                             const modelLabel = model.userData.path.toLowerCase();
-                            if (modelLabel.includes(firstWord)) {
-                                console.log(`Applying color ${colorSelected} to model at path: ${model.userData.path}`);
-                                // Apply color to model's material or texture
-                                // Example assuming model has a material with a 'color' property
+                            if (modelLabel.includes(firstWord.toLowerCase())) {
+                                console.log(
+                                    `Applying color ${colorSelected} to model at path: ${model.userData.path}`
+                                    );
                                 model.traverse(child => {
                                     if (child.isMesh) {
                                         child.material.color.set(colorSelected);
                                     }
                                 });
+                                colorApplied = true;
                             }
                         });
+
+                        if (!colorApplied && baseModel) {
+                            let basePartFound = false;
+                            baseModel.traverse(child => {
+                                if (child.name) {
+                                    console.log(
+                                        `Checking base model part: '${child.name}' for match with '${firstWord}'`
+                                        );
+
+                        
+                                    const childName = child.name.trim().toLowerCase();
+                                    const checkName = firstWord.trim().toLowerCase();
+
+                                    if (childName === checkName) {
+                                        console.log(
+                                            `Applying color ${colorSelected} to base model part: ${child.name}`
+                                            );
+                                        child.traverse(child => {
+                                            if (child.isMesh) {
+                                                if (child.material) {
+                                                    child.material.color.set(
+                                                        colorSelected);
+                                                }
+                                            }
+                                        });
+
+                                        basePartFound = true;
+                                    }
+                                }
+                            });
+
+
+
+                            if (!basePartFound) {
+                                console.log(
+                                    `No matching part found in additional models or base model for: ${firstWord}`
+                                    );
+                            }
+                        }
+
                     } else {
                         console.error(`Input element with name ${inputName} not found.`);
                     }
@@ -485,6 +556,7 @@
                     console.error('Color option ID or type not found.');
                 }
             });
+
         });
 
         function updateTotalPrice(colorPrice) {
