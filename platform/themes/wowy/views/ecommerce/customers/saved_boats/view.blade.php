@@ -62,29 +62,31 @@
                                     @endphp
                                     <div class="card m-1">
                                         <div class="card-body text-center">
-                                            <p><b>{{$value->color_picker ? $parent->ltitle : ''}}</b>
-                                            </p>
+                                            <p><b>{{ $value->color_picker ? $parent->ltitle : '' }}</b></p>
                                             <p>
-                                                <b>
-                                                    {{$value->slug->ltitle}}:
-                                                </b>
+                                                <b>{{ $value->slug->ltitle }}:</b>
                                                 @if($value->slug->parent)
-                                                    {{$value->ltitle}}
+                                                    {{ $value->ltitle }}
+                                                    @if($data->is_standard_option == 1)
+                                                        <small>(Standard Option)</small>
+                                                    @endif
                                                 @else
-                                                    <span style="background-color: {{$value->color_picker}};">{{$value->color_picker}}</span>
+                                                    <span style="background-color: {{ $value->color_picker }};">{{ $value->color_picker }}</span>
                                                 @endif
                                             </p>
+
                                             <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
                                         </div>
                                     </div>
+
                                 @endforeach
                             </div>
-                            @if($boat->boat->detail->standard_options)
+                            {{--@if($boat->boat->detail->standard_options)
                                 <div class="card-body list-style">
                                     <h4>Standard Options</h4>
                                     {!! $boat->boat->detail->standard_options !!}
                                 </div>
-                            @endif
+                            @endif--}}
                         </div>
                         <h4 class="mt-3 mb-1">{{ __('Total') }}</h4>
                         <div>

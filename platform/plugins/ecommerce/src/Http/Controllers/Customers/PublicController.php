@@ -32,17 +32,16 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use InvoiceHelper;
+use Log;
+use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
+use NaeemAwan\PredefinedLists\Models\BoatEnquiryDetail;
+use NaeemAwan\PredefinedLists\Models\PredefinedList;
+use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
 use OrderHelper;
 use OrderReturnHelper;
 use RvMedia;
 use SeoHelper;
 use Theme;
-use DB;
-
-use NaeemAwan\PredefinedLists\Models\PredefinedList;
-use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
-use NaeemAwan\PredefinedLists\Models\BoatEnquiryDetail;
-use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
 
 class PublicController extends Controller
 {
@@ -105,7 +104,6 @@ class PublicController extends Controller
     {
         if (cache()->has('boat_data')) {
             $boatData = cache()->get('boat_data');
-//            dd($boatData);
             $enquiry = new BoatEnquiry;
             $enquiry->user_id = auth('customer')->id();
             $enquiry->message = $boatData['message'];
@@ -114,20 +112,24 @@ class PublicController extends Controller
             $enquiry->total_price = $boatData['total_price'];
             $enquiry->vat_total = $boatData['total_price'] + (($boatData['total_price'] * 5) / 100);
             $enquiry->save();
+
             foreach ($boatData['option'] as $key => $value) {
                 $detail = new BoatEnquiryDetail;
                 $detail->enquiry_id = $enquiry->id;
                 $detail->subcat_slug = $key;
 
-                // Check if the key contains 'color-picker'
-                if (strpos($key, 'color-picker') !== false) {
-                    $splitValue = explode('-', $value);
-                    if (count($splitValue) === 2) {
-                        $detail->option_id = $splitValue[0]; // Assigning the integer part as option_id
-                        $detail->color_picker = $splitValue[1]; // Assigning the hash value to color_picker field
+                // Determine the delimiter
+                $delimiter = strpos($value, '-') !== false ? '-' : (strpos($value, '_') !== false ? '_' : null);
+
+                if ($delimiter) {
+                    $splitValue = explode($delimiter, $value);
+                    if (count($splitValue) >= 2) {
+                        $detail->option_id = implode($delimiter,
+                            array_slice($splitValue, 0, -1)); // All segments except the last one
+                        $detail->color_picker = end($splitValue); // The last segment as color_picker
                     } else {
                         // Handle error case where value format is unexpected
-                        \Log::error("Unexpected format for color-picker option value: $key => $value");
+                        Log::error("Unexpected format for option value: $key => $value");
                         continue; // Skip saving this detail and continue with next iteration
                     }
                 } else {
@@ -215,7 +217,7 @@ class PublicController extends Controller
     {
         $currentUser = auth('customer')->user();
 
-        if (! Hash::check($request->input('old_password'), $currentUser->getAuthPassword())) {
+        if (!Hash::check($request->input('old_password'), $currentUser->getAuthPassword())) {
             return $response
                 ->setError()
                 ->setMessage(trans('acl::users.current_password_not_valid'));
@@ -239,7 +241,7 @@ class PublicController extends Controller
             ],
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => (int) $request->input('page'),
             ],
             'withCount' => ['products'],
             'order_by' => ['created_at' => 'DESC'],
@@ -267,7 +269,7 @@ class PublicController extends Controller
             ['address', 'products']
         );
 
-        if (! $order) {
+        if (!$order) {
             abort(404);
         }
 
@@ -293,11 +295,11 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ], ['*']);
 
-        if (! $order) {
+        if (!$order) {
             abort(404);
         }
 
-        if (! $order->canBeCanceled()) {
+        if (!$order->canBeCanceled()) {
             return $response->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cancel_error'));
         }
@@ -327,7 +329,7 @@ class PublicController extends Controller
             ],
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => (int)$request->input('page', 1),
+                'current_paged' => (int) $request->input('page', 1),
             ],
         ]);
 
@@ -395,7 +397,7 @@ class PublicController extends Controller
             'customer_id' => auth('customer')->id(),
         ]);
 
-        if (! $address) {
+        if (!$address) {
             abort(404);
         }
 
@@ -450,7 +452,7 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (! $order || ! $order->isInvoiceAvailable()) {
+        if (!$order || !$order->isInvoiceAvailable()) {
             abort(404);
         }
 
@@ -478,10 +480,10 @@ class PublicController extends Controller
 
             $thumbnailService
                 ->setImage(RvMedia::getRealPath($file->url))
-                ->setSize((int)$avatarData->width, (int)$avatarData->height)
-                ->setCoordinates((int)$avatarData->x, (int)$avatarData->y)
+                ->setSize((int) $avatarData->width, (int) $avatarData->height)
+                ->setCoordinates((int) $avatarData->x, (int) $avatarData->y)
                 ->setDestinationPath(File::dirname($file->url))
-                ->setFileName(File::name($file->url) . '.' . File::extension($file->url))
+                ->setFileName(File::name($file->url).'.'.File::extension($file->url))
                 ->save('crop');
 
             $account->avatar = $file->url;
@@ -510,7 +512,7 @@ class PublicController extends Controller
             ['products']
         );
 
-        if (! $order || ! $order->canBeReturned()) {
+        if (!$order || !$order->canBeReturned()) {
             abort(404);
         }
 
@@ -543,11 +545,11 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (! $order) {
+        if (!$order) {
             abort(404);
         }
 
-        if (! $order->canBeReturned()) {
+        if (!$order->canBeReturned()) {
             return $response
                 ->setError()
                 ->withInput()
@@ -569,7 +571,7 @@ class PublicController extends Controller
 
         [$status, $data, $message] = OrderReturnHelper::returnOrder($order, $orderReturnData);
 
-        if (! $status) {
+        if (!$status) {
             return $response
                 ->setError()
                 ->withInput()
@@ -597,7 +599,7 @@ class PublicController extends Controller
             ],
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => (int) $request->input('page'),
             ],
             'withCount' => ['items'],
             'order_by' => ['created_at' => 'DESC'],
@@ -623,7 +625,7 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (! $orderReturn) {
+        if (!$orderReturn) {
             abort(404);
         }
 
@@ -644,7 +646,7 @@ class PublicController extends Controller
 
     public function getDownloads()
     {
-        if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
             abort(404);
         }
 
@@ -678,7 +680,7 @@ class PublicController extends Controller
 
     public function getDownload(int $id, BaseHttpResponse $response)
     {
-        if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
             abort(404);
         }
 
@@ -699,24 +701,23 @@ class PublicController extends Controller
             ->with(['order', 'product'])
             ->first();
 
-        if (! $orderProduct) {
+        if (!$orderProduct) {
             abort(404);
         }
 
-        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now(
-        )->format('Y-m-d-h-i-s') . '.zip';
+        $zipName = 'digital-product-'.Str::slug($orderProduct->product_name).Str::random(5).'-'.Carbon::now()->format('Y-m-d-h-i-s').'.zip';
         $fileName = RvMedia::getRealPath($zipName);
         $zip = new Zipper();
         $zip->make($fileName);
         $product = $orderProduct->product;
         $productFiles = $product->id ? $product->productFiles : $orderProduct->productFiles;
 
-        if (! $productFiles->count()) {
+        if (!$productFiles->count()) {
             return $response->setError()->setMessage(__('Cannot found files'));
         }
         foreach ($productFiles as $file) {
             $filePath = RvMedia::getRealPath($file->url);
-            if (! RvMedia::isUsingCloud()) {
+            if (!RvMedia::isUsingCloud()) {
                 if (File::exists($filePath)) {
                     $zip->add($filePath);
                 }
@@ -745,7 +746,7 @@ class PublicController extends Controller
 
     public function getProductReviews()
     {
-        if (! EcommerceHelper::isReviewEnabled()) {
+        if (!EcommerceHelper::isReviewEnabled()) {
             abort(404);
         }
 
@@ -781,7 +782,8 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function getSavedBoats(Request $request){
+    public function getSavedBoats(Request $request)
+    {
         SeoHelper::setTitle(__('Saved Boats'));
 
         $boats = $this->boatenquiryRepository->advancedGet([
@@ -790,7 +792,7 @@ class PublicController extends Controller
             ],
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => (int) $request->input('page'),
             ],
             'order_by' => ['created_at' => 'DESC'],
         ]);
@@ -806,34 +808,36 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function getViewSavedBoat($id){
+    public function getViewSavedBoat($id)
+    {
 
-        $boat = BoatEnquiry::where(['boat_enquiries.id'=> $id, 'boat_enquiries.user_id' =>auth('customer')->id() ])
-        ->join('predefined_list as p', 'p.id', '=', 'boat_enquiries.boat_id') 
-        ->select('boat_enquiries.*', 'p.ltitle')    
-        ->with('details')    
-        ->first();
+        $boat = BoatEnquiry::where(['boat_enquiries.id' => $id, 'boat_enquiries.user_id' => auth('customer')->id()])
+            ->join('predefined_list as p', 'p.id', '=', 'boat_enquiries.boat_id')
+            ->select('boat_enquiries.*', 'p.ltitle')
+            ->with('details')
+            ->first();
 
-        if (! $boat) {
+        if (!$boat) {
             abort(404);
         }
 
-       // dd($boat->toArray());
+        // dd($boat->toArray());
 
-        foreach( $boat->details as $details){    
-            
-            $opt = PredefinedList::where(['id'=> $details->option_id])->select('predefined_list.ltitle')->first()->toArray();
-            $details['ltitle'] =$opt['ltitle'];
+        foreach ($boat->details as $details) {
+
+            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.ltitle')->first()->toArray();
+            $details['ltitle'] = $opt['ltitle'];
         }
 
         $result = BoatEnquiryDetail::join('predefined_list as c', 'boat_enquiry_details.subcat_slug', '=', 'c.type')
-        ->join('predefined_list as p', 'c.parent_id', '=', 'p.id')
-        ->whereIn('boat_enquiry_details.id',$boat->details->pluck('id')->toArray())
-        ->orderBy('p.sort_order','ASC')
-        ->orderBy('c.sort_order','ASC')
-        ->select('c.id', 'boat_enquiry_details.option_id', 'c.ltitle','c.image', 'boat_enquiry_details.subcat_slug')
-        ->with('enquiry_option')
-        ->get();
+            ->join('predefined_list as p', 'c.parent_id', '=', 'p.id')
+            ->whereIn('boat_enquiry_details.id', $boat->details->pluck('id')->toArray())
+            ->orderBy('p.sort_order', 'ASC')
+            ->orderBy('c.sort_order', 'ASC')
+            ->select('c.id', 'boat_enquiry_details.option_id', 'c.ltitle', 'c.image',
+                'boat_enquiry_details.subcat_slug')
+            ->with('enquiry_option')
+            ->get();
 
 //dd($boat->toArray(), $result->toArray());
 
@@ -848,7 +852,7 @@ class PublicController extends Controller
 
         return Theme::scope(
             'ecommerce.customers.saved_boats.view',
-            compact('boat','result'),
+            compact('boat', 'result'),
             'plugins/ecommerce::themes.customers.saved_boats.view'
         )->render();
     }
