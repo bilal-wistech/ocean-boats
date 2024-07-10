@@ -179,173 +179,143 @@
 
         $('#summary-end').hide();
         var price = 0;
-        var currency = "<?php echo get_application_currency()['symbol']; ?>"
-        var boat_price = $('input[name="boat_price"]').val();
-        var total_price = 0;
+        var currency = "<?php echo get_application_currency()['symbol']; ?>";
+        var boat_price = parseFloat($('input[name="boat_price"]').val());
+        var total_price = boat_price;
         var vat_price = 0;
         var vat_total = 0;
-        // events for clicking the radio buttons in the boat selection field
+
+        // Initialize prices for standard options
+        initializeStandardOptions();
+
+        function initializeStandardOptions() {
+            $('input.cat-item-check[data-waschecked="true"]').each(function () {
+                var value = $(this).val();
+                var typename = $(this).attr('data-typename');
+                var type = $(this).attr('data-type');
+                var optionPrice = parseFloat($(this).data('price'));
+
+                price += optionPrice;
+                addToSummary($(this), value, typename, type, optionPrice);
+            });
+
+            updateTotalPrice();
+        }
+
+        function addToSummary(element, value, typename, type, optionPrice) {
+            var html = `<div id="${value}" class="shadow card m-2 ${type}">
+                        <div class="head-cat card-header">
+                            <p class="text-center"><b>${typename}</b></p>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="spacing">
+                                <p>${element.next('label').text()}</p>
+                                <p><b>Price</b> : <span class="price">${Math.trunc(optionPrice).toLocaleString('en-US')}${currency}</span></p>
+                            </div>
+                        </div>
+                    </div>`;
+
+            $('#summary-end .summary-card').append(html);
+        }
+
+        function updateTotalPrice() {
+            total_price = boat_price + price;
+            $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
+            vat_price = (total_price * 5) / 100;
+            $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
+            vat_total = total_price + vat_price;
+            $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
+            $('input[name="total_price"]').val(total_price);
+        }
+
+        // Event handler for radio buttons
         $('body').on('click', 'input[type="radio"]', function () {
             var src = url + '/storage/' + 'transparent-pic-150x150.png';
-            // console.log(src)
             var value = $(this).val();
-            // console.log(value)
             var parent = $(this).data('parent');
-            // console.log(parent)
             var typename = $(this).attr('data-typename');
-            // console.log(typename)
             var type = $(this).attr('data-type');
-            // console.log(type)
+
             if ($(this).prop('checked') && $(this).attr('data-waschecked') == 'true') {
-                $('input[type="option[' + type + ']"]').attr('data-waschecked', false);
-                $(this).attr('data-waschecked', false);
-                $(this).prop('checked', false);
-                $('.cat-' + parent + '-img1').find('img').attr('src', src);
-                $('.cat-' + parent + '-img2').find('img').attr('src', src);
-                $('.cat-' + parent + '-img3').find('img').attr('src', src);
-                if ($('.cat-' + parent + '-img4').length) {
-                    $('.cat-' + parent + '-img4').find('img').attr('src', src);
-                }
-                var prev_div = $('#summary-end .summary-card .' + type);
-                // console.log(prev_div)
-                // price calculation
-                if (prev_div.length) {
-                    var prev_price = prev_div.find('.price').text();
-                    prev_price = prev_price.replace(",", "");
-                    price -= parseFloat(prev_price);
-                    prev_div.remove();
-                    total_price = parseFloat(boat_price) + parseFloat(price);
-                    $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
-                    vat_price = (total_price * 5) / 100;
-                    $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
-                    vat_total = total_price + vat_price;
-                    $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
-                    $('input[name="total_price"]').val(total_price);
-                }
+                handleUnchecked($(this), type, parent);
             } else {
-                $.ajax({
-                    type: "Post",
-                    url: url + "/customize-type-content",
-                    data: {
-                        value: value,
-                    },
-                    success: function (data) {
-                        // console.log(data)
-                        if (data['preview_enabled']) {
-                            var src1 = url + '/storage/' + data['image'][1];
-                            $('.cat-' + parent + '-img1').find('img').attr('src', src1);
-                            var src2 = url + '/storage/' + data['image'][2];
-                            $('.cat-' + parent + '-img2').find('img').attr('src', src2);
-                            var src3 = url + '/storage/' + data['image'][3];
-                            $('.cat-' + parent + '-img3').find('img').attr('src', src3);
-                            if (data['image'].hasOwnProperty(4)) {
-                                var src4 = url + '/storage/' + data['image'][4];
-                                $('.cat-' + parent + '-img4').find('img').attr('src', src4);
-                            }
-                        }
-
-                        var html = `<div id=` + value + ` class="shadow card m-2 ` + type + `"><div class="head-cat card-header"><p class="text-center"><b>` + typename + `</b></p></div><div class="card-body text-center"><div class="spacing"><p>` + data['ltitle'] + `</p>`;
-                        if (data['main_image']) {
-                            html = html + `<img class="img-fluid img-thumbnail landscape2" src="` + url + '/storage/' + data['main_image'] + `">`;
-                        }
-                        html = html + `<p><b>Price</b> : <span class="price">` + Math.trunc(data['price']).toLocaleString('en-US') + currency + `</span></p></div></div>`;
-                        var prev_div = $('#summary-end .summary-card .' + type);
-                        if (prev_div.length) {
-                            var prev_price = prev_div.find('.price').text();
-                            prev_price = prev_price.replace(",", "");
-                            price -= parseFloat(prev_price);
-                            prev_div.remove();
-                        }
-                        $('#summary-end .summary-card').append(html);
-
-                        price += parseFloat(data['price']);
-                        total_price = parseFloat(boat_price) + parseFloat(price);
-                        $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
-                        vat_price = (total_price * 5) / 100;
-                        $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
-                        vat_total = total_price + vat_price;
-                        $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
-                        $('input[name="total_price"]').val(total_price);
-                    }
-                });
-                $('input[type="option[' + type + ']"]').attr('data-waschecked', false);
-                $(this).attr('data-waschecked', true);
-                $(this).prop('checked', true);
+                handleChecked($(this), value, typename, type, parent);
             }
         });
 
+        // Event handler for checkboxes
         $('body').on('click', 'input[type="checkbox"]', function () {
-            var src = url + '/storage/' + 'transparent-pic-150x150.png';
             var value = $(this).val();
-            var parent = $(this).data('parent');
             var typename = $(this).attr('data-typename');
             var type = $(this).attr('data-type');
+
             if ($(this).is(':checked')) {
+                handleChecked($(this), value, typename, type, value);
+            } else {
+                handleUnchecked($(this), type, value);
+            }
+        });
+
+        function handleChecked(element, value, typename, type, parent) {
+            if (element.attr('data-waschecked') == 'true') {
+                // Option was already checked, use data-price
+                var optionPrice = parseFloat(element.data('price'));
+                addToSummary(element, value, typename, type, optionPrice);
+                price += optionPrice;
+                updateTotalPrice();
+            } else {
+                // Make AJAX call for newly selected option
                 $.ajax({
                     type: "Post",
                     url: url + "/customize-type-content",
-                    data: {
-                        value: value,
-                    },
+                    data: {value: value},
                     success: function (data) {
-                        if (data['preview_enabled']) {
-                            var src1 = url + '/storage/' + data['image'][1];
-                            $('.cat-' + value + '-img1').find('img').attr('src', src1);
-                            var src2 = url + '/storage/' + data['image'][2];
-                            $('.cat-' + value + '-img2').find('img').attr('src', src2);
-                            var src3 = url + '/storage/' + data['image'][3];
-                            $('.cat-' + value + '-img3').find('img').attr('src', src3);
-                            if (data['image'].hasOwnProperty(4)) {
-                                var src4 = url + '/storage/' + data['image'][4];
-                                $('.cat-' + value + '-img4').find('img').attr('src', src4);
-                            }
-                        }
-                        var html = `<div id=` + value + ` class="shadow card m-2 ` + type + `"><div class="head-cat card-header"><p class="text-center"><b>` + typename + `</b></p></div><div class="card-body text-center"><div class="spacing"><p>` + data['ltitle'] + `</p>`;
-                        if (data['main_image']) {
-                            html = html + `<img class="img-fluid img-thumbnail landscape2" src="` + url + '/storage/' + data['main_image'] + `">`;
-                        }
-                        html = html + `<p><b>Price</b> : <span class="price">` + Math.trunc(data['price']).toLocaleString('en-US') + currency + `</span></p></div></div>`;
-                        var prev_div = $('#summary-end .summary-card .' + type);
-                        $('#summary-end .summary-card').append(html);
-
-                        price += parseFloat(data['price']);
-                        total_price = parseFloat(boat_price) + parseFloat(price);
-                        $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
-                        vat_price = (total_price * 5) / 100;
-                        $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
-                        vat_total = total_price + vat_price;
-                        $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
-                        $('input[name="total_price"]').val(total_price);
+                        updateImages(data, parent);
+                        addToSummary(element, value, typename, type, parseFloat(data.price));
+                        price += parseFloat(data.price);
+                        updateTotalPrice();
                     }
                 });
-            } else {
-
-                $('.cat-' + value + '-img1').find('img').attr('src', src);
-                $('.cat-' + value + '-img2').find('img').attr('src', src);
-                $('.cat-' + value + '-img3').find('img').attr('src', src);
-                if ($('.cat-' + value + '-img4').length) {
-                    $('.cat-' + value + '-img4').find('img').attr('src', src);
-                }
-
-                var prev_div = $('#summary-end .summary-card #' + value);
-                if (prev_div.length) {
-                    var prev_price = prev_div.find('.price').text();
-                    prev_price = prev_price.replace(",", "");
-                    price -= parseFloat(prev_price);
-                    prev_div.remove();
-                    total_price = parseFloat(boat_price) + parseFloat(price);
-                    $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
-                    vat_price = (total_price * 5) / 100;
-                    $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
-                    vat_total = total_price + vat_price;
-                    $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
-                    $('input[name="total_price"]').val(total_price + currency);
-                }
-
             }
+            $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+            element.attr('data-waschecked', 'true');
+            element.prop('checked', true);
+        }
 
+        function handleUnchecked(element, type, parent) {
+            resetImages(parent);
+            var prevDiv = $('#summary-end .summary-card #' + element.val());
+            if (prevDiv.length) {
+                var prevPrice = prevDiv.find('.price').text().replace(",", "");
+                price -= parseFloat(prevPrice);
+                prevDiv.remove();
+                updateTotalPrice();
+            }
+            $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+            element.attr('data-waschecked', 'false');
+            element.prop('checked', false);
+        }
 
-        });
+        function updateImages(data, parent) {
+            if (data['preview_enabled']) {
+                $('.cat-' + parent + '-img1').find('img').attr('src', url + '/storage/' + data['image'][1]);
+                $('.cat-' + parent + '-img2').find('img').attr('src', url + '/storage/' + data['image'][2]);
+                $('.cat-' + parent + '-img3').find('img').attr('src', url + '/storage/' + data['image'][3]);
+                if (data['image'].hasOwnProperty(4)) {
+                    $('.cat-' + parent + '-img4').find('img').attr('src', url + '/storage/' + data['image'][4]);
+                }
+            }
+        }
+
+        function resetImages(parent) {
+            var src = url + '/storage/' + 'transparent-pic-150x150.png';
+            $('.cat-' + parent + '-img1').find('img').attr('src', src);
+            $('.cat-' + parent + '-img2').find('img').attr('src', src);
+            $('.cat-' + parent + '-img3').find('img').attr('src', src);
+            if ($('.cat-' + parent + '-img4').length) {
+                $('.cat-' + parent + '-img4').find('img').attr('src', src);
+            }
+        }
 
         $('body').on('click', '.view-summary', function () {
             $('#summary-end').show();

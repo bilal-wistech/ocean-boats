@@ -76,11 +76,13 @@
                                                 <input class="form-check-input cat-item-check"
                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                       value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                       value="{{ $option->id }}"
+                                                       data-typename="{{ $value1->ltitle }}"
                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
                                                        data-parent="{{ $option->parent_id }}"
                                                        data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
                                                        data-model="{{ asset('storage/' . $option->file) }}"
+                                                       data-price="{{ $option->price }}"
                                                        id="collapse-{{ $option->id }}"
                                                         {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
 
