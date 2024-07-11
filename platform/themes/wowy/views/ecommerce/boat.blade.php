@@ -374,23 +374,38 @@
 
             let previousSelectedRadio = {};
 
-function handleRadioClick(input) {
-    const modelPath = input.dataset.model;
-    const radioGroupName = input.name;
-    document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
-        const otherModelPath = radio.dataset.model;
-        const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
-        if (modelIndex !== -1) {
+            function handleRadioClick(input) {
+            const modelPath = input.dataset.model;
+            const radioGroupName = input.name;
+            let isDeselecting = input === previousSelectedRadio[radioGroupName];
+            document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
+            const otherModelPath = radio.dataset.model;
+            const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
+            if (modelIndex !== -1) {
             scene.remove(additionalModels[modelIndex]);
             additionalModels.splice(modelIndex, 1);
-        }
-    });
-
-    if (input.checked) {
+          }
+        });
+        if (isDeselecting) {
+        previousSelectedRadio[radioGroupName] = null;
+        } else if (input.checked) {
         toggleAdditionalModel(modelPath, true);
         previousSelectedRadio[radioGroupName] = input;
-    }
-}
+       }
+     }
+
+        $('body').on('click', 'input[type="radio"]', function () {
+            var value = $(this).val();
+            var parent = $(this).data('parent');
+            var typename = $(this).attr('data-typename');
+            var type = $(this).attr('data-type');
+
+            if ($(this).prop('checked') && $(this).attr('data-waschecked') == 'true') {
+                handleUnchecked($(this), type, parent);
+            } else {
+                handleChecked($(this), value, typename, type, parent);
+            }
+        });
 
             document.querySelectorAll('.cat-item-check').forEach(input => {
                 if (input.type === 'checkbox') {
