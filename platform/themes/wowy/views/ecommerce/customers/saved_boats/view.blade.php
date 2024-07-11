@@ -62,16 +62,21 @@
                                     @endphp
                                     <div class="card m-1">
                                         <div class="card-body text-center">
-                                            <p><b>{{ $value->color_picker ? $parent->ltitle : '' }}</b></p>
+                                            {{--<p><b>{{ $value->color_picker ? $parent->ltitle : '' }}</b></p>--}}
                                             <p>
                                                 <b>{{ $value->slug->ltitle }}:</b>
                                                 @if($value->slug->parent)
-                                                    {{ $value->ltitle }}
-                                                    @if($data->is_standard_option == 1)
-                                                        <small>(Standard Option)</small>
-                                                    @endif
-                                                @else
-                                                    <span style="background-color: {{ $value->color_picker }};">{{ $value->color_picker }}</span>
+                                                    <span>
+                                                        @if($value->color_picker)
+                                                            <span style="background-color: {{ $value->color_picker }};">{{ $value->color_picker }}</span>
+                                                        @else
+                                                            {{ $value->ltitle }}
+                                                        @endif
+
+                                                        @if($data->is_standard_option == 1)
+                                                            <small>(Standard Option)</small>
+                                                        @endif
+                                                </span>
                                                 @endif
                                             </p>
 
