@@ -118,25 +118,45 @@ class PublicController extends Controller
                 $detail->enquiry_id = $enquiry->id;
                 $detail->subcat_slug = $key;
 
-                // Determine the delimiter
-                $delimiter = strpos($value, '-') !== false ? '-' : (strpos($value, '_') !== false ? '_' : null);
+                if ($value !== null) {
+                    // Determine the delimiter
+                    $delimiter = strpos($value, '-') !== false ? '-' : (strpos($value, '_') !== false ? '_' : null);
 
-                if ($delimiter) {
-                    $splitValue = explode($delimiter, $value);
-                    if (count($splitValue) >= 2) {
-                        $detail->option_id = implode($delimiter,
-                            array_slice($splitValue, 0, -1)); // All segments except the last one
-                        $detail->color_picker = end($splitValue); // The last segment as color_picker
+                    if ($delimiter) {
+                        $splitValue = explode($delimiter, $value);
+                        if (count($splitValue) >= 2) {
+                            $detail->option_id = implode($delimiter, array_slice($splitValue, 0, -1)); // All segments except the last one
+                            $detail->color_picker = end($splitValue); // The last segment as color_picker
+
+                            // Check if both option_id and color_picker are set before saving
+                            if ($detail->option_id !== null && $detail->color_picker !== null) {
+                                $detail->save();
+                            }
+                        } else {
+                            // Handle error case where value format is unexpected
+                            Log::error("Unexpected format for option value: $key => $value");
+                            continue; // Skip saving this detail and continue with next iteration
+                        }
                     } else {
-                        // Handle error case where value format is unexpected
-                        Log::error("Unexpected format for option value: $key => $value");
-                        continue; // Skip saving this detail and continue with next iteration
+                        $detail->option_id = $value; // For other options, assuming they directly represent option_id
+                        // Since there's no delimiter, we assume no color_picker
+                        $detail->color_picker = null;
+
+                        // Save the detail if option_id is not null
+                        if ($detail->option_id !== null) {
+                            $detail->save();
+                        }
                     }
                 } else {
-                    $detail->option_id = $value; // For other options, assuming they directly represent option_id
-                }
+                    // Handle case where $value is null or empty
+                    $detail->option_id = null; // Assign null or default value
+                    $detail->color_picker = null; // Assign null since option_id is null
 
-                $detail->save();
+                    // Save the detail if option_id is not null
+                    if ($detail->option_id !== null) {
+                        $detail->save();
+                    }
+                }
             }
 
             if ($boatData['redirect_url_pay']) {
@@ -155,7 +175,6 @@ class PublicController extends Controller
         return Theme::scope('ecommerce.customers.overview', [], 'plugins/ecommerce::themes.customers.overview')
             ->render();
     }
-
 
     public function getEditAccount()
     {
@@ -483,7 +502,7 @@ class PublicController extends Controller
                 ->setSize((int) $avatarData->width, (int) $avatarData->height)
                 ->setCoordinates((int) $avatarData->x, (int) $avatarData->y)
                 ->setDestinationPath(File::dirname($file->url))
-                ->setFileName(File::name($file->url).'.'.File::extension($file->url))
+                ->setFileName(File::name($file->url) . '.' . File::extension($file->url))
                 ->save('crop');
 
             $account->avatar = $file->url;
@@ -705,7 +724,7 @@ class PublicController extends Controller
             abort(404);
         }
 
-        $zipName = 'digital-product-'.Str::slug($orderProduct->product_name).Str::random(5).'-'.Carbon::now()->format('Y-m-d-h-i-s').'.zip';
+        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip';
         $fileName = RvMedia::getRealPath($zipName);
         $zip = new Zipper();
         $zip->make($fileName);
@@ -834,12 +853,17 @@ class PublicController extends Controller
             ->whereIn('boat_enquiry_details.id', $boat->details->pluck('id')->toArray())
             ->orderBy('p.sort_order', 'ASC')
             ->orderBy('c.sort_order', 'ASC')
-            ->select('c.id', 'boat_enquiry_details.option_id', 'c.ltitle', 'c.image',
-                'boat_enquiry_details.subcat_slug')
+            ->select(
+                'c.id',
+                'boat_enquiry_details.option_id',
+                'c.ltitle',
+                'c.image',
+                'boat_enquiry_details.subcat_slug'
+            )
             ->with('enquiry_option')
             ->get();
 
-//dd($boat->toArray(), $result->toArray());
+        //dd($boat->toArray(), $result->toArray());
 
 
         SeoHelper::setTitle(__('Saved Boat details'));
