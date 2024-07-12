@@ -4,7 +4,10 @@
 
     Theme::asset()->usePath()->add('jquery-ui-css', 'css/plugins/jquery-ui.css');
     Theme::asset()->container('footer')->usePath()->add('jquery-ui-js', 'js/plugins/jquery-ui.js');
-    Theme::asset()->container('footer')->usePath()->add('jquery-ui-touch-punch-js', 'js/plugins/jquery.ui.touch-punch.min.js');
+    Theme::asset()
+        ->container('footer')
+        ->usePath()
+        ->add('jquery-ui-touch-punch-js', 'js/plugins/jquery.ui.touch-punch.min.js');
 
     $categories = $product->childitems_display();
 @endphp
@@ -48,12 +51,13 @@
                     </div>
                     <div class="customboat-card-body cat-body">
                         @forelse($value->childitems() as $key1 => $value1)
-                            <div class="col btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
-                                href="#collapse{{ $key1 }}"
-                                aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                            <div class="col btn options-boat @if ($value->ltitle != 'Colors') dropdown-toggle @endif mt-5 mb-15"
+                                data-bs-toggle="collapse" href="#collapse{{ $key1 }}"
+                                aria-expanded="{{ $key1 == 0 || $value->ltitle == 'Colors' ? 'true' : 'false' }}">
                                 <div class="title">{{ $value1->ltitle }}</div>
                             </div>
-                            <div class="collapse {{ $key1 == 0 ? 'show' : '' }}" id="collapse{{ $key1 }}">
+                            <div class="collapse {{ $key1 == 0 || $value->ltitle == 'Colors' ? 'show' : '' }}"
+                                id="collapse{{ $key1 }}">
                                 @forelse($value1->childitems() as $option)
                                     @if ($option->side_layout == 'radio')
                                         @if ($value->multi_select != 3)
@@ -74,18 +78,17 @@
                                     @elseif($option->side_layout == 'toggle')
                                         <div class="form-check">
                                             @if ($value->multi_select != 3)
-                                            <input class="form-check-input cat-item-check"
-                                            name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                            type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                            value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
-                                            data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                            data-parent="{{ $option->parent_id }}"
-                                            data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                            data-model="{{ asset('storage/' . $option->file) }}"
-                                            data-price="{{ $option->price }}"
-                                            id="collapse-{{ $option->id }}"
-                                            {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
-                                     
+                                                <input class="form-check-input cat-item-check"
+                                                    name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                    type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                    value="{{ $option->id }}" data-typename="{{ $value1->ltitle }}"
+                                                    data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                    data-parent="{{ $option->parent_id }}"
+                                                    data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                                    data-model="{{ asset('storage/' . $option->file) }}"
+                                                    data-price="{{ $option->price }}"
+                                                    id="collapse-{{ $option->id }}"
+                                                    {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
                                             @endif
 
                                             <label class="form-check-label" for="collapse-{{ $option->id }}">
@@ -138,7 +141,9 @@
                             <div class="col-4">
                                 @php
                                     $currencies = get_all_currencies() ?? [];
-                                    $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
+                                    $selectedCurrency =
+                                        $currencies->firstWhere('id', get_application_currency_id())->title ??
+                                        'Select Currency';
                                 @endphp
 
                                 <div class="currency-dropdown dropdown">
@@ -309,7 +314,9 @@
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
         renderer.gammaOutput = true;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
@@ -375,37 +382,26 @@
             let previousSelectedRadio = {};
 
             function handleRadioClick(input) {
-            const modelPath = input.dataset.model;
-            const radioGroupName = input.name;
-            let isDeselecting = input === previousSelectedRadio[radioGroupName];
-            document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
-            const otherModelPath = radio.dataset.model;
-            const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
-            if (modelIndex !== -1) {
-            scene.remove(additionalModels[modelIndex]);
-            additionalModels.splice(modelIndex, 1);
-          }
-        });
-        if (isDeselecting) {
-        previousSelectedRadio[radioGroupName] = null;
-        } else if (input.checked) {
-        toggleAdditionalModel(modelPath, true);
-        previousSelectedRadio[radioGroupName] = input;
-       }
-     }
-
-        $('body').on('click', 'input[type="radio"]', function () {
-            var value = $(this).val();
-            var parent = $(this).data('parent');
-            var typename = $(this).attr('data-typename');
-            var type = $(this).attr('data-type');
-
-            if ($(this).prop('checked') && $(this).attr('data-waschecked') == 'true') {
-                handleUnchecked($(this), type, parent);
-            } else {
-                handleChecked($(this), value, typename, type, parent);
+                // console.log(input);
+                const modelPath = input.dataset.model;
+                const radioGroupName = input.name;
+                let isDeselecting = input === previousSelectedRadio[radioGroupName];
+                document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
+                    const otherModelPath = radio.dataset.model;
+                    const modelIndex = additionalModels.findIndex(m => m.userData.path ===
+                        otherModelPath);
+                    if (modelIndex !== -1) {
+                        scene.remove(additionalModels[modelIndex]);
+                        additionalModels.splice(modelIndex, 1);
+                    }
+                });
+                if (isDeselecting) {
+                    previousSelectedRadio[radioGroupName] = null;
+                } else if (input.checked) {
+                    toggleAdditionalModel(modelPath, true);
+                    previousSelectedRadio[radioGroupName] = input;
+                }
             }
-        });
 
             document.querySelectorAll('.cat-item-check').forEach(input => {
                 if (input.type === 'checkbox') {
@@ -462,61 +458,75 @@
             const pickr = Pickr.create({
                 el: pickerElement,
                 theme: 'classic',
+                default: 'rgb(0, 0, 0)',
                 swatches: [
-                    'rgba(244, 67, 54, 1)',
-                    'rgba(233, 30, 99, 0.95)',
-                    'rgba(156, 39, 176, 0.9)',
-                    'rgba(103, 58, 183, 0.85)',
-                    'rgba(63, 81, 181, 0.8)',
-                    'rgba(33, 150, 243, 0.75)',
-                    'rgba(3, 169, 244, 0.7)',
-                    'rgba(0, 188, 212, 0.7)',
-                    'rgba(0, 150, 136, 0.75)',
-                    'rgba(76, 175, 80, 0.8)',
-                    'rgba(139, 195, 74, 0.85)',
-                    'rgba(205, 220, 57, 0.9)',
-                    'rgba(255, 235, 59, 0.95)',
-                    'rgba(255, 193, 7, 1)'
+                    'rgb(0, 0, 0)',
+                    'rgb(203, 203, 202)',
+                    'rgb(146, 139, 112)',
+                    'rgb(37, 130, 183)',
+                    'rgb(231, 225, 203)',
+                    'rgb(231, 225, 203)',
+                    'rgb(202, 228, 230)',
+                    'rgb(184, 210, 225)'
                 ],
                 components: {
                     preview: true,
-                    opacity: true,
+                    opacity: false,
                     hue: true,
                     interaction: {
-                        hex: true,
-                        rgba: true,
+                        hex: false,
+                        rgba: false,
                         input: true,
-                        clear: true,
+                        clear: false,
                         save: true
                     }
                 }
             });
 
-            pickr.on('save', (color, instance) => {
-                const colorOptionId = pickerElement.getAttribute('data-color-option-id');
-                const colorType = pickerElement.getAttribute('data-color-option-type');
-                const colorPrice = parseFloat(pickerElement.getAttribute('data-color-price'));
+            pickr.on('init', instance => {
+                updateColorPreview(instance);
+            });
 
-                if (colorOptionId && colorType) {
-                    const colorSelected = color.toHEXA().toString();
-                    const inputName = `option[${colorType}]`;
-                    const inputElement = document.querySelector(`input[name="${inputName}"]`);
+            pickr.on('change', (color, instance) => {
+                updateColorPreview(instance);
+                applyColorChange(color, pickerElement);
+            });
 
-                    if (inputElement) {
-                        inputElement.value = `${colorOptionId}-${colorSelected}`;
-                        updateTotalPrice(colorPrice); // Update total price function
+            pickr.on('swatchselect', (color, instance) => {
+                updateColorPreview(instance);
+                applyColorChange(color, pickerElement);
+            });
+        });
 
-                        const firstWord = colorType.split('-')[
-                        0]; // Extract "top" from "top-color"
+        function updateColorPreview(instance) {
+            instance.applyColor(true);
+        }
 
-                        let colorApplied = false;
+        function applyColorChange(color, pickerElement) {
+            const colorOptionId = pickerElement.getAttribute('data-color-option-id');
+            const colorType = pickerElement.getAttribute('data-color-option-type');
+            const colorPrice = parseFloat(pickerElement.getAttribute('data-color-price'));
 
+            if (colorOptionId && colorType) {
+                const colorSelected = color.toHEXA().toString();
+                const inputName = `option[${colorType}]`;
+                const inputElement = document.querySelector(`input[name="${inputName}"]`);
+
+                if (inputElement) {
+                    inputElement.value = `${colorOptionId}-${colorSelected}`;
+                    updateTotalPrice(colorPrice); // Update total price function
+
+                    const firstWord = colorType.split('-')[0]; // Extract "top" from "top-color"
+
+                    let colorApplied = false;
+
+                    if (typeof additionalModels !== 'undefined') {
                         additionalModels.forEach(model => {
                             const modelLabel = model.userData.path.toLowerCase();
                             if (modelLabel.includes(firstWord)) {
-                                console.log(`Applying color ${colorSelected} to model at path: ${model.userData.path}`);
-                                // Apply color to model's material or texture
-                                // Example assuming model has a material with a 'color' property
+                                console.log(
+                                    `Applying color ${colorSelected} to model at path: ${model.userData.path}`
+                                    );
                                 model.traverse(child => {
                                     if (child.isMesh) {
                                         child.material.color.set(colorSelected);
@@ -525,55 +535,51 @@
                                 colorApplied = true;
                             }
                         });
-
-                        if (!colorApplied && baseModel) {
-                            let basePartFound = false;
-                            baseModel.traverse(child => {
-                                if (child.name) {
-                                    console.log(
-                                        `Checking base model part: '${child.name}' for match with '${firstWord}'`
-                                        );
-
-                        
-                                    const childName = child.name.trim().toLowerCase();
-                                    const checkName = firstWord.trim().toLowerCase();
-
-                                    if (childName === checkName) {
-                                        console.log(
-                                            `Applying color ${colorSelected} to base model part: ${child.name}`
-                                            );
-                                        child.traverse(child => {
-                                            if (child.isMesh) {
-                                                if (child.material) {
-                                                    child.material.color.set(
-                                                        colorSelected);
-                                                }
-                                            }
-                                        });
-
-                                        basePartFound = true;
-                                    }
-                                }
-                            });
-
-
-
-                            if (!basePartFound) {
-                                console.log(
-                                    `No matching part found in additional models or base model for: ${firstWord}`
-                                    );
-                            }
-                        }
-
-                    } else {
-                        console.error(`Input element with name ${inputName} not found.`);
                     }
-                } else {
-                    console.error('Color option ID or type not found.');
-                }
-            });
 
-        });
+                    if (!colorApplied && typeof baseModel !== 'undefined') {
+                        let basePartFound = false;
+                        baseModel.traverse(child => {
+                            if (child.name) {
+                                console.log(
+                                    `Checking base model part: '${child.name}' for match with '${firstWord}'`
+                                    );
+
+                                const childName = child.name.trim().toLowerCase();
+                                const checkName = firstWord.trim().toLowerCase();
+
+                                if (childName === checkName) {
+                                    console.log(
+                                        `Applying color ${colorSelected} to base model part: ${child.name}`
+                                        );
+                                    child.traverse(child => {
+                                        if (child.isMesh && child.material) {
+                                            child.material.color.set(colorSelected);
+                                        }
+                                    });
+
+                                    basePartFound = true;
+                                }
+                            }
+                        });
+
+                        if (!basePartFound) {
+                            console.log(
+                                `No matching part found in additional models or base model for: ${firstWord}`
+                                );
+                        }
+                    }
+
+                } else {
+                    console.error(`Input element with name ${inputName} not found.`);
+                }
+            } else {
+                console.error('Color option ID or type not found.');
+            }
+        }
+
+
+
 
         function updateTotalPrice(colorPrice) {
             let totalPrice = parseFloat($('input[name="total_price"]').val());
