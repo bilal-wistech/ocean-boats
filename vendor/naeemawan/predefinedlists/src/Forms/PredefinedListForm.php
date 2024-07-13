@@ -104,7 +104,14 @@ class PredefinedListForm extends FormAbstract
                 'attr' => [
                     'class' => 'form-control select-full',
                 ],
-                'choices' => getStatusArr(),
+                'choices' => getIsStandardOptionArr(),
+            ]);
+            $this->add('color', 'customColor', [
+                'label' => trans('Pick/Add Color'),
+                'label_attr' => ['class' => 'control-label required'],
+                'attr' => [
+                    'class' => 'form-control color-picker',
+                ],
             ]);
         }
 
