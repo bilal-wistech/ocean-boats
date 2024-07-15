@@ -54,44 +54,28 @@
                             <h4 class="mt-3 mt-50">{{ __('Options Selected') }}</h4>
                             <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
                                 @foreach($boat->details as $key=>$value)
-                                    @php
-                                        $data = PredefinedList::where('id',$value->option_id)
-                                        /*->where('type',$value->subcat_slug)*/
-                                        ->first();
-                                        $parent = PredefinedList::where('id',$data->parent_id)->first();
-                                    @endphp
                                     <div class="card m-1">
                                         <div class="card-body text-center">
-                                            {{--<p><b>{{ $value->color_picker ? $parent->ltitle : '' }}</b></p>--}}
                                             <p>
                                                 <b>{{ $value->slug->ltitle }}:</b>
                                                 @if($value->slug->parent)
                                                     <span>
-                                                        @if($value->color_picker)
-                                                            <span style="background-color: {{ $value->color_picker }};">{{ $value->color_picker }}</span>
+                                                        @if($value->color)
+                                                            <span style="background-color: {{ $value->color }};">{{ $value->ltitle }}</span>
                                                         @else
                                                             {{ $value->ltitle }}
                                                         @endif
-
-                                                        @if($data->is_standard_option == 1)
+                                                        @if($value->is_standard_option == 1)
                                                             <small>(Standard Option)</small>
                                                         @endif
                                                 </span>
-                                                @endif
-                                            </p>
-
+                                            @endif
                                             <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
                                         </div>
                                     </div>
 
                                 @endforeach
                             </div>
-                            {{--@if($boat->boat->detail->standard_options)
-                                <div class="card-body list-style">
-                                    <h4>Standard Options</h4>
-                                    {!! $boat->boat->detail->standard_options !!}
-                                </div>
-                            @endif--}}
                         </div>
                         <h4 class="mt-3 mb-1">{{ __('Total') }}</h4>
                         <div>

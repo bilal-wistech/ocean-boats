@@ -806,8 +806,11 @@ class PublicController extends Controller
 
         foreach ($boat->details as $details) {
 
-            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.ltitle')->first()->toArray();
+            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.ltitle',
+                'predefined_list.color', 'predefined_list.is_standard_option')->first()->toArray();
             $details['ltitle'] = $opt['ltitle'];
+            $details['color'] = $opt['color'];
+            $details['is_standard_option'] = $opt['is_standard_option'];
         }
 
         $result = BoatEnquiryDetail::join('predefined_list as c', 'boat_enquiry_details.subcat_slug', '=', 'c.type')
@@ -820,6 +823,8 @@ class PublicController extends Controller
                 'boat_enquiry_details.option_id',
                 'c.ltitle',
                 'c.image',
+                'c.color',
+                'c.is_standard_option',
                 'boat_enquiry_details.subcat_slug'
             )
             ->with('enquiry_option')
