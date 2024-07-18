@@ -806,11 +806,15 @@ class PublicController extends Controller
 
         foreach ($boat->details as $details) {
 
-            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.ltitle',
-                'predefined_list.color', 'predefined_list.is_standard_option')->first()->toArray();
+            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.id',
+                'predefined_list.ltitle',
+                'predefined_list.color', 'predefined_list.is_standard_option', 'predefined_list.file',
+                'predefined_list.type')->first()->toArray();
             $details['ltitle'] = $opt['ltitle'];
             $details['color'] = $opt['color'];
             $details['is_standard_option'] = $opt['is_standard_option'];
+            $details['file'] = $opt['file'];
+            $details['type'] = $opt['type'];
         }
 
         $result = BoatEnquiryDetail::join('predefined_list as c', 'boat_enquiry_details.subcat_slug', '=', 'c.type')
@@ -833,9 +837,9 @@ class PublicController extends Controller
         //dd($boat->toArray(), $result->toArray());
 
 
-        SeoHelper::setTitle(__('Saved Boat details'));
+        SeoHelper::setTitle(('Saved Boat details'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()->add(('Home'), route('public.index'))
             ->add(
                 __('Saved Boat details'),
                 route('customer.saved_boats.view', $id)
@@ -847,4 +851,5 @@ class PublicController extends Controller
             'plugins/ecommerce::themes.customers.saved_boats.view'
         )->render();
     }
+
 }
