@@ -237,12 +237,55 @@
             var type = $(this).attr('data-type');
 
             if ($(this).prop('checked') && $(this).attr('data-waschecked') == 'true') {
-                handleUnchecked($(this), type, parent);
+                handleUncheckedRadio($(this), type, parent);
             } else {
-                handleChecked($(this), value, typename, type, parent);
+                handleCheckedRadio($(this), value, typename, type, parent);
             }
         });
+ 
+var selectedOptions = {};
+function handleCheckedRadio(element, value, typename, type, parent) {
+  if (selectedOptions[type]) {
+    var prevElement = $(`input[value="${selectedOptions[type]}"]`);
+    handleUnchecked(prevElement, type, prevElement.val());
+  }
+  if (element.attr('data-waschecked') == 'true') {
+    var optionPrice = parseFloat(element.data('price'));
+    addToSummary(element, value, typename, type, optionPrice);
+    price += optionPrice;
+    updateTotalPrice();
+  } else {
+    $.ajax({
+      type: "Post",
+      url: url + "/customize-type-content",
+      data: {value: value},
+      success: function (data) {
+        addToSummary(element, value, typename, type, parseFloat(data.price));
+        price += parseFloat(data.price);
+        updateTotalPrice();
+      }
+    });
+  }
+  
+  $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+  element.attr('data-waschecked', 'true');
+  element.prop('checked', true);
+  selectedOptions[type] = value;
+}
 
+function handleUncheckedRadio(element, type, parent) {
+  var prevDiv = $('#summary-end .summary-card #' + element.val());
+  if (prevDiv.length) {
+    var prevPrice = prevDiv.find('.price').text().replace(",", "");
+    price -= parseFloat(prevPrice);
+    prevDiv.remove();
+    updateTotalPrice();
+  }
+  $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+  element.attr('data-waschecked', 'false');
+  element.prop('checked', false);
+  delete selectedOptions[type];
+}
         // Event handler for checkboxes
         $('body').on('click', 'input[type="checkbox"]', function () {
             var value = $(this).val();
