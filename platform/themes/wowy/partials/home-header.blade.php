@@ -11,7 +11,7 @@
         <!-- end -->
         <link rel="preconnect" href="{{ $fontURL = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net') }}">
         <link href="{{ $fontURL }}/css2?family={{ urlencode(theme_option('font_text', 'Poppins')) }}:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-        
+
         <style>
             :root {
                 --font-text: {{ theme_option('font_text', 'Poppins') }}, sans-serif;
@@ -44,7 +44,7 @@
             }
             $headerStyle = ($headerStyle && in_array($headerStyle, array_keys(get_layout_header_styles()))) ? $headerStyle : '';
         @endphp
-        
+
         <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-YENJX9LDVZ"></script>
 <script>
@@ -98,7 +98,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
 @endforeach
 
 </div>
-       
+
  <header class="header-areac {{ $headerStyle }}">
         <div class="header-laptop">
         <div id="header-top1">
@@ -124,28 +124,39 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                        </form></li>
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav d-flex">
-                     <!-- Custom Currency Dropdown -->
-                    <div class="dropdown my-dropdown currency">
-                    <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                      AED
-                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                    <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
-                    <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
-                    <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
-                    </div>
+                        @php
+                            $currencies = get_all_currencies() ?? [];
+                            $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
+                        @endphp
+                                <!-- Currency Dropdown -->
+                        <div class="dropdown my-dropdown currency">
+                            <button class="dropdown-toggle" type="button" id="currencyDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ $selectedCurrency }}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
+                                @foreach ($currencies as $currency)
+                                    @if ($currency->id !== get_application_currency_id())
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                             @if (count($socialLink) == 4)
-                                <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i class="{{ $socialLink[1]['value'] }}"></i></a></li>
+                                <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i
+                                                class="{{ $socialLink[1]['value'] }}"></i></a></li>
                             @endif
                         @endforeach
                     </ul>
                 </div>
-                <div class="line-break"></div>  
+                <div class="line-break"></div>
             </div>
-        </div> 
+        </div>
         <div id="header-bottom1">
-                
+
                 <div class="main-menu main-menu-padding-1 main-menu-lh-2 d-none d-lg-block main-menu-light-white hover-boder hover-boder-white">
                             <nav>
                                 {!!
@@ -155,7 +166,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                                 !!}
                             </nav>
                         </div>
-               
+
                 <ul class="header-navbar-bottom-right header-navbar-bottom">
                 <div class="header-action-2">
                     <div class="header-action-icon-2">
@@ -170,7 +181,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                                 <span class="pro-count blue">{{ Cart::instance('cart')->count() }}</span>
                         </a>
                     </div>
-                                    
+
                 </div>
                 @if (auth('customer')->check())
                     <li><a href="{{ route('customer.overview') }}"><img alt="{{ __('Sign In') }}" src="{{ Theme::asset()->url('images/icons/icon-user-white.svg') }}" style="width: 18%;position: absolute;float: right;"></a></li>
@@ -193,16 +204,16 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         @endif
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav">
-                        
+
                         @if (theme_option('social_links'))
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                         <li><a href="{{ $socialLink[2]['value'] }}"><i class="{{ $socialLink[1]['value'] }}"></i></a></li>
                         @endforeach
                         @endif
                     </ul>
-                
+
             </div>
-        </div> 
+        </div>
         <div class="logo1">
                     <a href="{{ route('public.index') }}"><img
                             src="{{ RvMedia::getImageUrl(theme_option('logo')) }}"
@@ -234,13 +245,13 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         <span class="burger-icon-mid"></span>
                         <span class="burger-icon-bottom"></span>
                     </div>
-                </div>                 
                 </div>
-               
+                </div>
+
                 </ul>
         </div>
         </div>
-        
+
 </div>
 
    <!-- end -->
@@ -326,12 +337,12 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                     </div>
                 </div>
             </div>
-            
-            
-            
+
+
+
             <!-- end -->
         </header>
-    
+
         </div>
         <div class="mobile-header-active mobile-header-wrapper-style">
             <div class="mobile-header-wrapper-inner">
@@ -373,7 +384,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                             </div>
                         </div>
 
-                   
+
                     <!-- maryam -->
                     <div class="mobile-menu-wrap mobile-header-border">
                     <!-- mobile menu start -->
@@ -389,7 +400,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         <!-- mobile menu end -->
                         <!-- mobile menu end -->
                     </div>
-                    
+
 
                     @if (theme_option('social_links'))
                         <div class="mobile-social-icon">
@@ -398,7 +409,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i class="{{ $socialLink[1]['value'] }}"></i></a></li>
                     @endif
                 @endforeach
-                
+
             </ul>
                         </div>
                     @endif
