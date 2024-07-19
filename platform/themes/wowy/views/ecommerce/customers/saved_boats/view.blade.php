@@ -124,7 +124,7 @@
             camera.lookAt(scene.position);
         
             const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.gammaOutput = true;
+            renderer.gammaOutput = false;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 2;
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -139,7 +139,7 @@
             directionalLight2.position.set(-5, -5, -5).normalize();
             scene.add(directionalLight2);
         
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
             scene.add(ambientLight);
         
             const dracoLoader = new THREE.DRACOLoader();
@@ -153,7 +153,6 @@
             let loadedModels = 0;
         
             function onAllModelsLoaded() {
-                console.log('All models loaded. Applying colors...');
                 applyColors();
             }
         
@@ -278,8 +277,15 @@
         
                 const controls = new THREE.OrbitControls(camera, renderer.domElement);
                 controls.enableDamping = false;
-                controls.minDistance = 3;
-                controls.maxDistance = 13;
+        controls.minDistance = 5;
+        controls.maxDistance = 13;
+        controls.enabled = false;
+        container.addEventListener('pointerenter', () => {
+            controls.enabled = true;
+        });
+        container.addEventListener('pointerleave', () => {
+            controls.enabled = false;
+        });
         
                 function animate() {
                     requestAnimationFrame(animate);

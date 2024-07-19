@@ -343,7 +343,7 @@
         directionalLight2.position.set(-5, -5, -5).normalize();
         scene.add(directionalLight2);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
         scene.add(ambientLight);
 
         const dracoLoader = new THREE.DRACOLoader();
@@ -392,7 +392,7 @@
         }
 
         function calculateTargetSize() {
-            return window.innerWidth < 768 ? 6 : 8;
+            return window.innerWidth < 768 ? 6 : 9;
         }
 
         loadingIndicator.style.display = 'block';
