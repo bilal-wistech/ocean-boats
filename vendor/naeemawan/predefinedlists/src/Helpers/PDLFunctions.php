@@ -131,15 +131,4 @@ if (!function_exists('getPackageDimensions')) {
     return [0,0,0];
   }
 }
-if (!function_exists('getIsStandardOptionArr')) {
-  /**
-  * return status array
-  */
-  function getIsStandardOptionArr()
-  {
-    return [
-      '0' => 'Disable',
-      '1' => 'Enable',
-    ];
-  }
-}
+

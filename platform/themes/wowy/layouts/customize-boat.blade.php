@@ -5,8 +5,8 @@
         {!! Theme::partial('breadcrumb') !!}
     @endif
 
-    <section class="">
-        <div class="">
+    <section class="mt-60 mb-60">
+        <div class="container">
             {!! Theme::content() !!}
         </div>
     </section>
