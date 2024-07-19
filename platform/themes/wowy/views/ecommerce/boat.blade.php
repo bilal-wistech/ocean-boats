@@ -43,9 +43,9 @@
                 <input type="hidden" name="boat_id" value="{{ $product->id }}">
                 <input type="hidden" name="total_price" value="{{ $product->price ?? 0 }}">
                 @forelse($categories as $key=>$value)
-                    <?php
-                    $i = $key + 1;
-                    ?>
+                        <?php
+                        $i = $key + 1;
+                        ?>
                     <div class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
                         <div class="customboat-card-header">
                             <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
@@ -58,28 +58,28 @@
                                     </div>
                                 @else
                                     <div class="btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
-                                        href="#collapse{{ $key1 }}"
-                                        aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                                         href="#collapse{{ $key1 }}"
+                                         aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
                                         <div class="title">{{ $value1->ltitle }}</div>
                                     </div>
                                 @endif
                                 <div class="collapse {{ $key1 == 0 || $value->ltitle == 'Colors' ? 'show' : '' }}"
-                                    id="collapse{{ $key1 }}">
+                                     id="collapse{{ $key1 }}">
                                     @forelse($value1->childitems() as $option)
                                         @if ($option->side_layout == 'radio')
                                             @if ($value->multi_select != 3)
                                                 <input class="form-check-input visually-hidden cat-item-check"
-                                                    type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                    id="{{ $option->id }}" value="{{ $option->id }}"
-                                                    data-typename="{{ $value1->ltitle }}"
-                                                    data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                    name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                    data-parent="{{ $option->parent_id }}" data-waschecked="false">
+                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                       id="{{ $option->id }}" value="{{ $option->id }}"
+                                                       data-typename="{{ $value1->ltitle }}"
+                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                       data-parent="{{ $option->parent_id }}" data-waschecked="false">
                                             @endif
                                             <label class="form-check-label color-box" for="{{ $option->id }}"
-                                                style="background-color: {{ $option->color ?: '#ffffff' }};">
+                                                   style="background-color: {{ $option->color ?: '#ffffff' }};">
                                                 <div class="tick-icon"><img
-                                                        src="{{ asset('/storage/check_circle.png') }}">
+                                                            src="{{ asset('/storage/check_circle.png') }}">
                                                 </div>
                                                 <div class="color-name">{{ $option->ltitle }}</div>
                                             </label>
@@ -87,25 +87,26 @@
                                             <div class="form-check">
                                                 @if ($value->multi_select != 3)
                                                     <input class="form-check-input cat-item-check checkradio"
-                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                        value="{{ $option->id }}"
-                                                        data-typename="{{ $value1->ltitle }}"
-                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                        data-parent="{{ $option->parent_id }}"
-                                                        data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                                        data-model="{{ asset('storage/' . $option->file) }}"
-                                                        id="collapse-{{ $option->id }}"
-                                                        {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
+                                                           name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                           type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                           value="{{ $option->id }}"
+                                                           data-typename="{{ $value1->ltitle }}"
+                                                           data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                           data-parent="{{ $option->parent_id }}"
+                                                           data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                                           data-model="{{ asset('storage/' . $option->file) }}"
+                                                           id="collapse-{{ $option->id }}"
+                                                           {{ $option->is_standard_option == 1 ? 'checked' : '' }}
+                                                           data-price="{{ $option->price ?? 0 }}">
                                                 @endif
 
 
                                                 <label class="form-check-label" for="collapse-{{ $option->id }}">
                                                     <div data-bs-toggle="{{ $option->main_image ? 'collapse' : '' }}"
-                                                        data-bs-target="#color-details-{{ $option->id }}"
-                                                        aria-expanded="false"
-                                                        aria-controls="color-details-{{ $option->id }}"
-                                                        class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
+                                                         data-bs-target="#color-details-{{ $option->id }}"
+                                                         aria-expanded="false"
+                                                         aria-controls="color-details-{{ $option->id }}"
+                                                         class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
                                                         {{ $option->ltitle }} ({{ format_price($option->price) }})
                                                     </div>
                                                 </label>
@@ -113,7 +114,7 @@
                                                 <div class="collapse" id="color-details-{{ $option->id }}">
                                                     <div class="content-boat">
                                                         <img class="img-fluid img-thumbnail landscape"
-                                                            src="{{ RvMedia::getImageUrl($option->main_image) }}">
+                                                             src="{{ RvMedia::getImageUrl($option->main_image) }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -139,12 +140,12 @@
                             <div class=" row">
                                 <div class="col-8">
                                     <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span
-                                            class="sub-total">{{ format_price($product->price) }}</span></p>
+                                                class="sub-total">{{ format_price($product->price) }}</span></p>
                                     <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span
-                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                                class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                                     </p>
                                     <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span
-                                            class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                                class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                     </p>
                                 </div>
                                 <div class="col-4">
@@ -155,7 +156,7 @@
 
                                     <div class="currency-dropdown dropdown">
                                         <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                data-bs-toggle="dropdown" aria-expanded="false">
                                             {{ $selectedCurrency }}
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -163,7 +164,7 @@
                                                 @if ($currency->id !== get_application_currency_id())
                                                     <li>
                                                         <a class="dropdown-item"
-                                                            href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                                           href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
                                                     </li>
                                                 @endif
                                             @endforeach
@@ -178,22 +179,22 @@
                             @if (isset($categories[$key + 1]))
                                 @if ($key > 0)
                                     <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                        data-value="{{ $categories[$key - 1]->type }}" type="button">Back
+                                            data-value="{{ $categories[$key - 1]->type }}" type="button">Back
                                     </button>
                                 @endif
                                 <button class="btn card-btn" type="button"
-                                    data-curval="{{ $categories[$key]->type }}"
-                                    data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
+                                        data-curval="{{ $categories[$key]->type }}"
+                                        data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
                                     Next
                                     Step
                                 </button>
                             @else
                                 <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
-                                    type="button">Back
+                                        data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
+                                        type="button">Back
                                 </button>
                                 <button class="btn card-btn" data-curval="{{ $categories[$key]->type }}"
-                                    data-value="summary" type="button">Next Step
+                                        data-value="summary" type="button">Next Step
                                 </button>
                             @endif
                         </div>
@@ -214,10 +215,11 @@
                     <input type="hidden" name="redirect_url_pay" value="0">
                     <div class="mt-10 customboat-card-footer d-flex flex-row flex-wrap">
                         <button type="button" class="btn card-btn prv" data-curval="summary"
-                            data-value="{{ lastitem($product->id)->type }}">Back
+                                data-value="{{ lastitem($product->id)->type }}">Back
                         </button>
                         <button type="submit" class="btn card-btn" style="border-radius: unset;">Save &
-                            Exit</button>
+                            Exit
+                        </button>
                         <button type="button" class="btn view-summary">View Your Summary</button>
                         <button type="button" class="btn card-btn submit-btn" style="border-radius: unset;">Book
                             Boat
@@ -231,7 +233,7 @@
     </div>
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -348,16 +350,16 @@
                             <p><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span>
                             </p>
                             <p><b>VAT 5%</b>: <span
-                                    class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                        class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                             </p>
                             <p><b>Total</b>: <span
-                                    class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                        class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                             </p>
                         </div>
                         <div class="col-3">
                             <div class="currency-dropdown dropdown">
                                 <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                     AED
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -379,7 +381,7 @@
 <!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    jQuery(function($) {
+    jQuery(function ($) {
         var offset = $('#custom-boat-container').offset().top - 1;
         $('html, body').animate({
             scrollTop: offset
@@ -393,7 +395,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const modelPath = '{{ asset('storage/' . $modelPath) }}';
         const container = document.getElementById('Three-model');
 
@@ -437,7 +439,7 @@
 
         function loadModel(path, targetSize, callback) {
             loadingIndicator.style.display = 'block'; // Show loader
-            loader.load(path, function(gltf) {
+            loader.load(path, function (gltf) {
                 const model = gltf.scene;
                 model.userData.path = path;
 
@@ -463,7 +465,7 @@
 
                 callback(model);
                 loadingIndicator.style.display = 'none';
-            }, undefined, function(error) {
+            }, undefined, function (error) {
                 console.error('Error loading model:', path, error);
                 loadingIndicator.style.display = 'none';
             });
@@ -474,7 +476,7 @@
         }
 
         loadingIndicator.style.display = 'block';
-        loadModel(modelPath, calculateTargetSize(), function(model) {
+        loadModel(modelPath, calculateTargetSize(), function (model) {
             baseModel = model;
             scene.add(baseModel);
             loadingIndicator.style.display = 'none';
@@ -521,7 +523,7 @@
                 } else if (input.type === 'radio') {
                     handleRadioClick(input);
                 }
-                input.addEventListener('click', function() {
+                input.addEventListener('click', function () {
                     if (this.type === 'checkbox') {
                         handleCheckboxClick(this);
                     } else if (this.type === 'radio') {
@@ -531,10 +533,10 @@
             });
 
             document.querySelectorAll('.color-box').forEach(label => {
-                label.addEventListener('click', function() {
+                label.addEventListener('click', function () {
                     const input = document.getElementById(this.htmlFor);
                     const modelPart = input.dataset.typename.split(' ')[0]
-                .toLowerCase();
+                        .toLowerCase();
 
                     if (input.checked) {
                         input.checked = false;
@@ -550,7 +552,7 @@
         function toggleAdditionalModel(path, add) {
             if (add) {
                 loadingIndicator.style.display = 'block'; // Show loader
-                loadModel(path, 4, function(model) {
+                loadModel(path, 4, function (model) {
                     additionalModels.push(model);
                     if (baseModel) {
                         model.position.copy(baseModel.position);
@@ -615,7 +617,7 @@
                     if (!basePartFound) {
                         console.log(
                             `No matching part found in additional models or base model for: ${titleToMatch}`
-                            );
+                        );
                     }
                 }
             } else {
@@ -644,7 +646,7 @@
                         if (childName.includes(modelPart)) {
                             child.traverse(subChild => {
                                 if (subChild.isMesh && subChild.material && originalColors[
-                                        subChild.name]) {
+                                    subChild.name]) {
                                     subChild.material.color.copy(originalColors[subChild.name]);
                                 }
                             });
