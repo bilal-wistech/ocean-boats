@@ -51,18 +51,18 @@
                             <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
                         </div>
                         <div class="customboat-card-body cat-body">
-                        @forelse($value->childitems() as $key1 => $value1)
-                        @if ($value->ltitle == 'Colors')
-                            <div class="mt-5 mb-5">
-                            <div class="colors-title">{{ $value1->ltitle }}</div>
-                            </div>
-                        @else
-                        <div class="btn options-boat dropdown-toggle mt-5 mb-15"
-                        data-bs-toggle="collapse" href="#collapse{{ $key1 }}"
-                        aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
-                        <div class="title">{{ $value1->ltitle }}</div>
-                        </div>
-                        @endif
+                            @forelse($value->childitems() as $key1 => $value1)
+                                @if ($value->ltitle == 'Colors')
+                                    <div class="mt-5 mb-5">
+                                        <div class="colors-title">{{ $value1->ltitle }}</div>
+                                    </div>
+                                @else
+                                    <div class="btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
+                                        href="#collapse{{ $key1 }}"
+                                        aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                                        <div class="title">{{ $value1->ltitle }}</div>
+                                    </div>
+                                @endif
                                 <div class="collapse {{ $key1 == 0 || $value->ltitle == 'Colors' ? 'show' : '' }}"
                                     id="collapse{{ $key1 }}">
                                     @forelse($value1->childitems() as $option)
@@ -95,12 +95,11 @@
                                                         data-parent="{{ $option->parent_id }}"
                                                         data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
                                                         data-model="{{ asset('storage/' . $option->file) }}"
-                                                       
                                                         id="collapse-{{ $option->id }}"
                                                         {{ $option->is_standard_option == 1 ? 'checked' : '' }}>
                                                 @endif
-                                           
-                                              
+
+
                                                 <label class="form-check-label" for="collapse-{{ $option->id }}">
                                                     <div data-bs-toggle="{{ $option->main_image ? 'collapse' : '' }}"
                                                         data-bs-target="#color-details-{{ $option->id }}"
@@ -292,7 +291,7 @@
                         </div>
                     </div>
                 </div>
-              
+
             </div>
         </div>
     </div>
@@ -321,12 +320,15 @@
         const container = document.getElementById('Three-model');
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
+            1000);
         camera.position.set(0, 0, 6);
         camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.gammaOutput = true;
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.gammaOutput = false;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2;
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -353,12 +355,14 @@
         let baseModel, additionalModels = [];
         let originalColors = {};
 
+        const loadingIndicator = document.getElementById('loader'); // Keep reference to the loading indicator
+
         function loadModel(path, targetSize, callback) {
+            loadingIndicator.style.display = 'block'; // Show loader
             loader.load(path, function(gltf) {
                 const model = gltf.scene;
                 model.userData.path = path;
-                
-                
+
                 model.traverse(child => {
                     if (child.isMesh && child.material) {
                         originalColors[child.name] = child.material.color.clone();
@@ -380,8 +384,10 @@
                 model.position.z -= center.z;
 
                 callback(model);
+                loadingIndicator.style.display = 'none';
             }, undefined, function(error) {
                 console.error('Error loading model:', path, error);
+                loadingIndicator.style.display = 'none';
             });
         }
 
@@ -389,9 +395,11 @@
             return window.innerWidth < 768 ? 6 : 8;
         }
 
+        loadingIndicator.style.display = 'block';
         loadModel(modelPath, calculateTargetSize(), function(model) {
             baseModel = model;
             scene.add(baseModel);
+            loadingIndicator.style.display = 'none';
 
             function handleCheckboxClick(input) {
                 const modelPath = input.dataset.model;
@@ -409,20 +417,19 @@
                 if (input.classList.contains('checkradio')) {
                     document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
                         const otherModelPath = radio.dataset.model;
-                        const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
+                        const modelIndex = additionalModels.findIndex(m => m.userData.path ===
+                            otherModelPath);
                         if (modelIndex !== -1) {
                             scene.remove(additionalModels[modelIndex]);
                             additionalModels.splice(modelIndex, 1);
                         }
-                        
-                       
+
                         const modelPart = radio.dataset.typename.split(' ')[0].toLowerCase();
                         resetColor(modelPart);
                     });
 
                     if (isDeselecting) {
                         previousSelectedRadio[radioGroupName] = null;
-                    
                     } else if (input.checked) {
                         toggleAdditionalModel(modelPath, true);
                         previousSelectedRadio[radioGroupName] = input;
@@ -448,8 +455,9 @@
             document.querySelectorAll('.color-box').forEach(label => {
                 label.addEventListener('click', function() {
                     const input = document.getElementById(this.htmlFor);
-                    const modelPart = input.dataset.typename.split(' ')[0].toLowerCase();
-                    
+                    const modelPart = input.dataset.typename.split(' ')[0]
+                .toLowerCase();
+
                     if (input.checked) {
                         input.checked = false;
                         resetColor(modelPart);
@@ -462,9 +470,8 @@
         });
 
         function toggleAdditionalModel(path, add) {
-            const loader = document.getElementById('loader');
             if (add) {
-                loader.style.display = 'block';
+                loadingIndicator.style.display = 'block'; // Show loader
                 loadModel(path, 4, function(model) {
                     additionalModels.push(model);
                     if (baseModel) {
@@ -472,7 +479,7 @@
                         model.scale.copy(baseModel.scale);
                     }
                     scene.add(model);
-                    loader.style.display = 'none';
+                    loadingIndicator.style.display = 'none'; // Hide loader after model is added
                 });
             } else {
                 const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
@@ -516,7 +523,8 @@
                             if (childName.includes(titleToMatch)) {
                                 child.traverse(subChild => {
                                     if (subChild.isMesh && subChild.material) {
-                                        if (!originalColors[subChild.name].equals(colorSelected)) {
+                                        if (!originalColors[subChild.name].equals(
+                                            colorSelected)) {
                                             subChild.material.color.set(colorSelected);
                                         }
                                     }
@@ -527,7 +535,9 @@
                     });
 
                     if (!basePartFound) {
-                        console.log(`No matching part found in additional models or base model for: ${titleToMatch}`);
+                        console.log(
+                            `No matching part found in additional models or base model for: ${titleToMatch}`
+                            );
                     }
                 }
             } else {
@@ -555,7 +565,8 @@
                         const childName = child.name.trim().toLowerCase();
                         if (childName.includes(modelPart)) {
                             child.traverse(subChild => {
-                                if (subChild.isMesh && subChild.material && originalColors[subChild.name]) {
+                                if (subChild.isMesh && subChild.material && originalColors[
+                                        subChild.name]) {
                                     subChild.material.color.copy(originalColors[subChild.name]);
                                 }
                             });
@@ -569,6 +580,13 @@
         controls.enableDamping = false;
         controls.minDistance = 5;
         controls.maxDistance = 13;
+        controls.enabled = false;
+        container.addEventListener('pointerenter', () => {
+            controls.enabled = true;
+        });
+        container.addEventListener('pointerleave', () => {
+            controls.enabled = false;
+        });
 
         function animate() {
             requestAnimationFrame(animate);
