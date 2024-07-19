@@ -18,6 +18,7 @@ class BoatEnquiryDetail extends BaseModel
 		'enquiry_id',
 		'subcat_id',
 		'option_id',
+        'color_picker'
 	];
 
     public function enquiry_option()
