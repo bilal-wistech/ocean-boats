@@ -257,19 +257,18 @@
     <div class="row mt-60" id="summary-end">
         <div class="col-md-8 col-12 m-auto">
             <div style="box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;">
-                <div class="card card-custom">
+                <div class="card card-custom mb-50">
                     <div class="card-header text-center bg-brand">
                         <h4 class="text-white">Summary</h4>
                     </div>
                     <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
                     </div>
-                    <div class="card-body list-style">
+                    {{-- <div class="card-body list-style">
                         <h4>Included:</h4>
-                        {!! $product->detail->standard_options !!}
-                    </div>
+                        {!! $product->detail->is_standard_option !!}
+                    </div> --}}
                      {{-- Discount --}}
       <div class="card-body discount-area">
-        <h4>Discount:</h4>
         <div class="row mt-20">
             <div class="col-12 mb-10">
                 <div class="card mx-auto">
@@ -345,7 +344,7 @@
     </div>
     
       {{-- end --}}
-                    <div class="row m-2">
+                    <div class="row mt-2 mb-20">
                         <div class="col-9 text-end">
                             <p><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span>
                             </p>
