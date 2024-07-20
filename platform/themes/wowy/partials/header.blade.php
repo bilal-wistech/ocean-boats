@@ -102,7 +102,7 @@
                         </li>
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav d-flex">
-                        @php
+                        {{-- @php
                             $currencies = get_all_currencies() ?? [];
                             $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
                         @endphp
@@ -121,7 +121,7 @@
                                     @endif
                                 @endforeach
                             </ul>
-                        </div>
+                        </div> --}}
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                             @if (count($socialLink) == 4)
                                 <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i
