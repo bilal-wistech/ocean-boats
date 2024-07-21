@@ -13,9 +13,7 @@
           href="{{ $fontURL = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net') }}">
     <link href="{{ $fontURL }}/css2?family={{ urlencode(theme_option('font_text', 'Poppins')) }}:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
           rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/> <!-- 'classic' theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css"/> <!-- 'monolith' theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/> <!-- 'nano' theme -->
+
     <style>
         :root {
             --font-text: {{ theme_option('font_text', 'Poppins') }}, sans-serif;
@@ -102,7 +100,7 @@
                         </li>
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav d-flex">
-                        {{-- @php
+                        @php
                             $currencies = get_all_currencies() ?? [];
                             $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
                         @endphp
@@ -121,7 +119,7 @@
                                     @endif
                                 @endforeach
                             </ul>
-                        </div> --}}
+                        </div>
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                             @if (count($socialLink) == 4)
                                 <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i
