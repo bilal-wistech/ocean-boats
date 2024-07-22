@@ -282,6 +282,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
             'uses' => 'PublicEcommerceController@changeCurrency',
         ]);
 
+        Route::post('currency/convert', [
+            'as' => 'public.convert-currency',
+            'uses' => 'PublicEcommerceController@convertCurrency',
+        ]);
+
         Route::get('product-variation/{id}', [
             'as' => 'public.web.get-variation-by-attributes',
             'uses' => 'PublicProductController@getProductVariation',

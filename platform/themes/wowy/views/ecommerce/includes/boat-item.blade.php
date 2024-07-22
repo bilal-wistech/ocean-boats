@@ -2,7 +2,7 @@
     <div class="product-cart-wrap boat-custom mb-30">
         <div class="product-img-action-wrap">
             <div class="product-img product-img-zoom">
-                <a href="{{url('/customize-boat/'.$product->ltitle)}}">
+                <a href="{{url('/customize-boat/'.$product->type)}}">
                     <img class="default-img" src="{{ RvMedia::getImageUrl($product->main_image, '', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
                     <!-- <img class="hover-img" src="{{ RvMedia::getImageUrl($product->image[1] ?? $product->image, 'product-thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}"> -->
                 </a>
@@ -32,7 +32,7 @@
             </div>
 
             <div class="justify-content-center mt-20 mb-20">
-                <a href="{{url('/customize-boat/'.$product->ltitle)}}"><button type="button" class="btn boat">Build Your Boat</button></a>
+                <a href="{{url('/customize-boat/'.$product->type)}}"><button type="button" class="btn boat">Build Your Boat</button></a>
             </div>
 
         </div>
