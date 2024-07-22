@@ -123,32 +123,43 @@
             camera.position.set(0, 0, 6);
             camera.lookAt(scene.position);
         
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.gammaOutput = false;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 2;
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setClearColor(0x182955);
-            container.appendChild(renderer.domElement);
+            const renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+    renderer.physicallyCorrectLights = true;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.6;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0x182955);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
         
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-            directionalLight.position.set(5, 5, 5).normalize();
-            scene.add(directionalLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5).normalize();
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight2.position.set(-5, -5, -5).normalize();
+    scene.add(directionalLight2);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+    scene.add(hemiLight);
+
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
         
-            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-            directionalLight2.position.set(-5, -5, -5).normalize();
-            scene.add(directionalLight2);
-        
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-            scene.add(ambientLight);
-        
-            const dracoLoader = new THREE.DRACOLoader();
-            dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
-        
-            const loader = new THREE.GLTFLoader();
-            loader.setDRACOLoader(dracoLoader);
+    const loader = new THREE.GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
         
             let baseModel, additionalModels = [];
+            let originalMaterials = {};
+            let originalColors = {};
             let modelsToLoad = accessoryModelPaths.length + 1;
             let loadedModels = 0;
         
@@ -233,19 +244,37 @@
                 loader.load(path, function(gltf) {
                     const model = gltf.scene;
                     model.userData.path = path;
-                    const bbox = new THREE.Box3().setFromObject(model);
-                    const size = new THREE.Vector3();
-                    bbox.getSize(size);
-                    const maxDimension = Math.max(size.x, size.y, size.z);
-                    const scaleFactor = targetSize / maxDimension;
-                    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                    bbox.setFromObject(model);
-                    const center = new THREE.Vector3();
-                    bbox.getCenter(center);
-        
-                    model.position.x -= center.x;
-                    model.position.y -= center.y;
-                    model.position.z -= center.z;
+                    model.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    originalMaterials[child.name] = child.material.clone();
+                    originalColors[child.name] = child.material.color.clone();
+                    
+                    const newMaterial = new THREE.MeshStandardMaterial({
+                        color: child.material.color,
+                        metalness: 0.5,
+                        roughness: 0.5
+                    });
+                    child.material = newMaterial;
+                }
+            });
+
+            const bbox = new THREE.Box3().setFromObject(model);
+            const size = new THREE.Vector3();
+            bbox.getSize(size);
+            const maxDimension = Math.max(size.x, size.y, size.z);
+            const scaleFactor = targetSize / maxDimension;
+            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            bbox.setFromObject(model);
+            const center = new THREE.Vector3();
+            bbox.getCenter(center);
+
+            model.position.x -= center.x;
+            model.position.y -= center.y;
+            model.position.z -= center.z;
+
         
                     if (baseModel) {
                         model.position.copy(baseModel.position);
