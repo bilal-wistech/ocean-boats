@@ -317,246 +317,221 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modelPath = '{{ asset('storage/' . $modelPath) }}';
-        const container = document.getElementById('Three-model');
+  document.addEventListener('DOMContentLoaded', function () {
+    const modelPath = '{{ asset('storage/' . $modelPath) }}';
+    const container = document.getElementById('Three-model');
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
-            1000);
-        camera.position.set(0, 0, 6);
-        camera.lookAt(scene.position);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0, 6);
+    camera.lookAt(scene.position);
 
-        const renderer = new THREE.WebGLRenderer({
-            antialias: true
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+    renderer.physicallyCorrectLights = true;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.6;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0x182955);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5).normalize();
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight2.position.set(-5, -5, -5).normalize();
+    scene.add(directionalLight2);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+    scene.add(hemiLight);
+
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+
+    const loader = new THREE.GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+
+    let baseModel, additionalModels = [];
+    let originalMaterials = {};
+    let originalColors = {};
+
+    const loadingIndicator = document.getElementById('loader');
+
+    function loadModel(path, targetSize, callback) {
+        loadingIndicator.style.display = 'block';
+        loader.load(path, function (gltf) {
+            const model = gltf.scene;
+            model.userData.path = path;
+
+            model.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    originalMaterials[child.name] = child.material.clone();
+                    originalColors[child.name] = child.material.color.clone();
+                    
+                    const newMaterial = new THREE.MeshStandardMaterial({
+                        color: child.material.color,
+                        metalness: 0.5,
+                        roughness: 0.5
+                    });
+                    child.material = newMaterial;
+                }
+            });
+
+            const bbox = new THREE.Box3().setFromObject(model);
+            const size = new THREE.Vector3();
+            bbox.getSize(size);
+            const maxDimension = Math.max(size.x, size.y, size.z);
+            const scaleFactor = targetSize / maxDimension;
+            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            bbox.setFromObject(model);
+            const center = new THREE.Vector3();
+            bbox.getCenter(center);
+
+            model.position.x -= center.x;
+            model.position.y -= center.y;
+            model.position.z -= center.z;
+
+            callback(model);
+            loadingIndicator.style.display = 'none';
+        }, undefined, function (error) {
+            console.error('Error loading model:', path, error);
+            loadingIndicator.style.display = 'none';
         });
-        renderer.gammaOutput = false;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 2;
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setClearColor(0x182955);
-        container.appendChild(renderer.domElement);
+    }
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(5, 5, 5).normalize();
-        scene.add(directionalLight);
+    function calculateTargetSize() {
+        return window.innerWidth < 768 ? 6 : 12;
+    }
 
-        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight2.position.set(-5, -5, -5).normalize();
-        scene.add(directionalLight2);
+    loadingIndicator.style.display = 'block';
+    loadModel(modelPath, calculateTargetSize(), function (model) {
+        baseModel = model;
+        scene.add(baseModel);
+        loadingIndicator.style.display = 'none';
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-        scene.add(ambientLight);
+        function handleCheckboxClick(input) {
+            const modelPath = input.dataset.model;
+            const isChecked = input.checked;
+            toggleAdditionalModel(modelPath, isChecked);
+        }
 
-        const dracoLoader = new THREE.DRACOLoader();
-        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+        let previousSelectedRadio = {};
 
-        const loader = new THREE.GLTFLoader();
-        loader.setDRACOLoader(dracoLoader);
+        function handleRadioClick(input) {
+            const modelPath = input.dataset.model;
+            const radioGroupName = input.name;
+            let isDeselecting = input === previousSelectedRadio[radioGroupName];
 
-        let baseModel, additionalModels = [];
-        let originalColors = {};
+            if (input.classList.contains('checkradio')) {
+                document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
+                    const otherModelPath = radio.dataset.model;
+                    const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
+                    if (modelIndex !== -1) {
+                        scene.remove(additionalModels[modelIndex]);
+                        additionalModels.splice(modelIndex, 1);
+                    }
 
-        const loadingIndicator = document.getElementById('loader'); // Keep reference to the loading indicator
+                    const modelPart = radio.dataset.typename.split(' ')[0].toLowerCase();
+                    resetColor(modelPart);
+                });
 
-        function loadModel(path, targetSize, callback) {
-            loadingIndicator.style.display = 'block'; // Show loader
-            loader.load(path, function (gltf) {
-                const model = gltf.scene;
-                model.userData.path = path;
+                if (isDeselecting) {
+                    previousSelectedRadio[radioGroupName] = null;
+                } else if (input.checked) {
+                    toggleAdditionalModel(modelPath, true);
+                    previousSelectedRadio[radioGroupName] = input;
+                }
+            }
+        }
 
+        document.querySelectorAll('.cat-item-check').forEach(input => {
+            if (input.type === 'checkbox') {
+                handleCheckboxClick(input);
+            } else if (input.type === 'radio') {
+                handleRadioClick(input);
+            }
+            input.addEventListener('click', function () {
+                if (this.type === 'checkbox') {
+                    handleCheckboxClick(this);
+                } else if (this.type === 'radio') {
+                    handleRadioClick(this);
+                }
+            });
+        });
+
+        document.querySelectorAll('.color-box').forEach(label => {
+            label.addEventListener('click', function () {
+                const input = document.getElementById(this.htmlFor);
+                const modelPart = input.dataset.typename.split(' ')[0].toLowerCase();
+
+                if (input.checked) {
+                    input.checked = false;
+                    resetColor(modelPart);
+                } else {
+                    input.checked = true;
+                    applyColorChange(this.style.backgroundColor, input);
+                }
+            });
+        });
+    });
+
+    function toggleAdditionalModel(path, add) {
+        if (add) {
+            loadingIndicator.style.display = 'block';
+            loadModel(path, 4, function (model) {
+                additionalModels.push(model);
+                if (baseModel) {
+                    model.position.copy(baseModel.position);
+                    model.scale.copy(baseModel.scale);
+                }
+                scene.add(model);
+                loadingIndicator.style.display = 'none';
+            });
+        } else {
+            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+            if (modelIndex !== -1) {
+                scene.remove(additionalModels[modelIndex]);
+                additionalModels.splice(modelIndex, 1);
+            }
+        }
+    }
+
+    function applyColorChange(color, input) {
+        const colorOptionId = input.value;
+        const colorTitle = input.dataset.typename;
+
+        if (colorOptionId && colorTitle) {
+            const colorSelected = new THREE.Color(color);
+            const titleToMatch = colorTitle.split(' ')[0].toLowerCase();
+
+            function applyColorToModel(model) {
                 model.traverse(child => {
                     if (child.isMesh && child.material) {
-                        originalColors[child.name] = child.material.color.clone();
-                    }
-                });
-
-                const bbox = new THREE.Box3().setFromObject(model);
-                const size = new THREE.Vector3();
-                bbox.getSize(size);
-                const maxDimension = Math.max(size.x, size.y, size.z);
-                const scaleFactor = targetSize / maxDimension;
-                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                bbox.setFromObject(model);
-                const center = new THREE.Vector3();
-                bbox.getCenter(center);
-
-                model.position.x -= center.x;
-                model.position.y -= center.y;
-                model.position.z -= center.z;
-
-                callback(model);
-                loadingIndicator.style.display = 'none';
-            }, undefined, function (error) {
-                console.error('Error loading model:', path, error);
-                loadingIndicator.style.display = 'none';
-            });
-        }
-
-        function calculateTargetSize() {
-            return window.innerWidth < 768 ? 6 : 9;
-        }
-
-        loadingIndicator.style.display = 'block';
-        loadModel(modelPath, calculateTargetSize(), function (model) {
-            baseModel = model;
-            scene.add(baseModel);
-            loadingIndicator.style.display = 'none';
-
-            function handleCheckboxClick(input) {
-                const modelPath = input.dataset.model;
-                const isChecked = input.checked;
-                toggleAdditionalModel(modelPath, isChecked);
-            }
-
-            let previousSelectedRadio = {};
-
-            function handleRadioClick(input) {
-                const modelPath = input.dataset.model;
-                const radioGroupName = input.name;
-                let isDeselecting = input === previousSelectedRadio[radioGroupName];
-
-                if (input.classList.contains('checkradio')) {
-                    document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
-                        const otherModelPath = radio.dataset.model;
-                        const modelIndex = additionalModels.findIndex(m => m.userData.path ===
-                            otherModelPath);
-                        if (modelIndex !== -1) {
-                            scene.remove(additionalModels[modelIndex]);
-                            additionalModels.splice(modelIndex, 1);
+                        if (!originalColors[child.name]) {
+                            originalColors[child.name] = child.material.color.clone();
                         }
-
-                        const modelPart = radio.dataset.typename.split(' ')[0].toLowerCase();
-                        resetColor(modelPart);
-                    });
-
-                    if (isDeselecting) {
-                        previousSelectedRadio[radioGroupName] = null;
-                    } else if (input.checked) {
-                        toggleAdditionalModel(modelPath, true);
-                        previousSelectedRadio[radioGroupName] = input;
-                    }
-                }
-            }
-
-            document.querySelectorAll('.cat-item-check').forEach(input => {
-                if (input.type === 'checkbox') {
-                    handleCheckboxClick(input);
-                } else if (input.type === 'radio') {
-                    handleRadioClick(input);
-                }
-                input.addEventListener('click', function () {
-                    if (this.type === 'checkbox') {
-                        handleCheckboxClick(this);
-                    } else if (this.type === 'radio') {
-                        handleRadioClick(this);
+                        child.material.color.set(colorSelected);
                     }
                 });
-            });
-
-            document.querySelectorAll('.color-box').forEach(label => {
-                label.addEventListener('click', function () {
-                    const input = document.getElementById(this.htmlFor);
-                    const modelPart = input.dataset.typename.split(' ')[0]
-                        .toLowerCase();
-
-                    if (input.checked) {
-                        input.checked = false;
-                        resetColor(modelPart);
-                    } else {
-                        input.checked = true;
-                        applyColorChange(this.style.backgroundColor, input);
-                    }
-                });
-            });
-        });
-
-        function toggleAdditionalModel(path, add) {
-            if (add) {
-                loadingIndicator.style.display = 'block'; // Show loader
-                loadModel(path, 4, function (model) {
-                    additionalModels.push(model);
-                    if (baseModel) {
-                        model.position.copy(baseModel.position);
-                        model.scale.copy(baseModel.scale);
-                    }
-                    scene.add(model);
-                    loadingIndicator.style.display = 'none'; // Hide loader after model is added
-                });
-            } else {
-                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-                if (modelIndex !== -1) {
-                    scene.remove(additionalModels[modelIndex]);
-                    additionalModels.splice(modelIndex, 1);
-                }
             }
-        }
 
-        function applyColorChange(color, input) {
-            const colorOptionId = input.value;
-            const colorTitle = input.dataset.typename;
-
-            if (colorOptionId && colorTitle) {
-                const colorSelected = new THREE.Color(color);
-                const titleToMatch = colorTitle.split(' ')[0].toLowerCase();
-                let colorApplied = false;
-
-                if (typeof additionalModels !== 'undefined') {
-                    additionalModels.forEach(model => {
-                        const modelLabel = model.userData.path.toLowerCase();
-                        if (modelLabel.includes(titleToMatch)) {
-                            model.traverse(child => {
-                                if (child.isMesh && child.material) {
-                                    if (!originalColors[child.name].equals(colorSelected)) {
-                                        child.material.color.set(colorSelected);
-                                    }
-                                }
-                            });
-                            colorApplied = true;
-                        }
-                    });
-                }
-
-                if (!colorApplied && typeof baseModel !== 'undefined') {
-                    let basePartFound = false;
-                    baseModel.traverse(child => {
-                        if (child.name) {
-                            const childName = child.name.trim().toLowerCase();
-                            if (childName.includes(titleToMatch)) {
-                                child.traverse(subChild => {
-                                    if (subChild.isMesh && subChild.material) {
-                                        if (!originalColors[subChild.name].equals(
-                                            colorSelected)) {
-                                            subChild.material.color.set(colorSelected);
-                                        }
-                                    }
-                                });
-                                basePartFound = true;
-                            }
-                        }
-                    });
-
-                    if (!basePartFound) {
-                        console.log(
-                            `No matching part found in additional models or base model for: ${titleToMatch}`
-                        );
-                    }
-                }
-            } else {
-                console.error('Color option ID or title not found.');
-            }
-        }
-
-        function resetColor(modelPart) {
             if (typeof additionalModels !== 'undefined') {
                 additionalModels.forEach(model => {
                     const modelLabel = model.userData.path.toLowerCase();
-                    if (modelLabel.includes(modelPart)) {
-                        model.traverse(child => {
-                            if (child.isMesh && child.material && originalColors[child.name]) {
-                                child.material.color.copy(originalColors[child.name]);
-                            }
-                        });
+                    if (modelLabel.includes(titleToMatch)) {
+                        applyColorToModel(model);
                     }
                 });
             }
@@ -565,48 +540,77 @@
                 baseModel.traverse(child => {
                     if (child.name) {
                         const childName = child.name.trim().toLowerCase();
-                        if (childName.includes(modelPart)) {
-                            child.traverse(subChild => {
-                                if (subChild.isMesh && subChild.material && originalColors[
-                                    subChild.name]) {
-                                    subChild.material.color.copy(originalColors[subChild.name]);
-                                }
-                            });
+                        if (childName.includes(titleToMatch)) {
+                            applyColorToModel(child);
                         }
                     }
                 });
             }
+        } else {
+            console.error('Color option ID or title not found.');
+        }
+    }
+
+    function resetColor(modelPart) {
+        function resetModelColor(model) {
+            model.traverse(child => {
+                if (child.isMesh && child.material && originalColors[child.name]) {
+                    child.material.color.copy(originalColors[child.name]);
+                }
+            });
         }
 
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 13;
-        controls.enabled = false;
-        container.addEventListener('pointerenter', () => {
-            controls.enabled = true;
-        });
-        container.addEventListener('pointerleave', () => {
-            controls.enabled = false;
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            controls.update();
+        if (typeof additionalModels !== 'undefined') {
+            additionalModels.forEach(model => {
+                const modelLabel = model.userData.path.toLowerCase();
+                if (modelLabel.includes(modelPart)) {
+                    resetModelColor(model);
+                }
+            });
         }
 
-        animate();
-
-        function updateTotalPrice() {
-            const currency = "<?php echo get_application_currency()['symbol']; ?>";
-            const vatPrice = (totalPrice * 5) / 100;
-            const vatTotal = totalPrice + vatPrice;
-
-            $('.sub-total').text(totalPrice.toLocaleString('en-US') + currency);
-            $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
-            $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
-            $('input[name="total_price"]').val(totalPrice);
+        if (typeof baseModel !== 'undefined') {
+            baseModel.traverse(child => {
+                if (child.name) {
+                    const childName = child.name.trim().toLowerCase();
+                    if (childName.includes(modelPart)) {
+                        resetModelColor(child);
+                    }
+                }
+            });
         }
+    }
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 3;
+    controls.maxDistance = 10;
+    controls.enabled = false;
+    container.addEventListener('pointerenter', () => {
+        controls.enabled = true;
     });
+    container.addEventListener('pointerleave', () => {
+        controls.enabled = false;
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    function updateTotalPrice() {
+        const currency = "<?php echo get_application_currency()['symbol']; ?>";
+        const vatPrice = (totalPrice * 5) / 100;
+        const vatTotal = totalPrice + vatPrice;
+
+        $('.sub-total').text(totalPrice.toLocaleString('en-US') + currency);
+        $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
+        $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
+        $('input[name="total_price"]').val(totalPrice);
+    }
+});
 </script>
