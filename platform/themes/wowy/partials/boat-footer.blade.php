@@ -382,6 +382,23 @@ function handleUncheckedRadio(element, type, parent) {
         });
 
     });
+    document.querySelectorAll('.applyPromo').forEach(button => {
+    button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const spinner = this.nextElementSibling;
+        const discountPercentage = parseFloat(this.closest('.promo').querySelector('.discount h4').textContent);
+        const originalPriceElement = this.closest('.promo').querySelector('.original-price');
+        const discountedPriceElement = this.closest('.promo').querySelector('.discounted-price');
+        input.disabled = true;
+        spinner.classList.remove('d-none');
+        setTimeout(() => {
+            spinner.classList.add('d-none');
+            const originalPrice = parseFloat(originalPriceElement.textContent.replace('AED', ''));
+            const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+            discountedPriceElement.textContent = `${discountedPrice.toFixed(2)} AED`;
+        }, 2000);
+    });
+});
 </script>
 
 
