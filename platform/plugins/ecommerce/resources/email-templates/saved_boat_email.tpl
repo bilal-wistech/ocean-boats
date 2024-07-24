@@ -1,20 +1,31 @@
 {{ header }}
 
-<h2>Order is waiting for you to complete!</h2>
+<h2>You have a boat to be booked!</h2>
 
 <p>Hi {{ customer_name }},</p>
-<p>We noticed you were intending to buy some products in our store, would you like to continue?</p>
+<p>We noticed you have booked a boat from our site, would you like to continue?</p>
 
-<a href="{{ site_url }}/checkout/{{ order_token }}/recover" class="button button-blue">Complete order</a> or <a href="{{ site_url }}">Go to our shop</a>
-
-<br />
-
-<h3>Product(s) in cart</h3>
-
-{{ product_list }}
+<a href="{{ site_url }}/customer/saved_boats" class="button button-blue">View Saved Boats</a> or <a href="{{ site_url }}">Go to our Site</a>
 
 <br />
 
-<p>If you have any question, please contact us via <a href="mailto:{{ site_admin_email }}">{{ site_admin_email }}</a></p>
+<h3>Boat(s) Details</h3>
+
+<table style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">Boat Title</th>
+        <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">Total Price</th>
+        <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">VAT Total</th>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ boat_title }}</td>
+        <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ total_price }}</td>
+        <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ vat_total }}</td>
+    </tr>
+</table>
+
+<br />
+
+<p>If you have any questions, please contact us via <a href="mailto:{{ site_admin_email }}">{{ site_admin_email }}</a></p>
 
 {{ footer }}

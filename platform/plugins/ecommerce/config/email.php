@@ -201,9 +201,9 @@ return [
             'can_off' => true,
             'variables' => [
                 'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
-                'boat_title' => 'Boat Title {{ boat_title }}',
-                'total_price' => 'Total Price{{ total_price }}',
-                'vat_total' => 'VAT Total {{ vat_total }}',
+                'boat_title' => 'Boat Title',
+                'total_price' => 'Total Price',
+                'vat_total' => 'VAT Total',
             ],
         ],
     ],

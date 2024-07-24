@@ -1,11 +1,12 @@
 <?php
-
 namespace Botble\Ecommerce\Commands;
 
 use Throwable;
-use OrderHelper;
-use Botble\Base\Supports\EmailHandler;
 use Illuminate\Console\Command;
+use Botble\Base\Helpers\BaseHelper;
+use Illuminate\Support\Facades\Mail;
+use Botble\Base\Supports\EmailHandler;
+use Botble\Ecommerce\Mail\SavedBoatsEmail;
 use Symfony\Component\Console\Attribute\AsCommand;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
 
@@ -13,16 +14,18 @@ use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
 class SendSavedBoatsEmailCommand extends Command
 {
     protected BoatEnquiryInterface $boatenquiryRepository;
-
-    public function __construct(BoatEnquiryInterface $boatenquiryRepository)
+    protected EmailHandler $emailHandler;
+    public function __construct(BoatEnquiryInterface $boatenquiryRepository, EmailHandler $emailHandler)
     {
         parent::__construct();
 
         $this->boatenquiryRepository = $boatenquiryRepository;
+        $this->emailHandler = $emailHandler;
     }
 
     public function handle()
     {
+        $helper = app(BaseHelper::class);
         $boat_enquiries = $this->boatenquiryRepository->getModel()
             ->with(['boat', 'customer', 'details'])
             ->where('is_finished', 0)
@@ -32,28 +35,29 @@ class SendSavedBoatsEmailCommand extends Command
 
         foreach ($boat_enquiries as $boat_enquiry) {
             $email = $boat_enquiry->customer->email;
-
-            if (! $email) {
+            if (!$email) {
                 continue;
             }
 
-            try {
-                $mailer = new EmailHandler();
-                $mailer->setModule('ecommerce')
-                    ->setTemplate('saved_boat_email')
-                    ->setVariableValue('customer_name', $boat_enquiry->customer->name)
-                    ->setVariableValue('customer_email', $email)
-                    ->setVariableValue('boat_title', $boat_enquiry->boat->ltitle)
-                    ->setVariableValue('total_price', $boat_enquiry->total_price)
-                    ->setVariableValue('vat_total', $boat_enquiry->vat_total);
-                
-                $mailer->sendUsingTemplate('saved_boat_email', $email);
-                
-                $count++;
-            } catch (Throwable $exception) {
-                info($exception->getMessage());
+            $variables = [
+                'customer_name' => $helper->clean($boat_enquiry->customer->name),
+                'boat_id' => $boat_enquiry->boat->id,
+                'boat_title' => $boat_enquiry->boat->ltitle,
+                'total_price' => number_format($boat_enquiry->total_price, 2),
+                'vat_total' => number_format($boat_enquiry->vat_total, 2),
+            ];
 
-                return self::FAILURE;
+            try {
+                \Log::info('Preparing to send email to: ' . $email);
+                \Log::info('Variables:', $variables);
+
+                Mail::to($email)->send(new SavedBoatsEmail($variables));
+
+                $count++;
+                \Log::info('Email sent successfully to: ' . $email);
+            } catch (Throwable $exception) {
+                \Log::error('Failed to send email: ' . $exception->getMessage());
+                \Log::error('Stack trace: ' . $exception->getTraceAsString());
             }
         }
 
