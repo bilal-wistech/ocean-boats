@@ -43,8 +43,8 @@ class SendSavedBoatsEmailCommand extends Command
                 'customer_name' => $helper->clean($boat_enquiry->customer->name),
                 'boat_id' => $boat_enquiry->boat->id,
                 'boat_title' => $boat_enquiry->boat->ltitle,
-                'total_price' => number_format($boat_enquiry->total_price, 2),
-                'vat_total' => number_format($boat_enquiry->vat_total, 2),
+                'total_price' => format_price($boat_enquiry->total_price),
+                'vat_total' => format_price($boat_enquiry->vat_total),
             ];
 
             try {
