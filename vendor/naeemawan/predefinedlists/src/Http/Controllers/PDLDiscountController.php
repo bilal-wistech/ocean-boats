@@ -2,11 +2,20 @@
 namespace NaeemAwan\PredefinedLists\Http\Controllers;
 
 use Botble\Base\Http\Controllers\BaseController;
+use NaeemAwan\PredefinedLists\Tables\PDLDiscountTable;
+use NaeemAwan\PredefinedLists\Repositories\Interfaces\PDLDiscountInterface;
 
 class PDLDiscountController extends BaseController
 {
-    public function index()
+    protected PDLDiscountInterface $pdlDiscountRepository;
+
+	public function __construct(PDLDiscountInterface $pdlDiscountRepository)
     {
-        # code...
+        $this->pdlDiscountRepository = $pdlDiscountRepository;
+    }
+
+    public function index(PDLDiscountTable $table)
+    {   
+        return $table->renderTable();
     }
 }

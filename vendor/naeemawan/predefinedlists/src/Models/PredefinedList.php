@@ -2,10 +2,11 @@
 
 namespace NaeemAwan\PredefinedLists\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use NaeemAwan\PredefinedLists\Models\BoatDiscount;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PredefinedList extends BaseModel
 {
@@ -69,6 +70,10 @@ class PredefinedList extends BaseModel
     public function parent()
     {
         return $this->hasOne(PredefinedList::class, 'parent_id');
+    }
+    public function discounts()
+    {
+        return $this->hasMany(BoatDiscount::class, 'list_id');
     }
 
 }

@@ -20,4 +20,9 @@ class BoatDiscount extends BaseModel
     'valid_to',
     'never_expires'
   ];
+
+  public function list()
+    {
+        return $this->belongsTo(PredefinedList::class, 'list_id');
+    }
 }
