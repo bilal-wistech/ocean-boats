@@ -460,7 +460,7 @@
                     const newMaterial = new THREE.MeshStandardMaterial({
                         color: child.material.color,
                         metalness: 0.5,
-                        roughness: 0.5
+                        roughness: 0.3
                     });
                     child.material = newMaterial;
                 }
