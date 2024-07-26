@@ -502,7 +502,8 @@ class EcommerceServiceProvider extends ServiceProvider
                 LanguageAdvancedManager::registerModule(Product::class, array_merge(
                     LanguageAdvancedManager::getTranslatableColumns(Product::class),
                     ['faq_schema_config']
-                ));
+                )
+                );
             }
 
             LanguageAdvancedManager::registerModule(ProductCategory::class, [
@@ -519,7 +520,8 @@ class EcommerceServiceProvider extends ServiceProvider
             LanguageAdvancedManager::registerModule(ProductAttribute::class, array_merge(
                 LanguageAdvancedManager::getTranslatableColumns(ProductAttribute::class),
                 ['attributes']
-            ));
+            )
+            );
 
             LanguageAdvancedManager::registerModule(ProductAttributeSet::class, [
                 'title',
@@ -573,7 +575,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         $variations = $data->variations()->get();
 
                         foreach ($variations as $variation) {
-                            if (! $variation->product->id) {
+                            if (!$variation->product->id) {
                                 continue;
                             }
 
@@ -582,7 +584,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $options = $request->input('options', []) ?: [];
 
-                        if (! $options) {
+                        if (!$options) {
                             return;
                         }
 
@@ -610,7 +612,7 @@ class EcommerceServiceProvider extends ServiceProvider
                             ]);
 
                             foreach ($item['values'] as $value) {
-                                if (! $value['id']) {
+                                if (!$value['id']) {
                                     continue;
                                 }
 
@@ -631,7 +633,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $attributes = json_decode($request->input('attributes', '[]'), true) ?: [];
 
-                        if (! $attributes) {
+                        if (!$attributes) {
                             break;
                         }
 
@@ -664,7 +666,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $options = $request->input('options', []) ?: [];
 
-                        if (! $options) {
+                        if (!$options) {
                             return;
                         }
 
@@ -676,7 +678,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         ]);
 
                         foreach ($options as $value) {
-                            if (! $value['id']) {
+                            if (!$value['id']) {
                                 continue;
                             }
 
@@ -724,7 +726,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'id' => 'cms-packages-products',
                     'priority' => 0,
                     'parent_id' => "cms-packages-build-boat",
-                    'name' => 'Products',
+                    'name' => 'Boats',
                     'icon' => 'fa fa-list',
                     'url' => route('predefined-list'),
                     'permissions' => ['plugins.ecommerce'],
@@ -754,6 +756,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'name' => 'Boat Views',
                     'icon' => 'fa fa-list-alt',
                     'url' => route('custom-boat-views'),
+                    'permissions' => ['plugins.ecommerce'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-packages-custom-boat-discounts',
+                    'priority' => 1,
+                    'parent_id' => "cms-packages-build-boat",
+                    'name' => 'Boat Discounts',
+                    'icon' => 'fa fa-list-alt',
+                    'url' => route('custom-boat-discounts'),
                     'permissions' => ['plugins.ecommerce'],
                 ])
                 ->registerItem([
@@ -976,7 +987,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (! dashboard_menu()->hasItem('cms-core-tools')) {
+            if (!dashboard_menu()->hasItem('cms-core-tools')) {
                 dashboard_menu()->registerItem([
                     'id' => 'cms-core-tools',
                     'priority' => 96,
