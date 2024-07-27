@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use NaeemAwan\PredefinedLists\Models\BoatDiscount;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\PDLDiscountInterface;
@@ -63,7 +64,7 @@ class PDLDiscountTable extends TableAbstract
                 return $this->getCheckbox($item->id);
             });
         $data = $data->addColumn('operations', function ($item) {
-            return $this->getOperations('custom-boat-enquiries.edit', 'custom-boat-enquiries.destroy', $item);
+            return $this->getOperations('custom-boat-discounts.edit', 'custom-boat-discounts.destroy', $item);
         });
 
         return $this->toJson($data);
@@ -133,7 +134,13 @@ class PDLDiscountTable extends TableAbstract
 
         return $columns;
     }
+    public function buttons(): array
+    {
+        $buttons=[];
+        $buttons = $this->addCreateButton(route('custom-boat-discounts.create'), 'custom-boat-discounts.create');
 
+        return apply_filters(BASE_FILTER_TABLE_BUTTONS, $buttons, BoatDiscount::class);
+    }
     public function bulkActions(): array
     {
         return []; //$this->addDeleteAction(route('custom-boat-enquiries.deletes'), 'custom-boat-enquiries.destroy', parent::bulkActions());

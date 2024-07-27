@@ -148,9 +148,6 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
       'uses' => 'PredefinedCategoryController@deletes',
       'permission' => 'plugins.ecommerce',
     ]);
-
-
-
   });
 
   //enquiries
@@ -193,6 +190,31 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
     Route::match(['post', 'get'], '/', [
       'as' => 'custom-boat-discounts',
       'uses' => 'PDLDiscountController@index',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::match(['post', 'get'], 'create', [
+      'as' => 'custom-boat-discounts.create',
+      'uses' => 'PDLDiscountController@create',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::match(['post', 'get'], '/store', [
+      'as' => 'custom-boat-discounts.store',
+      'uses' => 'PDLDiscountController@store',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::match(['post', 'get'], '/update/{id}', [
+      'as' => 'custom-boat-discounts.update',
+      'uses' => 'PDLDiscountController@update',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::match(['post', 'get'], '/edit/{id}', [
+      'as' => 'custom-boat-discounts.edit',
+      'uses' => 'PDLDiscountController@edit',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::delete('/delete/{id}', [
+      'as' => 'custom-boat-discounts.destroy',
+      'uses' => 'PDLDiscountController@destroy',
       'permission' => 'plugins.ecommerce',
     ]);
   });
