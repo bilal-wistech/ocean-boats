@@ -21,6 +21,10 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
     'as' => 'public.customize-boat.add-view',  // Route name
     'uses' => 'PublicProductController@addViewCount',  // Controller method
   ]);
+  Route::match(['post', 'get'], '/apply-discount', [
+    'as' => 'public.apply-discount',
+    'uses' => 'PublicProductController@applyDiscount',
+]);
   // payments
   Route::match(['post', 'get'], '/transaction/success', [
     'as' => 'ngenius.transaction.success',

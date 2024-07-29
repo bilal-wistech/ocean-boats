@@ -108,13 +108,6 @@
     var url = "<?php echo url('/'); ?>";
 
     $(document).ready(function () {
-        // $('.dropdown-item').on('click', function() {
-        //     $('.dropdown-item').removeClass('active');
-        //     $(this).addClass('active');
-        //     $('.dropdown-toggle').text($(this).text());
-        //     $('.tab-pane').removeClass('show active');
-        //     $($(this).data('bs-target')).addClass('show active');
-        // });
 
         $('body').on('click', '.card-btn', function () {
             val = $(this).data('value');
@@ -140,42 +133,6 @@
             $(this).removeClass('show');
             $(this).prev('.dropdown-toggle').attr('aria-expanded', 'false');
         });
-
-        // $('body').on('click','input[type="radio"]',function(){
-        //     var src=url+'/storage/'+'transparent-pic-150x150.png';
-        //     var value = $(this).val();
-        //     var parent = $(this).data('parent');
-        //     var type = $(this).attr('name');
-        //     if($(this).prop('checked') && $(this).attr('data-waschecked')=='true'){
-        //         $('input[type="'+type+'"]').attr('data-waschecked', false);
-        //         $(this).attr('data-waschecked', false);
-        //         $(this).prop('checked', false);
-        //         $('.cat-'+parent+'-img1').find('img').attr('src',src);
-        //         $('.cat-'+parent+'-img2').find('img').attr('src',src);
-        //         $('.cat-'+parent+'-img3').find('img').attr('src',src);
-        //     }else{
-        //         $.ajax({
-        //             type: "Post",
-        //             url: url+"/customize-type-content",
-        //             data: {
-        //                 value:value,
-        //             },
-        //             success: function(data){
-        //                 var src1=url+'/storage/'+data['image'][1];
-        //                 $('.cat-'+parent+'-img1').find('img').attr('src',src1);
-        //                 var src2=url+'/storage/'+data['image'][2];
-        //                 $('.cat-'+parent+'-img2').find('img').attr('src',src2);
-        //                 var src3=url+'/storage/'+data['image'][3];
-        //                 $('.cat-'+parent+'-img3').find('img').attr('src',src3);
-        //                 var html=`<div class="card m-2 p-2"><div class="card-body text-center"><p><b>Color</b></p><p>Green</p><p><b>Price</b> : $120.00</p></div></div>`;
-        //                 $('#summary-end').append(html);
-        //             }
-        //         });
-        //         $('input[type="'+type+'"]').attr('data-waschecked', false);
-        //         $(this).attr('data-waschecked', true);
-        //         $(this).prop('checked', true);
-        //     }
-        // });
 
         $('#summary-end').hide();
         var price = 0;
@@ -382,23 +339,23 @@ function handleUncheckedRadio(element, type, parent) {
         });
 
     });
-    document.querySelectorAll('.applyPromo').forEach(button => {
-    button.addEventListener('click', function() {
-        const input = this.previousElementSibling;
-        const spinner = this.nextElementSibling;
-        const discountPercentage = parseFloat(this.closest('.promo').querySelector('.discount h4').textContent);
-        const originalPriceElement = this.closest('.promo').querySelector('.original-price');
-        const discountedPriceElement = this.closest('.promo').querySelector('.discounted-price');
-        input.disabled = true;
-        spinner.classList.remove('d-none');
-        setTimeout(() => {
-            spinner.classList.add('d-none');
-            const originalPrice = parseFloat(originalPriceElement.textContent.replace('AED', ''));
-            const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
-            discountedPriceElement.textContent = `${discountedPrice.toFixed(2)} AED`;
-        }, 2000);
-    });
-});
+//     document.querySelectorAll('.applyPromo').forEach(button => {
+//     button.addEventListener('click', function() {
+//         const input = this.previousElementSibling;
+//         const spinner = this.nextElementSibling;
+//         const discountPercentage = parseFloat(this.closest('.promo').querySelector('.discount h4').textContent);
+//         const originalPriceElement = this.closest('.promo').querySelector('.original-price');
+//         const discountedPriceElement = this.closest('.promo').querySelector('.discounted-price');
+//         input.disabled = true;
+//         spinner.classList.remove('d-none');
+//         setTimeout(() => {
+//             spinner.classList.add('d-none');
+//             const originalPrice = parseFloat(originalPriceElement.textContent.replace('AED', ''));
+//             const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+//             discountedPriceElement.textContent = `${discountedPrice.toFixed(2)} AED`;
+//         }, 2000);
+//     });
+// });
 </script>
 
 
