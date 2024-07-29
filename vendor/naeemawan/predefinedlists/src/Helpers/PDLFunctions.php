@@ -150,8 +150,8 @@ if (!function_exists('getDiscountTypeArr')) {
   function getDiscountTypeArr()
   {
     return [
-      'amount' => 'Amount',
       'percentage' => 'Percentage',
+      'amount' => 'Amount',
     ];
   }
 }

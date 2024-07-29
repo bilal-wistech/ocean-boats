@@ -46,7 +46,11 @@ class PDLDiscountTable extends TableAbstract
                 return $item->list->ltitle;
             })
             ->editColumn('discount', function ($item) {
-                return $item->discount;
+                if ($item->discount_type == 'amount') {
+                    return format_price($item->discount);
+                } else {
+                    return ($item->discount) . '%';
+                }
             })
             ->editColumn('discount_type', function ($item) {
                 return $item->discount_type;
@@ -136,7 +140,7 @@ class PDLDiscountTable extends TableAbstract
     }
     public function buttons(): array
     {
-        $buttons=[];
+        $buttons = [];
         $buttons = $this->addCreateButton(route('custom-boat-discounts.create'), 'custom-boat-discounts.create');
 
         return apply_filters(BASE_FILTER_TABLE_BUTTONS, $buttons, BoatDiscount::class);
