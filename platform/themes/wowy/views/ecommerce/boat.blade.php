@@ -28,6 +28,25 @@
             @php
                 $modelPath = $product->file;
             @endphp
+            @php
+                $boat_total = 0; // Start with the original product price
+                $discountAmount = 0;
+
+                if ($product->discounts->isNotEmpty()) {
+                    foreach ($product->discounts as $discount) {
+                        if ($discount->code === 'BOAT' || empty($discount->code)) {
+                            $boat_total = $product->price;
+                            if ($discount->discount_type === 'amount') {
+                                $discountAmount += $discount->discount; // Accumulate amount discounts
+                            } elseif ($discount->discount_type === 'percentage') {
+                                $discountAmount += ($boat_total * $discount->discount) / 100; // Accumulate percentage discounts
+                            }
+                        }
+                    }
+                }
+                $boat_total -= $discountAmount; // Apply the accumulated discount to the total price
+            @endphp
+
             <div class="row">
                 <div id="loader">
                     <div class="spinner"></div>
@@ -36,7 +55,7 @@
                 <div id="Three-model" style="width: 100%; height: 500px; overflow:hidden"></div>
             </div>
 
-            <input type="hidden" name="boat_price" value="{{ $product->price }}">
+            <input type="hidden" name="boat_price" value="{{ $boat_total ?? ($product->price ?? 0) }}">
 
         </div>
 
@@ -259,71 +278,72 @@
                                         <div class="row">
                                             @if ($product->discounts->isNotEmpty())
                                                 @foreach ($product->discounts as $discount)
-                                                    <div class="col-3 align-items-center d-flex">
-                                                        <div class="access-name">
-                                                            <h5>{{ $discount->list->ltitle }}</h5>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-9">
-                                                        <div class="promo">
-                                                            <div class="discount d-flex">
-                                                                <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                </h4>
-                                                                <p>OFF</p>
-                                                            </div>
-                                                            <div class="d-flex mt-10 mb-10">
-                                                                <div class="input-group">
-                                                                    <input type="text"
-                                                                        class="form-control promoCode" name="code"
-                                                                        placeholder="Promo Code">
-                                                                    <button class="btn btn-primary applyPromo"
-                                                                        type="button">Apply</button>
-                                                                    <div class="spinner-border text-primary ms-2 d-none"
-                                                                        role="status">
-                                                                        <span class="visually-hidden">Loading...</span>
-                                                                    </div>
-                                                                </div>
+                                                    @if ($discount->code !== 'BOAT' && !empty($discount->code))
+                                                        <div class="col-3 align-items-center d-flex">
+                                                            <div class="access-name">
+                                                                <h5>{{ $discount->list->ltitle }}</h5>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                @endforeach
-                                            @else
-                                                @foreach ($accessories as $accessory)
-                                                    @if ($accessory->discounts->isNotEmpty())
-                                                        @foreach ($accessory->discounts as $discount)
-                                                            <div class="col-3 align-items-center d-flex">
-                                                                <div class="access-name">
-                                                                    <h5>{{ $discount->list->ltitle }}</h5>
+                                                        <div class="col-9">
+                                                            <div class="promo">
+                                                                <div class="discount d-flex">
+                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                    </h4>
+                                                                    <p>OFF</p>
                                                                 </div>
-                                                            </div>
-                                                            <div class="col-9">
-                                                                <div class="promo">
-                                                                    <div class="discount d-flex">
-                                                                        <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                        </h4>
-                                                                        <p>OFF</p>
-                                                                    </div>
-                                                                    <div class="d-flex mt-10 mb-10">
-                                                                        <div class="input-group">
-                                                                            <input type="text"
-                                                                                class="form-control promoCode"
-                                                                                name="code"
-                                                                                placeholder="Promo Code">
-                                                                            <button class="btn btn-primary applyPromo"
-                                                                                type="button">Apply</button>
-                                                                            <div class="spinner-border text-primary ms-2 d-none"
-                                                                                role="status">
-                                                                                <span
-                                                                                    class="visually-hidden">Loading...</span>
-                                                                            </div>
+                                                                <div class="d-flex mt-10 mb-10">
+                                                                    <div class="input-group">
+                                                                        <input type="text"
+                                                                            class="form-control promoCode"
+                                                                            name="code" placeholder="Promo Code">
+                                                                        <button class="btn btn-primary applyPromo"
+                                                                            type="button">Apply</button>
+                                                                        <div class="spinner-border text-primary ms-2 d-none"
+                                                                            role="status">
+                                                                            <span
+                                                                                class="visually-hidden">Loading...</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        @endforeach
+                                                        </div>
                                                     @endif
                                                 @endforeach
                                             @endif
+                                            @foreach ($accessories as $accessory)
+                                                @if ($accessory->discounts->isNotEmpty())
+                                                    @foreach ($accessory->discounts as $discount)
+                                                        <div class="col-3 align-items-center d-flex">
+                                                            <div class="access-name">
+                                                                <h5>{{ $discount->list->ltitle }}</h5>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-9">
+                                                            <div class="promo">
+                                                                <div class="discount d-flex">
+                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                    </h4>
+                                                                    <p>OFF</p>
+                                                                </div>
+                                                                <div class="d-flex mt-10 mb-10">
+                                                                    <div class="input-group">
+                                                                        <input type="text"
+                                                                            class="form-control promoCode"
+                                                                            name="code" placeholder="Promo Code">
+                                                                        <button class="btn btn-primary applyPromo"
+                                                                            type="button">Apply</button>
+                                                                        <div class="spinner-border text-primary ms-2 d-none"
+                                                                            role="status">
+                                                                            <span
+                                                                                class="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                @endif
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
@@ -715,7 +735,7 @@
                     }
                 }.bind(
                     this
-                    ), // Ensure 'this' refers to the correct context inside success callback
+                ), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
                 },
