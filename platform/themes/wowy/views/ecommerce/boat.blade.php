@@ -397,6 +397,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     const modelPath = '{{ asset('storage/' . $modelPath) }}';
     const container = document.getElementById('Three-model');
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -442,6 +444,12 @@
     let originalColors = {};
 
     const loadingIndicator = document.getElementById('loader');
+    container.addEventListener('mousemove', onMouseMove, false);
+    function onMouseMove(event) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+    }
 
     function loadModel(path, targetSize, callback) {
         loadingIndicator.style.display = 'block';
@@ -479,7 +487,7 @@
             model.position.x -= center.x;
             model.position.y -= center.y;
             model.position.z -= center.z;
-
+           
             callback(model);
             loadingIndicator.style.display = 'none';
         }, undefined, function (error) {
@@ -672,10 +680,21 @@
     });
 
     function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+        container.style.cursor = 'pointer';
+    } else {
+        container.style.cursor = 'default';
     }
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
 
     animate();
 
