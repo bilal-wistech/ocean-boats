@@ -4,7 +4,10 @@
 
     Theme::asset()->usePath()->add('jquery-ui-css', 'css/plugins/jquery-ui.css');
     Theme::asset()->container('footer')->usePath()->add('jquery-ui-js', 'js/plugins/jquery-ui.js');
-    Theme::asset()->container('footer')->usePath()->add('jquery-ui-touch-punch-js', 'js/plugins/jquery.ui.touch-punch.min.js');
+    Theme::asset()
+        ->container('footer')
+        ->usePath()
+        ->add('jquery-ui-touch-punch-js', 'js/plugins/jquery.ui.touch-punch.min.js');
 
     $categories = $product->childitems_display();
 @endphp
@@ -25,6 +28,25 @@
             @php
                 $modelPath = $product->file;
             @endphp
+            @php
+                $boat_total = 0; // Start with the original product price
+                $discountAmount = 0;
+
+                if ($product->discounts->isNotEmpty()) {
+                    foreach ($product->discounts as $discount) {
+                        if ($discount->code === 'BOAT' || empty($discount->code)) {
+                            $boat_total = $product->price;
+                            if ($discount->discount_type === 'amount') {
+                                $discountAmount += $discount->discount; // Accumulate amount discounts
+                            } elseif ($discount->discount_type === 'percentage') {
+                                $discountAmount += ($boat_total * $discount->discount) / 100; // Accumulate percentage discounts
+                            }
+                        }
+                    }
+                }
+                $boat_total -= $discountAmount; // Apply the accumulated discount to the total price
+            @endphp
+
             <div class="row">
                 <div id="loader">
                     <div class="spinner"></div>
@@ -32,8 +54,16 @@
                 </div>
                 <div id="Three-model" style="width: 100%; height: 500px; overflow:hidden"></div>
             </div>
+            @php
+                $boat_price = 0;
+                if ($boat_total) {
+                    $boat_price = $boat_total;
+                } else {
+                    $boat_price = $product->price;
+                }
+            @endphp
 
-            <input type="hidden" name="boat_price" value="{{ $product->price }}">
+            <input type="hidden" name="boat_price" value="{{ $boat_price }}">
 
         </div>
 
@@ -41,11 +71,11 @@
             <form id="submit-form" action="{{ route('public.customize-boat.submit') }}" method="post">
                 @csrf
                 <input type="hidden" name="boat_id" value="{{ $product->id }}">
-                <input type="hidden" name="total_price" value="{{ $product->price ?? 0 }}">
+                <input type="hidden" name="total_price" value="{{ $product->price }}">
                 @forelse($categories as $key=>$value)
-                        <?php
-                        $i = $key + 1;
-                        ?>
+                    <?php
+                    $i = $key + 1;
+                    ?>
                     <div class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
                         <div class="customboat-card-header">
                             <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
@@ -58,28 +88,28 @@
                                     </div>
                                 @else
                                     <div class="btn options-boat dropdown-toggle mt-5 mb-15" data-bs-toggle="collapse"
-                                         href="#collapse{{ $key1 }}"
-                                         aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
+                                        href="#collapse{{ $key1 }}"
+                                        aria-expanded="{{ $key1 == 0 ? 'true' : 'false' }}">
                                         <div class="title">{{ $value1->ltitle }}</div>
                                     </div>
                                 @endif
                                 <div class="collapse {{ $key1 == 0 || $value->ltitle == 'Colors' ? 'show' : '' }}"
-                                     id="collapse{{ $key1 }}">
+                                    id="collapse{{ $key1 }}">
                                     @forelse($value1->childitems() as $option)
                                         @if ($option->side_layout == 'radio')
                                             @if ($value->multi_select != 3)
                                                 <input class="form-check-input visually-hidden cat-item-check"
-                                                       type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                       id="{{ $option->id }}" value="{{ $option->id }}"
-                                                       data-typename="{{ $value1->ltitle }}"
-                                                       data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                       name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                       data-parent="{{ $option->parent_id }}" data-waschecked="false">
+                                                    type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                    id="{{ $option->id }}" value="{{ $option->id }}"
+                                                    data-typename="{{ $value1->ltitle }}"
+                                                    data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                    name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                    data-parent="{{ $option->parent_id }}" data-waschecked="false">
                                             @endif
                                             <label class="form-check-label color-box" for="{{ $option->id }}"
-                                                   style="background-color: {{ $option->color ?: '#ffffff' }};">
+                                                style="background-color: {{ $option->color ?: '#ffffff' }};">
                                                 <div class="tick-icon"><img
-                                                            src="{{ asset('/storage/check_circle.png') }}">
+                                                        src="{{ asset('/storage/check_circle.png') }}">
                                                 </div>
                                                 <div class="color-name">{{ $option->ltitle }}</div>
                                             </label>
@@ -87,26 +117,24 @@
                                             <div class="form-check">
                                                 @if ($value->multi_select != 3)
                                                     <input class="form-check-input cat-item-check checkradio"
-                                                           name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
-                                                           type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
-                                                           value="{{ $option->id }}"
-                                                           data-typename="{{ $value1->ltitle }}"
-                                                           data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
-                                                           data-parent="{{ $option->parent_id }}"
-                                                           data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
-                                                           data-model="{{ asset('storage/' . $option->file) }}"
-                                                           id="collapse-{{ $option->id }}"
-                                                           {{ $option->is_standard_option == 1 ? 'checked' : '' }}
-                                                           data-price="{{ $option->price ?? 0 }}">
+                                                        name="{{ $value->multi_select == 2 ? 'option[' . $value->type . ']' : 'option[' . $value1->type . ']' }}"
+                                                        type="{{ $value->multi_select == 1 ? 'checkbox' : 'radio' }}"
+                                                        value="{{ $option->id }}"
+                                                        data-typename="{{ $value1->ltitle }}"
+                                                        data-type="{{ $value->multi_select == 2 ? $value->type : $value1->type }}"
+                                                        data-parent="{{ $option->parent_id }}"
+                                                        data-waschecked="{{ $option->is_standard_option == 1 ? 'true' : 'false' }}"
+                                                        data-model="{{ asset('storage/' . $option->file) }}"
+                                                        id="collapse-{{ $option->id }}"
+                                                        {{ $option->is_standard_option == 1 ? 'checked' : '' }}
+                                                        data-price="{{ $option->price ?? 0 }}">
                                                 @endif
-
-
                                                 <label class="form-check-label" for="collapse-{{ $option->id }}">
                                                     <div data-bs-toggle="{{ $option->main_image ? 'collapse' : '' }}"
-                                                         data-bs-target="#color-details-{{ $option->id }}"
-                                                         aria-expanded="false"
-                                                         aria-controls="color-details-{{ $option->id }}"
-                                                         class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
+                                                        data-bs-target="#color-details-{{ $option->id }}"
+                                                        aria-expanded="false"
+                                                        aria-controls="color-details-{{ $option->id }}"
+                                                        class="tog {{ $option->main_image ? 'dropdown-toggle' : '' }}">
                                                         {{ $option->ltitle }} ({{ format_price($option->price) }})
                                                     </div>
                                                 </label>
@@ -114,49 +142,38 @@
                                                 <div class="collapse" id="color-details-{{ $option->id }}">
                                                     <div class="content-boat">
                                                         <img class="img-fluid img-thumbnail landscape"
-                                                             src="{{ RvMedia::getImageUrl($option->main_image) }}">
+                                                            src="{{ RvMedia::getImageUrl($option->main_image) }}">
                                                     </div>
                                                 </div>
                                             </div>
-                                            {{-- color options --}}
-                                            {{--                                    @elseif($option->side_layout == 'color') --}}
-                                            {{--                                        <label for="{{ $option->id }}" --}}
-                                            {{--                                            class="control-label color-picker {{ $option->type }}" --}}
-                                            {{--                                            data-color-option-id="{{ $option->id }}" --}}
-                                            {{--                                            data-color-option-type="{{ $option->type }}" data-color-picker="true" --}}
-                                            {{--                                            data-color-price="{{ $option->price }}">{{ $option->ltitle }}</label> --}}
-                                            {{--                                        <input type="hidden" name="option[{{ $option->type }}]" value="" --}}
-                                            {{--                                            class="form-control color-picker" --}}
-                                            {{--                                            data-color-option-id="{{ $option->id }}" --}}
-                                            {{--                                            data-color-option-type="{{ $option->type }}" --}}
-                                            {{--                                            data-color-price="{{ $option->price }}"> --}}
                                         @endif
                                     @empty
                                     @endforelse
                                 </div>
                             @empty
                             @endforelse
-
                             <div class=" row">
                                 <div class="col-8">
                                     <p class="text-center" style="font-size:16px"><b>Sub Total</b>: <span
-                                                class="sub-total">{{ format_price($product->price) }}</span></p>
+                                            class="sub-total">{{ format_price($product->price) }}</span></p>
                                     <p class="text-center" style="font-size:16px"><b>VAT 5%</b>: <span
-                                                class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                            class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                                     </p>
                                     <p class="text-center mb-10" style="font-size:16px"><b>Total</b>: <span
-                                                class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                            class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                     </p>
                                 </div>
                                 <div class="col-4">
                                     @php
                                         $currencies = get_all_currencies() ?? [];
-                                        $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
+                                        $selectedCurrency =
+                                            $currencies->firstWhere('id', get_application_currency_id())->title ??
+                                            'Select Currency';
                                     @endphp
 
                                     <div class="currency-dropdown dropdown">
                                         <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            data-bs-toggle="dropdown" aria-expanded="false">
                                             {{ $selectedCurrency }}
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
@@ -164,7 +181,7 @@
                                                 @if ($currency->id !== get_application_currency_id())
                                                     <li>
                                                         <a class="dropdown-item"
-                                                           href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                                            href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
                                                     </li>
                                                 @endif
                                             @endforeach
@@ -173,28 +190,27 @@
 
                                 </div>
                             </div>
-
                         </div>
                         <div class="customboat-card-footer d-flex justify-content-between flex-row">
                             @if (isset($categories[$key + 1]))
                                 @if ($key > 0)
                                     <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                            data-value="{{ $categories[$key - 1]->type }}" type="button">Back
+                                        data-value="{{ $categories[$key - 1]->type }}" type="button">Back
                                     </button>
                                 @endif
                                 <button class="btn card-btn" type="button"
-                                        data-curval="{{ $categories[$key]->type }}"
-                                        data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
+                                    data-curval="{{ $categories[$key]->type }}"
+                                    data-value="{{ isset($categories[$key + 1]) ? $categories[$key + 1]->type : '' }}">
                                     Next
                                     Step
                                 </button>
                             @else
                                 <button class="btn card-btn prv" data-curval="{{ $categories[$key]->type }}"
-                                        data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
-                                        type="button">Back
+                                    data-value="{{ isset($categories[$key - 1]) ? $categories[$key - 1]->type : '' }}"
+                                    type="button">Back
                                 </button>
                                 <button class="btn card-btn" data-curval="{{ $categories[$key]->type }}"
-                                        data-value="summary" type="button">Next Step
+                                    data-value="summary" type="button">Next Step
                                 </button>
                             @endif
                         </div>
@@ -215,7 +231,7 @@
                     <input type="hidden" name="redirect_url_pay" value="0">
                     <div class="mt-10 customboat-card-footer d-flex flex-row flex-wrap">
                         <button type="button" class="btn card-btn prv" data-curval="summary"
-                                data-value="{{ lastitem($product->id)->type }}">Back
+                            data-value="{{ lastitem($product->id)->type }}">Back
                         </button>
                         <button type="submit" class="btn card-btn" style="border-radius: unset;">Save &
                             Exit
@@ -229,11 +245,9 @@
                 </div>
             </form>
         </div>
-
     </div>
-
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -263,110 +277,118 @@
                     </div>
                     <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
                     </div>
-                    {{-- <div class="card-body list-style">
-                        <h4>Included:</h4>
-                        {!! $product->detail->is_standard_option !!}
-                    </div> --}}
-                     {{-- Discount --}}
-      <div class="card-body discount-area">
-        <div class="row mt-20">
-            <div class="col-12 mb-10">
-                <div class="card mx-auto">
-                    <div class="discount-card d-flex justify-content-center">
-                        <div class="row">
-                            <div class="col-5 align-items-center d-flex">
-                                <div class="access-name">
-                                    <h5>Sports Seats</h5>
-                                </div>
-                            </div>
-                            <div class="col-7">
-                                <div class="promo">
-                                    <div class="discount d-flex">
-                                        <h4>20%</h4>
-                                        <p>OFF</p>
-                                    </div>
-                                    <div class="d-flex mt-10 mb-10">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control promoCode" placeholder="Promo Code">
-                                            <button class="btn btn-primary applyPromo" type="button">Apply</button>
-                                            <div class="spinner-border text-primary ms-2 d-none" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
+                    {{-- Discount --}}
+                    <div class="card-body discount-area">
+                        <div class="row mt-20">
+                            <div class="col-12 mb-10">
+                                <div class="card mx-auto">
+                                    <div class="discount-card d-flex justify-content-center">
+                                        <div class="row">
+                                            @if ($product->discounts->isNotEmpty())
+                                                @foreach ($product->discounts as $discount)
+                                                    @if ($discount->code !== 'BOAT' && !empty($discount->code))
+                                                        <div class="col-3 align-items-center d-flex">
+                                                            <div class="access-name">
+                                                                <h5>{{ $discount->list->ltitle }}</h5>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-9">
+                                                            <div class="promo">
+                                                                <div class="discount d-flex">
+                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                    </h4>
+                                                                    <p>OFF</p>
+                                                                </div>
+                                                                <div class="d-flex mt-10 mb-10">
+                                                                    <div class="input-group">
+                                                                        <input type="text"
+                                                                            class="form-control promoCode"
+                                                                            name="code" placeholder="Promo Code">
+                                                                        <button class="btn btn-primary applyPromo"
+                                                                            type="button">Apply</button>
+                                                                        <div class="spinner-border text-primary ms-2 d-none"
+                                                                            role="status">
+                                                                            <span
+                                                                                class="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {{-- 
+                                                        Todo : Fix this part to show discount and original price
+                                                         --}}
+                                                        {{-- <div class="price d-flex">
+                                                            <h5>Price: &nbsp;</h5>
+                                                            <p class="original-price">
+                                                                {{ format_price($product->price) }}</p>
+                                                            <p class="discounted-price ms-2"></p>
+                                                        </div> --}}
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                            @foreach ($accessories as $accessory)
+                                                @if ($accessory->discounts->isNotEmpty())
+                                                    @foreach ($accessory->discounts as $discount)
+                                                        <div class="col-3 align-items-center d-flex">
+                                                            <div class="access-name">
+                                                                <h5>{{ $discount->list->ltitle }}</h5>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-9">
+                                                            <div class="promo">
+                                                                <div class="discount d-flex">
+                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                    </h4>
+                                                                    <p>OFF</p>
+                                                                </div>
+                                                                <div class="d-flex mt-10 mb-10">
+                                                                    <div class="input-group">
+                                                                        <input type="text"
+                                                                            class="form-control promoCode"
+                                                                            name="code" placeholder="Promo Code"
+                                                                            id="accessory-{{ $accessory->id }}"
+                                                                            data-accessory-id="{{ $accessory->id }}">
+                                                                        <button class="btn btn-primary applyPromo"
+                                                                            type="button">Apply</button>
+                                                                        <div class="spinner-border text-primary ms-2 d-none"
+                                                                            role="status">
+                                                                            <span
+                                                                                class="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {{-- 
+                                                        Todo : Fix this part to show discount and original price
+                                                         --}}
+                                                        {{-- <div class="price d-flex">
+                                                            <h5>Price: &nbsp;</h5>
+                                                            <p class="original-price">
+                                                                {{ format_price($accessory->price) }}</p>
+                                                            <p class="discounted-price ms-2"></p>
+                                                        </div> --}}
+                                                    @endforeach
+                                                @endif
+                                            @endforeach
                                         </div>
-                                    </div>
-                                    <div class="price d-flex">
-                                        <h5>Price: &nbsp;</h5>
-                                        <p class="original-price">2100AED</p>
-                                        <p class="discounted-price ms-2"></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-12 mb-10">
-                <div class="card mx-auto">
-                    <div class="discount-card d-flex justify-content-center">
-                        <div class="row">
-                            <div class="col-5 align-items-center d-flex">
-                                <div class="access-name">
-                                    <h5>Hard Top</h5>
-                                </div>
-                            </div>
-                            <div class="col-7">
-                                <div class="promo">
-                                    <div class="discount d-flex">
-                                        <h4>20%</h4>
-                                        <p>OFF</p>
-                                    </div>
-                                    <div class="d-flex mt-10 mb-10">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control promoCode" placeholder="Promo Code">
-                                            <button class="btn btn-primary applyPromo" type="button">Apply</button>
-                                            <div class="spinner-border text-primary ms-2 d-none" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="price d-flex">
-                                        <h5>Price: &nbsp;</h5>
-                                        <p class="original-price">700AED</p>
-                                        <p class="discounted-price ms-2"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-      {{-- end --}}
+                    {{-- end --}}
                     <div class="row mt-2 mb-20">
                         <div class="col-9 text-end">
                             <p><b>Sub Total</b>: <span class="sub-total">{{ format_price($product->price) }}</span>
                             </p>
                             <p><b>VAT 5%</b>: <span
-                                        class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
+                                    class="vat-price">{{ format_price(($product->price * 5) / 100) }}</span>
                             </p>
                             <p><b>Total</b>: <span
-                                        class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
+                                    class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                             </p>
-                        </div>
-                        <div class="col-3">
-                            <div class="currency-dropdown dropdown">
-                                <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                    AED
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                    <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
-                                    <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
-                                    <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -380,7 +402,7 @@
 <!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    jQuery(function ($) {
+    jQuery(function($) {
         var offset = $('#custom-boat-container').offset().top - 1;
         $('html, body').animate({
             scrollTop: offset
@@ -400,48 +422,49 @@
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 6);
-    camera.lookAt(scene.position);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
+            1000);
+        camera.position.set(0, 0, 6);
+        camera.lookAt(scene.position);
 
-    const renderer = new THREE.WebGLRenderer({
-        antialias: true
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6;
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x182955);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.physicallyCorrectLights = true;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.6;
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0x182955);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5).normalize();
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5).normalize();
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight2.position.set(-5, -5, -5).normalize();
-    scene.add(directionalLight2);
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight2.position.set(-5, -5, -5).normalize();
+        scene.add(directionalLight2);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
-    scene.add(hemiLight);
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+        scene.add(hemiLight);
 
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
 
-    const loader = new THREE.GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+        const loader = new THREE.GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
 
-    let baseModel, additionalModels = [];
-    let originalMaterials = {};
-    let originalColors = {};
+        let baseModel, additionalModels = [];
+        let originalMaterials = {};
+        let originalColors = {};
 
     const loadingIndicator = document.getElementById('loader');
     container.addEventListener('mousemove', onMouseMove, false);
@@ -451,11 +474,11 @@
     mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
     }
 
-    function loadModel(path, targetSize, callback) {
-        loadingIndicator.style.display = 'block';
-        loader.load(path, function (gltf) {
-            const model = gltf.scene;
-            model.userData.path = path;
+        function loadModel(path, targetSize, callback) {
+            loadingIndicator.style.display = 'block';
+            loader.load(path, function(gltf) {
+                const model = gltf.scene;
+                model.userData.path = path;
 
             model.traverse(child => {
                 if (child.isMesh) {
@@ -474,15 +497,15 @@
                 }
             });
 
-            const bbox = new THREE.Box3().setFromObject(model);
-            const size = new THREE.Vector3();
-            bbox.getSize(size);
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = targetSize / maxDimension;
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            bbox.setFromObject(model);
-            const center = new THREE.Vector3();
-            bbox.getCenter(center);
+                const bbox = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                const scaleFactor = targetSize / maxDimension;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                bbox.setFromObject(model);
+                const center = new THREE.Vector3();
+                bbox.getCenter(center);
 
             model.position.x -= center.x;
             model.position.y -= center.y;
@@ -496,118 +519,153 @@
         });
     }
 
-    function calculateTargetSize() {
-        return window.innerWidth < 768 ? 6 : 12;
-    }
-
-    loadingIndicator.style.display = 'block';
-    loadModel(modelPath, calculateTargetSize(), function (model) {
-        baseModel = model;
-        scene.add(baseModel);
-        loadingIndicator.style.display = 'none';
-
-        function handleCheckboxClick(input) {
-            const modelPath = input.dataset.model;
-            const isChecked = input.checked;
-            toggleAdditionalModel(modelPath, isChecked);
+        function calculateTargetSize() {
+            return window.innerWidth < 768 ? 6 : 12;
         }
 
-        let previousSelectedRadio = {};
+        loadingIndicator.style.display = 'block';
+        loadModel(modelPath, calculateTargetSize(), function(model) {
+            baseModel = model;
+            scene.add(baseModel);
+            loadingIndicator.style.display = 'none';
 
-        function handleRadioClick(input) {
-            const modelPath = input.dataset.model;
-            const radioGroupName = input.name;
-            let isDeselecting = input === previousSelectedRadio[radioGroupName];
-
-            if (input.classList.contains('checkradio')) {
-                document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
-                    const otherModelPath = radio.dataset.model;
-                    const modelIndex = additionalModels.findIndex(m => m.userData.path === otherModelPath);
-                    if (modelIndex !== -1) {
-                        scene.remove(additionalModels[modelIndex]);
-                        additionalModels.splice(modelIndex, 1);
-                    }
-
-                    const modelPart = radio.dataset.typename.split(' ')[0].toLowerCase();
-                    resetColor(modelPart);
-                });
-
-                if (isDeselecting) {
-                    previousSelectedRadio[radioGroupName] = null;
-                } else if (input.checked) {
-                    toggleAdditionalModel(modelPath, true);
-                    previousSelectedRadio[radioGroupName] = input;
-                }
+            function handleCheckboxClick(input) {
+                const modelPath = input.dataset.model;
+                const isChecked = input.checked;
+                toggleAdditionalModel(modelPath, isChecked);
             }
-        }
 
-        document.querySelectorAll('.cat-item-check').forEach(input => {
-            if (input.type === 'checkbox') {
-                handleCheckboxClick(input);
-            } else if (input.type === 'radio') {
-                handleRadioClick(input);
-            }
-            input.addEventListener('click', function () {
-                if (this.type === 'checkbox') {
-                    handleCheckboxClick(this);
-                } else if (this.type === 'radio') {
-                    handleRadioClick(this);
-                }
-            });
-        });
+            let previousSelectedRadio = {};
 
-        document.querySelectorAll('.color-box').forEach(label => {
-            label.addEventListener('click', function () {
-                const input = document.getElementById(this.htmlFor);
-                const modelPart = input.dataset.typename.split(' ')[0].toLowerCase();
+            function handleRadioClick(input) {
+                const modelPath = input.dataset.model;
+                const radioGroupName = input.name;
+                let isDeselecting = input === previousSelectedRadio[radioGroupName];
 
-                if (input.checked) {
-                    input.checked = false;
-                    resetColor(modelPart);
-                } else {
-                    input.checked = true;
-                    applyColorChange(this.style.backgroundColor, input);
-                }
-            });
-        });
-    });
-
-    function toggleAdditionalModel(path, add) {
-        if (add) {
-            loadingIndicator.style.display = 'block';
-            loadModel(path, 4, function (model) {
-                additionalModels.push(model);
-                if (baseModel) {
-                    model.position.copy(baseModel.position);
-                    model.scale.copy(baseModel.scale);
-                }
-                scene.add(model);
-                loadingIndicator.style.display = 'none';
-            });
-        } else {
-            const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
-            if (modelIndex !== -1) {
-                scene.remove(additionalModels[modelIndex]);
-                additionalModels.splice(modelIndex, 1);
-            }
-        }
-    }
-
-    function applyColorChange(color, input) {
-        const colorOptionId = input.value;
-        const colorTitle = input.dataset.typename;
-
-        if (colorOptionId && colorTitle) {
-            const colorSelected = new THREE.Color(color);
-            const titleToMatch = colorTitle.split(' ')[0].toLowerCase();
-
-            function applyColorToModel(model) {
-                model.traverse(child => {
-                    if (child.isMesh && child.material) {
-                        if (!originalColors[child.name]) {
-                            originalColors[child.name] = child.material.color.clone();
+                if (input.classList.contains('checkradio')) {
+                    document.querySelectorAll(`input[name="${radioGroupName}"]`).forEach(radio => {
+                        const otherModelPath = radio.dataset.model;
+                        const modelIndex = additionalModels.findIndex(m => m.userData.path ===
+                            otherModelPath);
+                        if (modelIndex !== -1) {
+                            scene.remove(additionalModels[modelIndex]);
+                            additionalModels.splice(modelIndex, 1);
                         }
-                        child.material.color.set(colorSelected);
+
+                        const modelPart = radio.dataset.typename.split(' ')[0].toLowerCase();
+                        resetColor(modelPart);
+                    });
+
+                    if (isDeselecting) {
+                        previousSelectedRadio[radioGroupName] = null;
+                    } else if (input.checked) {
+                        toggleAdditionalModel(modelPath, true);
+                        previousSelectedRadio[radioGroupName] = input;
+                    }
+                }
+            }
+
+            document.querySelectorAll('.cat-item-check').forEach(input => {
+                if (input.type === 'checkbox') {
+                    handleCheckboxClick(input);
+                } else if (input.type === 'radio') {
+                    handleRadioClick(input);
+                }
+                input.addEventListener('click', function() {
+                    if (this.type === 'checkbox') {
+                        handleCheckboxClick(this);
+                    } else if (this.type === 'radio') {
+                        handleRadioClick(this);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.color-box').forEach(label => {
+                label.addEventListener('click', function() {
+                    const input = document.getElementById(this.htmlFor);
+                    const modelPart = input.dataset.typename.split(' ')[0]
+                        .toLowerCase();
+
+                    if (input.checked) {
+                        input.checked = false;
+                        resetColor(modelPart);
+                    } else {
+                        input.checked = true;
+                        applyColorChange(this.style.backgroundColor, input);
+                    }
+                });
+            });
+        });
+
+        function toggleAdditionalModel(path, add) {
+            if (add) {
+                loadingIndicator.style.display = 'block';
+                loadModel(path, 4, function(model) {
+                    additionalModels.push(model);
+                    if (baseModel) {
+                        model.position.copy(baseModel.position);
+                        model.scale.copy(baseModel.scale);
+                    }
+                    scene.add(model);
+                    loadingIndicator.style.display = 'none';
+                });
+            } else {
+                const modelIndex = additionalModels.findIndex(m => m.userData.path === path);
+                if (modelIndex !== -1) {
+                    scene.remove(additionalModels[modelIndex]);
+                    additionalModels.splice(modelIndex, 1);
+                }
+            }
+        }
+
+        function applyColorChange(color, input) {
+            const colorOptionId = input.value;
+            const colorTitle = input.dataset.typename;
+
+            if (colorOptionId && colorTitle) {
+                const colorSelected = new THREE.Color(color);
+                const titleToMatch = colorTitle.split(' ')[0].toLowerCase();
+
+                function applyColorToModel(model) {
+                    model.traverse(child => {
+                        if (child.isMesh && child.material) {
+                            if (!originalColors[child.name]) {
+                                originalColors[child.name] = child.material.color.clone();
+                            }
+                            child.material.color.set(colorSelected);
+                        }
+                    });
+                }
+
+                if (typeof additionalModels !== 'undefined') {
+                    additionalModels.forEach(model => {
+                        const modelLabel = model.userData.path.toLowerCase();
+                        if (modelLabel.includes(titleToMatch)) {
+                            applyColorToModel(model);
+                        }
+                    });
+                }
+
+                if (typeof baseModel !== 'undefined') {
+                    baseModel.traverse(child => {
+                        if (child.name) {
+                            const childName = child.name.trim().toLowerCase();
+                            if (childName.includes(titleToMatch)) {
+                                applyColorToModel(child);
+                            }
+                        }
+                    });
+                }
+            } else {
+                console.error('Color option ID or title not found.');
+            }
+        }
+
+        function resetColor(modelPart) {
+            function resetModelColor(model) {
+                model.traverse(child => {
+                    if (child.isMesh && child.material && originalColors[child.name]) {
+                        child.material.color.copy(originalColors[child.name]);
                     }
                 });
             }
@@ -615,8 +673,8 @@
             if (typeof additionalModels !== 'undefined') {
                 additionalModels.forEach(model => {
                     const modelLabel = model.userData.path.toLowerCase();
-                    if (modelLabel.includes(titleToMatch)) {
-                        applyColorToModel(model);
+                    if (modelLabel.includes(modelPart)) {
+                        resetModelColor(model);
                     }
                 });
             }
@@ -625,59 +683,26 @@
                 baseModel.traverse(child => {
                     if (child.name) {
                         const childName = child.name.trim().toLowerCase();
-                        if (childName.includes(titleToMatch)) {
-                            applyColorToModel(child);
+                        if (childName.includes(modelPart)) {
+                            resetModelColor(child);
                         }
                     }
                 });
             }
-        } else {
-            console.error('Color option ID or title not found.');
-        }
-    }
-
-    function resetColor(modelPart) {
-        function resetModelColor(model) {
-            model.traverse(child => {
-                if (child.isMesh && child.material && originalColors[child.name]) {
-                    child.material.color.copy(originalColors[child.name]);
-                }
-            });
         }
 
-        if (typeof additionalModels !== 'undefined') {
-            additionalModels.forEach(model => {
-                const modelLabel = model.userData.path.toLowerCase();
-                if (modelLabel.includes(modelPart)) {
-                    resetModelColor(model);
-                }
-            });
-        }
-
-        if (typeof baseModel !== 'undefined') {
-            baseModel.traverse(child => {
-                if (child.name) {
-                    const childName = child.name.trim().toLowerCase();
-                    if (childName.includes(modelPart)) {
-                        resetModelColor(child);
-                    }
-                }
-            });
-        }
-    }
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 3;
-    controls.maxDistance = 10;
-    controls.enabled = false;
-    container.addEventListener('pointerenter', () => {
-        controls.enabled = true;
-    });
-    container.addEventListener('pointerleave', () => {
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 3;
+        controls.maxDistance = 10;
         controls.enabled = false;
-    });
+        container.addEventListener('pointerenter', () => {
+            controls.enabled = true;
+        });
+        container.addEventListener('pointerleave', () => {
+            controls.enabled = false;
+        });
 
     function animate() {
     requestAnimationFrame(animate);
@@ -696,17 +721,78 @@
 }
 
 
-    animate();
+        animate();
 
-    function updateTotalPrice() {
-        const currency = "<?php echo get_application_currency()['symbol']; ?>";
-        const vatPrice = (totalPrice * 5) / 100;
-        const vatTotal = totalPrice + vatPrice;
+        function updateTotalPrice() {
+            const currency = "<?php echo get_application_currency()['symbol']; ?>";
+            const vatPrice = (totalPrice * 5) / 100;
+            const vatTotal = totalPrice + vatPrice;
 
-        $('.sub-total').text(totalPrice.toLocaleString('en-US') + currency);
-        $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
-        $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
-        $('input[name="total_price"]').val(totalPrice);
-    }
-});
+            $('.sub-total').text(totalPrice.toLocaleString('en-US') + currency);
+            $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
+            $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
+            $('input[name="total_price"]').val(totalPrice);
+        }
+
+        $('.applyPromo').on('click', function() {
+            const currency = "<?php echo get_application_currency()['symbol']; ?>";
+            let code = $(this).closest('.promo').find('.promoCode').val();
+            let accessoryId = $(this).closest('.promo').find('.promoCode').data('accessory-id');
+            let spinner = $(this).closest('.input-group').find('.spinner-border');
+            let subTotal = parseFloat($('.sub-total').text().replace(currency, '').replace(',', ''));
+            let vatPrice = parseFloat($('.vat-price').text().replace(currency, '').replace(',', ''));
+            let vatTotal = parseFloat($('.vat-total').text().replace(currency, '').replace(',', ''));
+            let totalPrice = parseFloat($('input[name="total_price"]').val());
+            spinner.removeClass('d-none');
+
+            $.ajax({
+                url: '{{ route('public.apply-discount') }}',
+                method: 'POST',
+                data: {
+                    code: code,
+                    accessory_id: accessoryId,
+                    total_price: totalPrice,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.error) {
+                        console.log(response.message);
+                        window.showAlert('alert-danger', response.message);
+                    } else {
+                        
+                        // Update the total price display
+                        $('.sub-total').text(response.data.new_total.toLocaleString(
+                            'en-US') + currency);
+
+                        // Calculate and update VAT
+                        var vatPrice = (response.data.new_total * 5) / 100;
+                        $('.vat-price').text(vatPrice.toLocaleString('en-US') + currency);
+
+                        // Calculate and update total with VAT
+                        var vatTotal = response.data.new_total + vatPrice;
+                        $('.vat-total').text(vatTotal.toLocaleString('en-US') + currency);
+
+                        // Update hidden input
+                        $('input[name="total_price"]').val(response.data.new_total);
+
+                        // Disable only the current promo code input and button
+                        $(this).closest('.promo').find('.promoCode').prop('disabled', true);
+                        $(this).prop('disabled', true);
+
+                        console.log(response.message);
+                        window.showAlert('alert-success', response.message);
+                    }
+                }.bind(
+                this), // Ensure 'this' refers to the correct context inside success callback
+                error: function() {
+                    console.log('An error occurred. Please try again.');
+                    window.showAlert('alert-danger', 'An error occurred. Please try again.');
+                },
+                complete: function() {
+                    spinner.addClass('d-none');
+                }
+            });
+        });
+
+    });
 </script>

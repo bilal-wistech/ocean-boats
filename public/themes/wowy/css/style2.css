@@ -1926,7 +1926,10 @@ label.form-check-label.color-box:not(:first-child) {
     background-color: var(--color-brand);
 }
 .original-price {
-    text-decoration: line-through;
+    text-decoration: none;
     margin-right: 10px;
     color:grey;
+}
+.strikethrough {
+    text-decoration: line-through;
 }
