@@ -315,12 +315,15 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="price d-flex">
+                                                        {{-- 
+                                                        Todo : Fix this part to show discount and original price
+                                                         --}}
+                                                        {{-- <div class="price d-flex">
                                                             <h5>Price: &nbsp;</h5>
                                                             <p class="original-price">
                                                                 {{ format_price($product->price) }}</p>
                                                             <p class="discounted-price ms-2"></p>
-                                                        </div>
+                                                        </div> --}}
                                                     @endif
                                                 @endforeach
                                             @endif
@@ -355,12 +358,15 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="price d-flex">
+                                                        {{-- 
+                                                        Todo : Fix this part to show discount and original price
+                                                         --}}
+                                                        {{-- <div class="price d-flex">
                                                             <h5>Price: &nbsp;</h5>
                                                             <p class="original-price">
                                                                 {{ format_price($accessory->price) }}</p>
                                                             <p class="discounted-price ms-2"></p>
-                                                        </div>
+                                                        </div> --}}
                                                     @endforeach
                                                 @endif
                                             @endforeach
@@ -744,22 +750,15 @@
                         // Update hidden input
                         $('input[name="total_price"]').val(response.data.new_total);
 
-                        // // Display the applied discount
-                        // $('.discounted-price').text('Discount: ' + response.data
-                        //     .discount_amount.toLocaleString('en-US') + currency);
-
                         // Disable only the current promo code input and button
                         $(this).closest('.promo').find('.promoCode').prop('disabled', true);
                         $(this).prop('disabled', true);
 
-                        // Apply strikethrough to the original price within the same section as the promo
-                        $(this).closest('.promo').find('.original-price').addClass(
-                            'strikethrough');
-
                         console.log(response.message);
                     }
                 }.bind(
-                this), // Ensure 'this' refers to the correct context inside success callback
+                    this
+                    ), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
                 },
