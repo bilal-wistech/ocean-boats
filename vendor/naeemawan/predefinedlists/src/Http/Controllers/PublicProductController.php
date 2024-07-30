@@ -211,18 +211,20 @@ class PublicProductController
             return $response->setError()->setMessage('Invalid or expired discount code.');
         }
 
+        // Get the product price from the discount object
+        $pdl_list_price = $discount->list->price;
         // Use the total price from the session
         $totalPrice = session('total_price');
 
-        // Calculate the discount
+        // Calculate the discount amount based on product price
         $discountAmount = 0;
         if ($discount->discount_type === 'amount') {
             $discountAmount = $discount->discount;
         } elseif ($discount->discount_type === 'percentage') {
-            $discountAmount = ($totalPrice * $discount->discount) / 100;
+            $discountAmount = ($pdl_list_price * $discount->discount) / 100;
         }
 
-        // Apply the discount
+        // Apply the discount to the total price
         $newTotalPrice = $totalPrice - $discountAmount;
 
         // Update the session with the new total price
