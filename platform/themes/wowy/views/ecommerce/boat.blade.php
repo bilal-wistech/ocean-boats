@@ -416,9 +416,11 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modelPath = '{{ asset('storage/' . $modelPath) }}';
-        const container = document.getElementById('Three-model');
+  document.addEventListener('DOMContentLoaded', function () {
+    const modelPath = '{{ asset('storage/' . $modelPath) }}';
+    const container = document.getElementById('Three-model');
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
@@ -464,7 +466,13 @@
         let originalMaterials = {};
         let originalColors = {};
 
-        const loadingIndicator = document.getElementById('loader');
+    const loadingIndicator = document.getElementById('loader');
+    container.addEventListener('mousemove', onMouseMove, false);
+    function onMouseMove(event) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+    }
 
         function loadModel(path, targetSize, callback) {
             loadingIndicator.style.display = 'block';
@@ -472,22 +480,22 @@
                 const model = gltf.scene;
                 model.userData.path = path;
 
-                model.traverse(child => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-
-                        originalMaterials[child.name] = child.material.clone();
-                        originalColors[child.name] = child.material.color.clone();
-
-                        const newMaterial = new THREE.MeshStandardMaterial({
-                            color: child.material.color,
-                            metalness: 0.5,
-                            roughness: 0.5
-                        });
-                        child.material = newMaterial;
-                    }
-                });
+            model.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    originalMaterials[child.name] = child.material.clone();
+                    originalColors[child.name] = child.material.color.clone();
+                    
+                    const newMaterial = new THREE.MeshStandardMaterial({
+                        color: child.material.color,
+                        metalness: 0.5,
+                        roughness: 0.3
+                    });
+                    child.material = newMaterial;
+                }
+            });
 
                 const bbox = new THREE.Box3().setFromObject(model);
                 const size = new THREE.Vector3();
@@ -499,17 +507,17 @@
                 const center = new THREE.Vector3();
                 bbox.getCenter(center);
 
-                model.position.x -= center.x;
-                model.position.y -= center.y;
-                model.position.z -= center.z;
-
-                callback(model);
-                loadingIndicator.style.display = 'none';
-            }, undefined, function(error) {
-                console.error('Error loading model:', path, error);
-                loadingIndicator.style.display = 'none';
-            });
-        }
+            model.position.x -= center.x;
+            model.position.y -= center.y;
+            model.position.z -= center.z;
+           
+            callback(model);
+            loadingIndicator.style.display = 'none';
+        }, undefined, function (error) {
+            console.error('Error loading model:', path, error);
+            loadingIndicator.style.display = 'none';
+        });
+    }
 
         function calculateTargetSize() {
             return window.innerWidth < 768 ? 6 : 12;
@@ -696,11 +704,22 @@
             controls.enabled = false;
         });
 
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
+    function animate() {
+    requestAnimationFrame(animate);
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+        container.style.cursor = 'pointer';
+    } else {
+        container.style.cursor = 'default';
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
 
         animate();
 

@@ -80,9 +80,6 @@
                             <h4 class="mt-3 mt-50">{{ __('Options Selected') }}</h4>
                             <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
                                 @foreach ($boat->details as $key => $value)
-                                    {{-- @php
-                                    dd($value);
-                                    @endphp --}}
                                     <div class="card m-1">
                                         <div class="card-body text-center">
                                             <p>
