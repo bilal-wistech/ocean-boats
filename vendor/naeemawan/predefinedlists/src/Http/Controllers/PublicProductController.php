@@ -192,6 +192,7 @@ class PublicProductController
     public function applyDiscount(Request $request, BaseHttpResponse $response)
     {
         $code = $request->input('code');
+        $accessoryId = $request->input('accessory_id');
 
         // Store the received values in the session
         session([
@@ -200,6 +201,7 @@ class PublicProductController
 
         // Find the discount in the database
         $discount = BoatDiscount::where('code', $code)
+            ->where('list_id', $accessoryId)
             ->where(function ($query) {
                 $query->where('valid_to', '>=', now())
                     ->orWhere('never_expires', 1);
@@ -213,6 +215,7 @@ class PublicProductController
 
         // Get the product price from the discount object
         $pdl_list_price = $discount->list->price;
+
         // Use the total price from the session
         $totalPrice = session('total_price');
 
@@ -242,4 +245,5 @@ class PublicProductController
                 'discount_amount' => $discountAmount,
             ]);
     }
+
 }

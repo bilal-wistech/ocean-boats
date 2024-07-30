@@ -346,7 +346,9 @@
                                                                     <div class="input-group">
                                                                         <input type="text"
                                                                             class="form-control promoCode"
-                                                                            name="code" placeholder="Promo Code">
+                                                                            name="code" placeholder="Promo Code"
+                                                                            id="accessory-{{ $accessory->id }}"
+                                                                            data-accessory-id="{{ $accessory->id }}">
                                                                         <button class="btn btn-primary applyPromo"
                                                                             type="button">Apply</button>
                                                                         <div class="spinner-border text-primary ms-2 d-none"
@@ -716,6 +718,7 @@
         $('.applyPromo').on('click', function() {
             const currency = "<?php echo get_application_currency()['symbol']; ?>";
             let code = $(this).closest('.promo').find('.promoCode').val();
+            let accessoryId = $(this).closest('.promo').find('.promoCode').data('accessory-id');
             let spinner = $(this).closest('.input-group').find('.spinner-border');
             let subTotal = parseFloat($('.sub-total').text().replace(currency, '').replace(',', ''));
             let vatPrice = parseFloat($('.vat-price').text().replace(currency, '').replace(',', ''));
@@ -728,13 +731,16 @@
                 method: 'POST',
                 data: {
                     code: code,
+                    accessory_id: accessoryId,
                     total_price: totalPrice,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
                     if (response.error) {
                         console.log(response.message);
+                        window.showAlert('alert-danger', response.message);
                     } else {
+                        
                         // Update the total price display
                         $('.sub-total').text(response.data.new_total.toLocaleString(
                             'en-US') + currency);
@@ -755,17 +761,19 @@
                         $(this).prop('disabled', true);
 
                         console.log(response.message);
+                        window.showAlert('alert-success', response.message);
                     }
                 }.bind(
-                    this
-                    ), // Ensure 'this' refers to the correct context inside success callback
+                this), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
+                    window.showAlert('alert-danger', 'An error occurred. Please try again.');
                 },
                 complete: function() {
                     spinner.addClass('d-none');
                 }
             });
         });
+
     });
 </script>
