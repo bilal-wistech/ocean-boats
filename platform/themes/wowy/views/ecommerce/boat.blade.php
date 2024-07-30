@@ -54,8 +54,16 @@
                 </div>
                 <div id="Three-model" style="width: 100%; height: 500px; overflow:hidden"></div>
             </div>
-
-            <input type="hidden" name="boat_price" value="{{ $boat_total ?? ($product->price ?? 0) }}">
+            @php
+                $boat_price = 0;
+                if ($boat_total) {
+                    $boat_price = $boat_total;
+                } else {
+                    $boat_price = $product->price;
+                }
+            @endphp
+            
+            <input type="hidden" name="boat_price" value="{{ $boat_price }}">
 
         </div>
 
@@ -63,7 +71,7 @@
             <form id="submit-form" action="{{ route('public.customize-boat.submit') }}" method="post">
                 @csrf
                 <input type="hidden" name="boat_id" value="{{ $product->id }}">
-                <input type="hidden" name="total_price" value="{{ $product->price ?? 0 }}">
+                <input type="hidden" name="total_price" value="{{ $product->price }}">
                 @forelse($categories as $key=>$value)
                     <?php
                     $i = $key + 1;
