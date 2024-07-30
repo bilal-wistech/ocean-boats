@@ -195,9 +195,8 @@ class PublicProductController
         $accessoryId = $request->input('accessory_id');
 
         // Store the received values in the session
-        session([
-            'total_price' => $request->input('total_price'),
-        ]);
+        $totalPrice = $request->input('total_price');
+        session(['total_price' => $totalPrice]);
 
         // Find the discount in the database
         $discount = BoatDiscount::where('code', $code)
@@ -216,9 +215,6 @@ class PublicProductController
         // Get the product price from the discount object
         $pdl_list_price = $discount->list->price;
 
-        // Use the total price from the session
-        $totalPrice = session('total_price');
-
         // Calculate the discount amount based on product price
         $discountAmount = 0;
         if ($discount->discount_type === 'amount') {
@@ -232,12 +228,14 @@ class PublicProductController
 
         // Update the session with the new total price
         session(['total_price' => $newTotalPrice]);
-        session([
-            'applied_discount' => [
-                'code' => $discount->code,
-                'amount' => $discountAmount,
-            ]
-        ]);
+
+        // Store or update the applied discount information in the session
+        $appliedDiscounts = session('applied_discounts', []);
+        $appliedDiscounts[$accessoryId] = [
+            'code' => $discount->code,
+            'amount' => $discountAmount,
+        ];
+        session(['applied_discounts' => $appliedDiscounts]);
 
         return $response->setMessage('Discount applied successfully.')
             ->setData([

@@ -110,6 +110,15 @@ class PublicController extends Controller
             $enquiry->status = 'unread';
             $enquiry->total_price = $boatData['total_price'];
             $enquiry->vat_total = $boatData['total_price'] + (($boatData['total_price'] * 5) / 100);
+
+            // Add total discount information to the enquiry
+            $appliedDiscounts = session('applied_discounts', []);
+            if (!empty($appliedDiscounts)) {
+                $totalDiscountAmount = array_sum(array_column($appliedDiscounts, 'amount'));
+                $enquiry->discount_amount = $totalDiscountAmount;
+                $enquiry->discount_details = json_encode($appliedDiscounts);
+            }
+
             $enquiry->save();
 
             foreach ($boatData['option'] as $key => $value) {
@@ -117,12 +126,22 @@ class PublicController extends Controller
                 $detail->enquiry_id = $enquiry->id;
                 $detail->subcat_slug = $key;
                 $detail->option_id = $value;
+
+                // Check if this option had a discount applied
+                if (isset($appliedDiscounts[$value])) {
+                    $detail->has_discount = true;
+                    $detail->discount_code = $appliedDiscounts[$value]['code'];
+                    $detail->discount_amount = $appliedDiscounts[$value]['amount'];
+                }
+
                 $detail->save();
             }
 
+            // Clear the session data
+            session()->forget('applied_discounts');
+            cache()->forget('boat_data');
 
             if ($boatData['redirect_url_pay']) {
-                cache()->forget('boat_data');
                 //return redirect to payment page directly
                 return redirect()->route('ngenius.transaction.id', ['id' => $enquiry->id]);
             }
@@ -464,7 +483,7 @@ class PublicController extends Controller
                 ->setSize((int) $avatarData->width, (int) $avatarData->height)
                 ->setCoordinates((int) $avatarData->x, (int) $avatarData->y)
                 ->setDestinationPath(File::dirname($file->url))
-                ->setFileName(File::name($file->url).'.'.File::extension($file->url))
+                ->setFileName(File::name($file->url) . '.' . File::extension($file->url))
                 ->save('crop');
 
             $account->avatar = $file->url;
@@ -686,7 +705,7 @@ class PublicController extends Controller
             abort(404);
         }
 
-        $zipName = 'digital-product-'.Str::slug($orderProduct->product_name).Str::random(5).'-'.Carbon::now()->format('Y-m-d-h-i-s').'.zip';
+        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip';
         $fileName = RvMedia::getRealPath($zipName);
         $zip = new Zipper();
         $zip->make($fileName);
@@ -806,10 +825,14 @@ class PublicController extends Controller
 
         foreach ($boat->details as $details) {
 
-            $opt = PredefinedList::where(['id' => $details->option_id])->select('predefined_list.id',
+            $opt = PredefinedList::where(['id' => $details->option_id])->select(
+                'predefined_list.id',
                 'predefined_list.ltitle',
-                'predefined_list.color', 'predefined_list.is_standard_option', 'predefined_list.file',
-                'predefined_list.type')->first()->toArray();
+                'predefined_list.color',
+                'predefined_list.is_standard_option',
+                'predefined_list.file',
+                'predefined_list.type'
+            )->first()->toArray();
             $details['ltitle'] = $opt['ltitle'];
             $details['color'] = $opt['color'];
             $details['is_standard_option'] = $opt['is_standard_option'];
@@ -829,7 +852,10 @@ class PublicController extends Controller
                 'c.image',
                 'c.color',
                 'c.is_standard_option',
-                'boat_enquiry_details.subcat_slug'
+                'boat_enquiry_details.subcat_slug',
+                'boat_enquiry_details.has_discount',
+                'boat_enquiry_details.discount_code',
+                'boat_enquiry_details.discount_amount'
             )
             ->with('enquiry_option')
             ->get();

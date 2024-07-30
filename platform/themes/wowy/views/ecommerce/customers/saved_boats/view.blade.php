@@ -74,7 +74,20 @@
                                                         @endif
                                                     </span>
                                                 @endif
-                                            <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
+                                            <p>
+                                                @php
+                                                    $discounted_price = $value->enquiry_option->price - $value->discount_amount;
+                                                @endphp
+                                                <b>Price</b> :
+                                                {{ format_price($value->enquiry_option->price) }}
+                                                @if ($value->has_discount == 1)
+                                                    <br>
+                                                    <b>Discounted Price</b> :
+                                                    {{ format_price($discounted_price) }} - <small>
+                                                        (coupon: {{ $value->discount_code }})
+                                                    </small>
+                                                @endif
+                                            </p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -116,95 +129,97 @@
                     '{{ asset('storage/' . $value->file) }}',
                 @endforeach
             ];
-        
+
             const container = document.getElementById('3d-model');
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
+                1000);
             camera.position.set(0, 0, 6);
             camera.lookAt(scene.position);
-        
+
             const renderer = new THREE.WebGLRenderer({
-        antialias: true
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6;
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x182955);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
-        
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5).normalize();
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
+                antialias: true
+            });
+            renderer.physicallyCorrectLights = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.6;
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x182955);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight2.position.set(-5, -5, -5).normalize();
-    scene.add(directionalLight2);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5).normalize();
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight2.position.set(-5, -5, -5).normalize();
+            scene.add(directionalLight2);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
-    scene.add(hemiLight);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
 
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
-        
-    const loader = new THREE.GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
-        
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+            scene.add(hemiLight);
+
+            const dracoLoader = new THREE.DRACOLoader();
+            dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.1/");
+
+            const loader = new THREE.GLTFLoader();
+            loader.setDRACOLoader(dracoLoader);
+
             let baseModel, additionalModels = [];
             let originalMaterials = {};
             let originalColors = {};
             let modelsToLoad = accessoryModelPaths.length + 1;
             let loadedModels = 0;
-        
+
             function onAllModelsLoaded() {
                 applyColors();
             }
-        
+
             function incrementLoadedModels() {
                 loadedModels++;
                 if (loadedModels === modelsToLoad) {
                     onAllModelsLoaded();
                 }
             }
-        
+
             function applyColors() {
                 const boatDetails = @json($boat->details);
                 const colorMap = {};
                 const otherOptions = [];
-        
+
                 boatDetails.forEach(detail => {
                     if (detail.subcat_slug.endsWith('-color')) {
                         const firstWord = detail.subcat_slug.split('-')[0];
-                        colorMap[firstWord] = detail.color; 
+                        colorMap[firstWord] = detail.color;
                     } else {
                         otherOptions.push(detail);
                     }
                 });
-        
+
                 // console.log('Color Map:', colorMap);
                 // console.log('Other Options:', otherOptions);
-        
+
                 Object.keys(colorMap).forEach(firstWord => {
                     // console.log(`Processing color map entry: ${firstWord}, Color: ${colorMap[firstWord]}`);
-                    
+
                     let modelFound = false;
                     otherOptions.forEach(option => {
                         if (option.subcat_slug.startsWith(firstWord)) {
                             console.log(`Option found for ${firstWord}: ${option.subcat_slug}`);
-        
+
                             additionalModels.forEach((model, index) => {
                                 if (model.userData.path.includes(option.file)) {
                                     // console.log("File found in additional models");
                                     model.traverse(child => {
                                         if (child.isMesh) {
-                                            child.material.color.set(colorMap[firstWord]);
+                                            child.material.color.set(colorMap[
+                                                firstWord]);
                                         }
                                     });
                                     modelFound = true;
@@ -212,122 +227,122 @@
                             });
                         }
                     });
-        
+
                     if (!modelFound) {
                         // console.log(`No matching option found for ${firstWord} in otherOptions`);
                         // console.log(`Checking base model children for ${firstWord}`);
                         baseModel.traverse(child => {
-                        if (child.name) {
-                            const childName = child.name.trim().toLowerCase();
+                            if (child.name) {
+                                const childName = child.name.trim().toLowerCase();
 
-                            if (childName.includes(firstWord)) {
-                                child.traverse(child => {
-                                if (child.isMesh && child.material) {
-                                child.material.color.set(colorMap[firstWord]);
-                                modelFound = true;
-                                    }
-                                });
-                                basePartFound = true;
+                                if (childName.includes(firstWord)) {
+                                    child.traverse(child => {
+                                        if (child.isMesh && child.material) {
+                                            child.material.color.set(colorMap[firstWord]);
+                                            modelFound = true;
+                                        }
+                                    });
+                                    basePartFound = true;
+                                }
                             }
-                        }
-                    });
+                        });
 
                     }
-        
+
                     if (!modelFound) {
                         console.log(`No matching parts found in base model for ${firstWord}`);
                     }
                 });
             }
-        
+
             function loadModel(path, targetSize, callback) {
                 loader.load(path, function(gltf) {
                     const model = gltf.scene;
                     model.userData.path = path;
                     model.traverse(child => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    
-                    originalMaterials[child.name] = child.material.clone();
-                    originalColors[child.name] = child.material.color.clone();
-                    
-                    const newMaterial = new THREE.MeshStandardMaterial({
-                        color: child.material.color,
-                        metalness: 0.5,
-                        roughness: 0.5
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            originalMaterials[child.name] = child.material.clone();
+                            originalColors[child.name] = child.material.color.clone();
+
+                            const newMaterial = new THREE.MeshStandardMaterial({
+                                color: child.material.color,
+                                metalness: 0.5,
+                                roughness: 0.5
+                            });
+                            child.material = newMaterial;
+                        }
                     });
-                    child.material = newMaterial;
-                }
-            });
 
-            const bbox = new THREE.Box3().setFromObject(model);
-            const size = new THREE.Vector3();
-            bbox.getSize(size);
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = targetSize / maxDimension;
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            bbox.setFromObject(model);
-            const center = new THREE.Vector3();
-            bbox.getCenter(center);
+                    const bbox = new THREE.Box3().setFromObject(model);
+                    const size = new THREE.Vector3();
+                    bbox.getSize(size);
+                    const maxDimension = Math.max(size.x, size.y, size.z);
+                    const scaleFactor = targetSize / maxDimension;
+                    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    bbox.setFromObject(model);
+                    const center = new THREE.Vector3();
+                    bbox.getCenter(center);
 
-            model.position.x -= center.x;
-            model.position.y -= center.y;
-            model.position.z -= center.z;
+                    model.position.x -= center.x;
+                    model.position.y -= center.y;
+                    model.position.z -= center.z;
 
-        
+
                     if (baseModel) {
                         model.position.copy(baseModel.position);
                         model.scale.copy(baseModel.scale);
                     }
-        
+
                     callback(model);
                     incrementLoadedModels();
                 }, undefined, function(error) {
                     console.error('Error loading model:', path, error);
-                    incrementLoadedModels(); 
+                    incrementLoadedModels();
                 });
             }
-        
+
             function calculateTargetSize() {
                 return window.innerWidth < 768 ? 5 : 8;
             }
-        
+
             loadModel(baseModelPath, calculateTargetSize(), function(model) {
                 baseModel = model;
                 scene.add(baseModel);
-        
+
                 accessoryModelPaths.forEach(function(path) {
                     loadModel(path, 4, function(accessoryModel) {
                         additionalModels.push(accessoryModel);
                         scene.add(accessoryModel);
                     });
                 });
-        
+
                 const controls = new THREE.OrbitControls(camera, renderer.domElement);
                 controls.enableDamping = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 13;
-        controls.enabled = false;
-        container.addEventListener('pointerenter', () => {
-            controls.enabled = true;
-        });
-        container.addEventListener('pointerleave', () => {
-            controls.enabled = false;
-        });
-        
+                controls.minDistance = 5;
+                controls.maxDistance = 13;
+                controls.enabled = false;
+                container.addEventListener('pointerenter', () => {
+                    controls.enabled = true;
+                });
+                container.addEventListener('pointerleave', () => {
+                    controls.enabled = false;
+                });
+
                 function animate() {
                     requestAnimationFrame(animate);
                     renderer.render(scene, camera);
                     controls.update();
                 }
-        
+
                 animate();
             });
         });
-        </script>
-        
-        
-    
-    
+    </script>
+
+
+
+
 @endsection
