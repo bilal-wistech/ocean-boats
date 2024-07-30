@@ -40,6 +40,32 @@
                                 <span class="d-inline-block">{{ __('Boat Price') }}:</span>
                                 <strong class="order-detail-value"> {{ format_price($boat->boat->price) }} </strong>
                             </div>
+                            @php
+                                $discount = 0;
+                                $discount_type = '';
+                                foreach ($boat->boat->discounts as $boat_discount) {
+                                    $discount = $boat_discount->discount;
+                                    $discount_type = $boat_discount->discount_type;
+                                }
+                                // Calculate the final price after applying the discount
+                                $original_price = $boat->boat->price;
+
+                                if ($discount_type == 'percentage') {
+                                    $discounted_price = $original_price - $original_price * ($discount / 100);
+                                } elseif ($discount_type == 'amount') {
+                                    $discounted_price = $original_price - $discount;
+                                } else {
+                                    $discounted_price = $original_price; // No discount
+                                }
+
+                                $formatted_price = format_price($discounted_price);
+                            @endphp
+                            @if ($discount)
+                                <div>
+                                    <span class="d-inline-block">{{ __('Discount Boat Price') }}:</span>
+                                    <strong class="order-detail-value"> {{ $formatted_price }} </strong>
+                                </div>
+                            @endif
                         </div>
 
                         <h4 class="mt-3 mb-1">{{ __('Final Model') }}</h4>
@@ -76,7 +102,8 @@
                                                 @endif
                                             <p>
                                                 @php
-                                                    $discounted_price = $value->enquiry_option->price - $value->discount_amount;
+                                                    $discounted_price =
+                                                        $value->enquiry_option->price - $value->discount_amount;
                                                 @endphp
                                                 <b>Price</b> :
                                                 {{ format_price($value->enquiry_option->price) }}
