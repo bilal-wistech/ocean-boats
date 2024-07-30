@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-7 col-12">
-                <div class="contact-from-area  padding-20-row-col wow tmFadeInUp animated" style="visibility: visible;">
+                <div class="contact-from-area  padding-20-row-col wow tmFadeInUp animated" id = "contact-form" style="visibility: visible;">
                     <h3 class="mb-50"><span class="billing">FEEL FREE </span>TO CONTACT US</h3>
                     <!--<div class="checkboxes mb-30">-->
                     <!--    <input type="checkbox" id="pleasure" name="option" value="1" checked>-->
@@ -198,3 +198,12 @@
 }
 </style>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    jQuery(function ($) {
+        var offset = $('#contact-form').offset().top - 100;
+        $('html, body').animate({
+            scrollTop: offset
+        }, 'slow');
+    });
+</script>
