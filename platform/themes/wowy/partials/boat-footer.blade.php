@@ -12,7 +12,8 @@
                 <div class="footer-bottom"></div>
             </div>
             <div class="col-lg-6">
-                <p class="float-md-left font-sm mb-0">{{ theme_option('copyright') }} {{ __('All rights reserved.') }}</p>
+                <p class="float-md-left font-sm mb-0">{{ theme_option('copyright') }} {{ __('All rights reserved.') }}
+                </p>
             </div>
             {{-- <div class="col-lg-6">
                 <p class="text-lg-end text-start font-sm mb-0">
@@ -25,7 +26,7 @@
 
 <!-- Quick view -->
 <div class="modal fade custom-modal" id="quick-view-modal" tabindex="-1" aria-labelledby="quick-view-modal-label"
-     aria-hidden="true">
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -62,40 +63,42 @@
 
 {!! Theme::place('footer') !!}
 
-@if (session()->has('success_msg') || session()->has('error_msg') || (isset($errors) && $errors->count() > 0) || isset($error_msg))
+@if (session()->has('success_msg') ||
+        session()->has('error_msg') ||
+        (isset($errors) && $errors->count() > 0) ||
+        isset($error_msg))
     <script type="text/javascript">
-        window.onload = function () {
+        window.onload = function() {
             @if (session()->has('success_msg'))
-            window.showAlert('alert-success', '{{ session('success_msg') }}');
+                window.showAlert('alert-success', '{{ session('success_msg') }}');
             @endif
 
             @if (session()->has('error_msg'))
-            window.showAlert('alert-danger', '{{ session('error_msg') }}');
+                window.showAlert('alert-danger', '{{ session('error_msg') }}');
             @endif
 
             @if (isset($error_msg))
-            window.showAlert('alert-danger', '{{ $error_msg }}');
+                window.showAlert('alert-danger', '{{ $error_msg }}');
             @endif
 
             @if (isset($errors))
-            @foreach ($errors->all() as $error)
-            window.showAlert('alert-danger', '{!! BaseHelper::clean($error) !!}');
-            @endforeach
+                @foreach ($errors->all() as $error)
+                    window.showAlert('alert-danger', '{!! BaseHelper::clean($error) !!}');
+                @endforeach
             @endif
         };
     </script>
 @endif
 <script>
-
     // boats page thing for the boat category.....
-    $(document).on('click', '.boat-category', function (e) {
+    $(document).on('click', '.boat-category', function(e) {
         e.preventDefault();
         const $this = $(e.currentTarget);
         const href = $this.attr('data-value');
         $(".list-content-loading").show();
         $.ajax({
             url: href,
-            success: function (data) {
+            success: function(data) {
                 console.log(data);
                 $(".list-content-loading").show();
                 $('.products-listing').empty();
@@ -107,9 +110,9 @@
 
     var url = "<?php echo url('/'); ?>";
 
-    $(document).ready(function () {
+    $(document).ready(function() {
 
-        $('body').on('click', '.card-btn', function () {
+        $('body').on('click', '.card-btn', function() {
             val = $(this).data('value');
             curval = $(this).data('curval');
             $('.card-' + val).removeClass('d-none');
@@ -122,14 +125,14 @@
             }
             $('.cat-' + val).addClass('selected');
         });
-        $('.dropdown').hover(function () {
+        $('.dropdown').hover(function() {
             $(this).find('.dropdown-menu').addClass('show');
             $(this).find('.dropdown-toggle').attr('aria-expanded', 'true');
-        }, function () {
+        }, function() {
             $(this).find('.dropdown-menu').removeClass('show');
             $(this).find('.dropdown-toggle').attr('aria-expanded', 'false');
         });
-        $('.dropdown-menu').mouseleave(function () {
+        $('.dropdown-menu').mouseleave(function() {
             $(this).removeClass('show');
             $(this).prev('.dropdown-toggle').attr('aria-expanded', 'false');
         });
@@ -146,7 +149,7 @@
         initializeStandardOptions();
 
         function initializeStandardOptions() {
-            $('input.cat-item-check[data-waschecked="true"]').each(function () {
+            $('input.cat-item-check[data-waschecked="true"]').each(function() {
                 var value = $(this).val();
                 var typename = $(this).attr('data-typename');
                 var type = $(this).attr('data-type');
@@ -176,17 +179,45 @@
         }
 
         function updateTotalPrice() {
-            total_price = boat_price + price;
-            $('.sub-total').text(total_price.toLocaleString('en-US') + currency);
-            vat_price = (total_price * 5) / 100;
-            $('.vat-price').text(vat_price.toLocaleString('en-US') + currency);
-            vat_total = total_price + vat_price;
-            $('.vat-total').text(vat_total.toLocaleString('en-US') + currency);
-            $('input[name="total_price"]').val(total_price);
+            var discountedPrice = boat_price + price; // This is already the discounted price
+            var originalPrice = discountedPrice;
+
+            // Get discount information from hidden fields
+            var discountValue = $('#discount_value').val();
+            var discountType = $('#discount_type').val();
+            var discountText = '';
+
+            if (discountValue && discountType) {
+                if (discountType === 'percentage') {
+                    var discountPercentage = parseFloat(discountValue);
+                    originalPrice = discountedPrice / (1 - discountPercentage / 100);
+                    discountText = `<br><small>(${discountValue}% off)</small>`;
+                } else if (discountType === 'amount') {
+                    var discountAmount = parseFloat(discountValue);
+                    originalPrice = discountedPrice + discountAmount;
+                    discountText =
+                        `<br><small>(${discountAmount.toLocaleString('en-US')}${currency} off)</small>`;
+                }
+            }
+
+            var priceHtml =
+                `<s>${originalPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}</s> ${discountedPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}${discountText}`;
+
+            $('.sub-total').html(priceHtml);
+
+            vat_price = (discountedPrice * 5) / 100;
+            $('.vat-price').text(vat_price.toLocaleString('en-US', {
+                maximumFractionDigits: 2
+            }) + currency);
+            vat_total = discountedPrice + vat_price;
+            $('.vat-total').text(vat_total.toLocaleString('en-US', {
+                maximumFractionDigits: 2
+            }) + currency);
+            $('input[name="total_price"]').val(discountedPrice);
         }
 
         // Event handler for radio buttons
-        $('body').on('click', 'input[type="radio"]', function () {
+        $('body').on('click', 'input[type="radio"]', function() {
             var src = url + '/storage/' + 'transparent-pic-150x150.png';
             var value = $(this).val();
             var parent = $(this).data('parent');
@@ -199,52 +230,55 @@
                 handleCheckedRadio($(this), value, typename, type, parent);
             }
         });
- 
-var selectedOptions = {};
-function handleCheckedRadio(element, value, typename, type, parent) {
-  if (selectedOptions[type]) {
-    var prevElement = $(`input[value="${selectedOptions[type]}"]`);
-    handleUnchecked(prevElement, type, prevElement.val());
-  }
-  if (element.attr('data-waschecked') == 'true') {
-    var optionPrice = parseFloat(element.data('price'));
-    addToSummary(element, value, typename, type, optionPrice);
-    price += optionPrice;
-    updateTotalPrice();
-  } else {
-    $.ajax({
-      type: "Post",
-      url: url + "/customize-type-content",
-      data: {value: value},
-      success: function (data) {
-        addToSummary(element, value, typename, type, parseFloat(data.price));
-        price += parseFloat(data.price);
-        updateTotalPrice();
-      }
-    });
-  }
-  
-  $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
-  element.attr('data-waschecked', 'true');
-  element.prop('checked', true);
-  selectedOptions[type] = value;
-}
 
-function handleUncheckedRadio(element, type, parent) {
-  var prevDiv = $('#summary-end .summary-card #' + element.val());
-  if (prevDiv.length) {
-    var prevPrice = prevDiv.find('.price').text().replace(",", "");
-    price -= parseFloat(prevPrice);
-    prevDiv.remove();
-    updateTotalPrice();
-  }
-  $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
-  element.attr('data-waschecked', 'false');
-  element.prop('checked', false);
-  delete selectedOptions[type];
-}
+        var selectedOptions = {};
+
+        function handleCheckedRadio(element, value, typename, type, parent) {
+            if (selectedOptions[type]) {
+                var prevElement = $(`input[value="${selectedOptions[type]}"]`);
+                handleUnchecked(prevElement, type, prevElement.val());
+            }
+            if (element.attr('data-waschecked') == 'true') {
+                var optionPrice = parseFloat(element.data('price'));
+                addToSummary(element, value, typename, type, optionPrice);
+                price += optionPrice;
+                updateTotalPrice();
+            } else {
+                $.ajax({
+                    type: "Post",
+                    url: url + "/customize-type-content",
+                    data: {
+                        value: value
+                    },
+                    success: function(data) {
+                        addToSummary(element, value, typename, type, parseFloat(data.price));
+                        price += parseFloat(data.price);
+                        updateTotalPrice();
+                    }
+                });
+            }
+
+            $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+            element.attr('data-waschecked', 'true');
+            element.prop('checked', true);
+            selectedOptions[type] = value;
+        }
+
+        function handleUncheckedRadio(element, type, parent) {
+            var prevDiv = $('#summary-end .summary-card #' + element.val());
+            if (prevDiv.length) {
+                var prevPrice = prevDiv.find('.price').text().replace(",", "");
+                price -= parseFloat(prevPrice);
+                prevDiv.remove();
+                updateTotalPrice();
+            }
+            $('input[name="option[' + type + ']"]').attr('data-waschecked', 'false');
+            element.attr('data-waschecked', 'false');
+            element.prop('checked', false);
+            delete selectedOptions[type];
+        }
         // Event handler for checkboxes
-        $('body').on('click', 'input[type="checkbox"]', function () {
+        $('body').on('click', 'input[type="checkbox"]', function() {
             var value = $(this).val();
             var typename = $(this).attr('data-typename');
             var type = $(this).attr('data-type');
@@ -268,8 +302,10 @@ function handleUncheckedRadio(element, type, parent) {
                 $.ajax({
                     type: "Post",
                     url: url + "/customize-type-content",
-                    data: {value: value},
-                    success: function (data) {
+                    data: {
+                        value: value
+                    },
+                    success: function(data) {
                         updateImages(data, parent);
                         addToSummary(element, value, typename, type, parseFloat(data.price));
                         price += parseFloat(data.price);
@@ -317,48 +353,49 @@ function handleUncheckedRadio(element, type, parent) {
             }
         }
 
-        $('body').on('click', '.view-summary', function () {
+        $('body').on('click', '.view-summary', function() {
             $('#summary-end').show();
             $('html, body').animate({
                 scrollTop: $('#summary-end').offset().top
             }, 1000);
         });
 
-        $('body').on('click', '.submit-btn', function () {
+        $('body').on('click', '.submit-btn', function() {
             $("input[name='redirect_url_pay']").val(1);
             $('#exampleModal').modal('show');
         });
 
-        $('body').on('click', '#submit-boot', function () {
+        $('body').on('click', '#submit-boot', function() {
             // Add the "button-loading" class to the button
             $(this).addClass("button-loading");
             $('#submit-form').submit();
-            setTimeout(function () {
+            setTimeout(function() {
                 $('#submit-boot').removeClass("button-loading");
             }, 3000);
         });
 
     });
-//     document.querySelectorAll('.applyPromo').forEach(button => {
-//     button.addEventListener('click', function() {
-//         const input = this.previousElementSibling;
-//         const spinner = this.nextElementSibling;
-//         const discountPercentage = parseFloat(this.closest('.promo').querySelector('.discount h4').textContent);
-//         const originalPriceElement = this.closest('.promo').querySelector('.original-price');
-//         const discountedPriceElement = this.closest('.promo').querySelector('.discounted-price');
-//         input.disabled = true;
-//         spinner.classList.remove('d-none');
-//         setTimeout(() => {
-//             spinner.classList.add('d-none');
-//             const originalPrice = parseFloat(originalPriceElement.textContent.replace('AED', ''));
-//             const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
-//             discountedPriceElement.textContent = `${discountedPrice.toFixed(2)} AED`;
-//         }, 2000);
-//     });
-// });
+    //     document.querySelectorAll('.applyPromo').forEach(button => {
+    //     button.addEventListener('click', function() {
+    //         const input = this.previousElementSibling;
+    //         const spinner = this.nextElementSibling;
+    //         const discountPercentage = parseFloat(this.closest('.promo').querySelector('.discount h4').textContent);
+    //         const originalPriceElement = this.closest('.promo').querySelector('.original-price');
+    //         const discountedPriceElement = this.closest('.promo').querySelector('.discounted-price');
+    //         input.disabled = true;
+    //         spinner.classList.remove('d-none');
+    //         setTimeout(() => {
+    //             spinner.classList.add('d-none');
+    //             const originalPrice = parseFloat(originalPriceElement.textContent.replace('AED', ''));
+    //             const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+    //             discountedPriceElement.textContent = `${discountedPrice.toFixed(2)} AED`;
+    //         }, 2000);
+    //     });
+    // });
 </script>
 
 
 <div id="scrollUp"><i class="fal fa-long-arrow-up"></i></div>
 </body>
+
 </html>

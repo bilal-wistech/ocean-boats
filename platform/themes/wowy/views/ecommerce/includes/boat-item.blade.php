@@ -8,6 +8,7 @@
         }
         // Calculate the final price after applying the discount
         $original_price = $product->price;
+        $formatted_original_price = format_price($original_price);
 
         if ($discount_type == 'percentage') {
             $discounted_price = $original_price - $original_price * ($discount / 100);
@@ -20,7 +21,8 @@
             $discount_display = '';
         }
 
-        $formatted_price = format_price($discounted_price);
+        $formatted_discounted_price = format_price($discounted_price);
+        $has_discount = $discount > 0 && ($discount_type == 'percentage' || $discount_type == 'amount');
     @endphp
     <div class="product-cart-wrap boat-custom mb-30">
         <div class="product-img-action-wrap">
@@ -36,9 +38,12 @@
             <h2>{{ $product->ltitle }}</h2>
             <div class="product-price">
                 STARTING AT
-                <span>&nbsp;{{ $formatted_price }}</span>
-                @if ($discount_display)
-                    <span class="discount-display"> ({{ $discount_display }})</span>
+                @if ($has_discount)
+                    <span class="original-price"><s>{{ $formatted_original_price }}</s></span>
+                    <span class="discounted-price">{{ $formatted_discounted_price }}</span>
+                    <span class="discount-display">({{ $discount_display }})</span>
+                @else
+                    <span>{{ $formatted_original_price }}</span>
                 @endif
             </div>
             <div class="justify-content-center desc">

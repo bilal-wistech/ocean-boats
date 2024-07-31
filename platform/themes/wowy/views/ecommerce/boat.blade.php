@@ -31,11 +31,17 @@
             @php
                 $boat_total = 0; // Start with the original product price
                 $discountAmount = 0;
+                $discountValue = 0;
+                $discountType = '';
 
                 if ($product->discounts->isNotEmpty()) {
                     foreach ($product->discounts as $discount) {
                         if ($discount->code === 'BOAT' || empty($discount->code)) {
                             $boat_total = $product->price;
+
+                            $discountValue = $discount->discount;
+                            $discountType = $discount->discount_type;
+
                             if ($discount->discount_type === 'amount') {
                                 $discountAmount += $discount->discount; // Accumulate amount discounts
                             } elseif ($discount->discount_type === 'percentage') {
@@ -64,7 +70,10 @@
             @endphp
 
             <input type="hidden" name="boat_price" value="{{ $boat_price }}">
-
+            @if ($discountAmount && $discountType)
+                <input type="hidden" name="discount_value" id="discount_value" value="{{ $discountValue }}">
+                <input type="hidden" name="discount_type" id="discount_type" value="{{ $discountType }}">
+            @endif
         </div>
 
         <div class="col-lg-4 col-12">
@@ -76,7 +85,8 @@
                     <?php
                     $i = $key + 1;
                     ?>
-                    <div class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
+                    <div
+                        class="customboat-card card-category card-{{ $value->type }} {{ $key > 0 ? 'd-none' : '' }}">
                         <div class="customboat-card-header">
                             <h4 class="category cat-title">{{ $i }}. Choose your {{ $value->ltitle }}</h4>
                         </div>
@@ -279,120 +289,122 @@
                     </div>
                     {{-- Discount --}}
                     @php
-    $hasAccessoryDiscounts = false;
+                        $hasAccessoryDiscounts = false;
 
-    foreach ($accessories as $accessory) {
-        if ($accessory->discounts->isNotEmpty()) {
-            $hasAccessoryDiscounts = true;
-            break;
-        }
-    }
-@endphp
+                        foreach ($accessories as $accessory) {
+                            if ($accessory->discounts->isNotEmpty()) {
+                                $hasAccessoryDiscounts = true;
+                                break;
+                            }
+                        }
+                    @endphp
 
-@if ($hasAccessoryDiscounts)
-                    <div class="card-body discount-area">
-                        <div class="row mt-20">
-                            <div class="col-12 mb-10">
-                                <div class="card mx-auto">
-                                    <div class="discount-card d-flex justify-content-center">
-                                        <div class="row">
-                                            @if ($product->discounts->isNotEmpty())
-                                                @foreach ($product->discounts as $discount)
-                                                    @if ($discount->code !== 'BOAT' && !empty($discount->code))
-                                                        <div class="col-3 align-items-center d-flex">
-                                                            <div class="access-name">
-                                                                <h5>{{ $discount->list->ltitle }}</h5>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-9">
-                                                            <div class="promo">
-                                                                <div class="discount d-flex">
-                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                    </h4>
-                                                                    <p>OFF</p>
+                    @if ($hasAccessoryDiscounts)
+                        <div class="card-body discount-area">
+                            <div class="row mt-20">
+                                <div class="col-12 mb-10">
+                                    <div class="card mx-auto">
+                                        <div class="discount-card d-flex justify-content-center">
+                                            <div class="row">
+                                                @if ($product->discounts->isNotEmpty())
+                                                    @foreach ($product->discounts as $discount)
+                                                        @if ($discount->code !== 'BOAT' && !empty($discount->code))
+                                                            <div class="col-3 align-items-center d-flex">
+                                                                <div class="access-name">
+                                                                    <h5>{{ $discount->list->ltitle }}</h5>
                                                                 </div>
-                                                                <div class="d-flex mt-10 mb-10">
-                                                                    <div class="input-group">
-                                                                        <input type="text"
-                                                                            class="form-control promoCode"
-                                                                            name="code" placeholder="Promo Code">
-                                                                        <button class="btn btn-primary applyPromo"
-                                                                            type="button">Apply</button>
-                                                                        <div class="spinner-border text-primary ms-2 d-none"
-                                                                            role="status">
-                                                                            <span
-                                                                                class="visually-hidden">Loading...</span>
+                                                            </div>
+                                                            <div class="col-9">
+                                                                <div class="promo">
+                                                                    <div class="discount d-flex">
+                                                                        <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                        </h4>
+                                                                        <p>OFF</p>
+                                                                    </div>
+                                                                    <div class="d-flex mt-10 mb-10">
+                                                                        <div class="input-group">
+                                                                            <input type="text"
+                                                                                class="form-control promoCode"
+                                                                                name="code"
+                                                                                placeholder="Promo Code">
+                                                                            <button class="btn btn-primary applyPromo"
+                                                                                type="button">Apply</button>
+                                                                            <div class="spinner-border text-primary ms-2 d-none"
+                                                                                role="status">
+                                                                                <span
+                                                                                    class="visually-hidden">Loading...</span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        {{-- 
+                                                            {{-- 
                                                         Todo : Fix this part to show discount and original price
                                                          --}}
-                                                        {{-- <div class="price d-flex">
+                                                            {{-- <div class="price d-flex">
                                                             <h5>Price: &nbsp;</h5>
                                                             <p class="original-price">
                                                                 {{ format_price($product->price) }}</p>
                                                             <p class="discounted-price ms-2"></p>
                                                         </div> --}}
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                            @foreach ($accessories as $accessory)
-                                                @if ($accessory->discounts->isNotEmpty())
-                                                    @foreach ($accessory->discounts as $discount)
-                                                        <div class="col-3 align-items-center d-flex">
-                                                            <div class="access-name">
-                                                                <h5>{{ $discount->list->ltitle }}</h5>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-9">
-                                                            <div class="promo">
-                                                                <div class="discount d-flex">
-                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                    </h4>
-                                                                    <p>OFF</p>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                                @foreach ($accessories as $accessory)
+                                                    @if ($accessory->discounts->isNotEmpty())
+                                                        @foreach ($accessory->discounts as $discount)
+                                                            <div class="col-3 align-items-center d-flex">
+                                                                <div class="access-name">
+                                                                    <h5>{{ $discount->list->ltitle }}</h5>
                                                                 </div>
-                                                                <div class="d-flex mt-10 mb-10">
-                                                                    <div class="input-group">
-                                                                        <input type="text"
-                                                                            class="form-control promoCode"
-                                                                            name="code" placeholder="Promo Code"
-                                                                            id="accessory-{{ $accessory->id }}"
-                                                                            data-accessory-id="{{ $accessory->id }}">
-                                                                        <button class="btn btn-primary applyPromo"
-                                                                            type="button">Apply</button>
-                                                                        <div class="spinner-border text-primary ms-2 d-none"
-                                                                            role="status">
-                                                                            <span
-                                                                                class="visually-hidden">Loading...</span>
+                                                            </div>
+                                                            <div class="col-9">
+                                                                <div class="promo">
+                                                                    <div class="discount d-flex">
+                                                                        <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
+                                                                        </h4>
+                                                                        <p>OFF</p>
+                                                                    </div>
+                                                                    <div class="d-flex mt-10 mb-10">
+                                                                        <div class="input-group">
+                                                                            <input type="text"
+                                                                                class="form-control promoCode"
+                                                                                name="code"
+                                                                                placeholder="Promo Code"
+                                                                                id="accessory-{{ $accessory->id }}"
+                                                                                data-accessory-id="{{ $accessory->id }}">
+                                                                            <button class="btn btn-primary applyPromo"
+                                                                                type="button">Apply</button>
+                                                                            <div class="spinner-border text-primary ms-2 d-none"
+                                                                                role="status">
+                                                                                <span
+                                                                                    class="visually-hidden">Loading...</span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        {{-- 
+                                                            {{-- 
                                                         Todo : Fix this part to show discount and original price
                                                          --}}
-                                                        {{-- <div class="price d-flex">
+                                                            {{-- <div class="price d-flex">
                                                             <h5>Price: &nbsp;</h5>
                                                             <p class="original-price">
                                                                 {{ format_price($accessory->price) }}</p>
                                                             <p class="discounted-price ms-2"></p>
                                                         </div> --}}
-                                                    @endforeach
-                                                @endif
-                                            @endforeach
+                                                        @endforeach
+                                                    @endif
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-@endif
-                    
+                    @endif
+
                     {{-- end --}}
                     <div class="row mt-2 mb-20">
                         <div class="col-9 text-end">
@@ -431,11 +443,11 @@
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const modelPath = '{{ asset('storage/' . $modelPath) }}';
-    const container = document.getElementById('Three-model');
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    document.addEventListener('DOMContentLoaded', function() {
+        const modelPath = '{{ asset('storage/' . $modelPath) }}';
+        const container = document.getElementById('Three-model');
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
@@ -481,13 +493,14 @@
         let originalMaterials = {};
         let originalColors = {};
 
-    const loadingIndicator = document.getElementById('loader');
-    container.addEventListener('mousemove', onMouseMove, false);
-    function onMouseMove(event) {
-    const rect = container.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
-    }
+        const loadingIndicator = document.getElementById('loader');
+        container.addEventListener('mousemove', onMouseMove, false);
+
+        function onMouseMove(event) {
+            const rect = container.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+        }
 
         function loadModel(path, targetSize, callback) {
             loadingIndicator.style.display = 'block';
@@ -495,22 +508,22 @@
                 const model = gltf.scene;
                 model.userData.path = path;
 
-            model.traverse(child => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    
-                    originalMaterials[child.name] = child.material.clone();
-                    originalColors[child.name] = child.material.color.clone();
-                    
-                    const newMaterial = new THREE.MeshStandardMaterial({
-                        color: child.material.color,
-                        metalness: 0.5,
-                        roughness: 0.3
-                    });
-                    child.material = newMaterial;
-                }
-            });
+                model.traverse(child => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        originalMaterials[child.name] = child.material.clone();
+                        originalColors[child.name] = child.material.color.clone();
+
+                        const newMaterial = new THREE.MeshStandardMaterial({
+                            color: child.material.color,
+                            metalness: 0.5,
+                            roughness: 0.3
+                        });
+                        child.material = newMaterial;
+                    }
+                });
 
                 const bbox = new THREE.Box3().setFromObject(model);
                 const size = new THREE.Vector3();
@@ -522,17 +535,17 @@
                 const center = new THREE.Vector3();
                 bbox.getCenter(center);
 
-            model.position.x -= center.x;
-            model.position.y -= center.y;
-            model.position.z -= center.z;
-           
-            callback(model);
-            loadingIndicator.style.display = 'none';
-        }, undefined, function (error) {
-            console.error('Error loading model:', path, error);
-            loadingIndicator.style.display = 'none';
-        });
-    }
+                model.position.x -= center.x;
+                model.position.y -= center.y;
+                model.position.z -= center.z;
+
+                callback(model);
+                loadingIndicator.style.display = 'none';
+            }, undefined, function(error) {
+                console.error('Error loading model:', path, error);
+                loadingIndicator.style.display = 'none';
+            });
+        }
 
         function calculateTargetSize() {
             return window.innerWidth < 768 ? 6 : 12;
@@ -719,21 +732,21 @@
             controls.enabled = false;
         });
 
-    function animate() {
-    requestAnimationFrame(animate);
+        function animate() {
+            requestAnimationFrame(animate);
 
-    raycaster.setFromCamera(mouse, camera);
+            raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObjects(scene.children, true);
-    if (intersects.length > 0) {
-        container.style.cursor = 'pointer';
-    } else {
-        container.style.cursor = 'default';
-    }
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            if (intersects.length > 0) {
+                container.style.cursor = 'pointer';
+            } else {
+                container.style.cursor = 'default';
+            }
 
-    controls.update();
-    renderer.render(scene, camera);
-}
+            controls.update();
+            renderer.render(scene, camera);
+        }
 
 
         animate();
@@ -774,7 +787,7 @@
                         console.log(response.message);
                         window.showAlert('alert-danger', response.message);
                     } else {
-                        
+
                         // Update the total price display
                         $('.sub-total').text(response.data.new_total.toLocaleString(
                             'en-US') + currency);
@@ -798,10 +811,12 @@
                         window.showAlert('alert-success', response.message);
                     }
                 }.bind(
-                this), // Ensure 'this' refers to the correct context inside success callback
+                    this
+                ), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
-                    window.showAlert('alert-danger', 'An error occurred. Please try again.');
+                    window.showAlert('alert-danger',
+                        'An error occurred. Please try again.');
                 },
                 complete: function() {
                     spinner.addClass('d-none');

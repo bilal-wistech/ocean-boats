@@ -1933,3 +1933,7 @@ label.form-check-label.color-box:not(:first-child) {
 .strikethrough {
     text-decoration: line-through;
 }
+.sub-total s {
+    color: grey;
+    margin-right: 5px;
+}
