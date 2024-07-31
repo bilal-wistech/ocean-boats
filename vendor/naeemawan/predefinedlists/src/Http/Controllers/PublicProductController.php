@@ -114,7 +114,7 @@ class PublicProductController
 
     public function getProduct($id, Request $request)
     {
-        $product = $this->productRepository->getByWhereIn('ltitle', [$id]);
+        $product = $this->productRepository->getByWhereIn('type', [$id]);
         $product = $product[0];
         $product_cats = $product->childitems_display();
         $accessories = [];
@@ -130,7 +130,7 @@ class PublicProductController
             Theme::breadcrumb()
                 ->add(__('Home'), route('public.index'))
                 ->add(__('Build a Boat'), route('public.customize-boat'))
-                ->add($product->ltitle, route('public.customize-boat.id', $product->id));
+                ->add($product->type, route('public.customize-boat.id', $product->id));
             return Theme::scope('ecommerce.boat', compact('product', 'accessories'), 'plugins/ecommerce::themes.boat')->render();
         }
     }
