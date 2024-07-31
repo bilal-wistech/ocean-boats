@@ -278,55 +278,25 @@
                     <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
                     </div>
                     {{-- Discount --}}
+                    
+                    @php
+                    $hasAccessoryDiscounts = false;
+                
+                    foreach ($accessories as $accessory) {
+                        if ($accessory->discounts->isNotEmpty()) {
+                            $hasAccessoryDiscounts = true;
+                            break;
+                        }
+                    }
+                @endphp
+                
+                @if ($hasAccessoryDiscounts)
                     <div class="card-body discount-area">
                         <div class="row mt-20">
                             <div class="col-12 mb-10">
                                 <div class="card mx-auto">
                                     <div class="discount-card d-flex justify-content-center">
                                         <div class="row">
-                                            @if ($product->discounts->isNotEmpty())
-                                                @foreach ($product->discounts as $discount)
-                                                    @if ($discount->code !== 'BOAT' && !empty($discount->code))
-                                                        <div class="col-3 align-items-center d-flex">
-                                                            <div class="access-name">
-                                                                <h5>{{ $discount->list->ltitle }}</h5>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-9">
-                                                            <div class="promo">
-                                                                <div class="discount d-flex">
-                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                    </h4>
-                                                                    <p>OFF</p>
-                                                                </div>
-                                                                <div class="d-flex mt-10 mb-10">
-                                                                    <div class="input-group">
-                                                                        <input type="text"
-                                                                            class="form-control promoCode"
-                                                                            name="code" placeholder="Promo Code">
-                                                                        <button class="btn btn-primary applyPromo"
-                                                                            type="button">Apply</button>
-                                                                        <div class="spinner-border text-primary ms-2 d-none"
-                                                                            role="status">
-                                                                            <span
-                                                                                class="visually-hidden">Loading...</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {{-- 
-                                                        Todo : Fix this part to show discount and original price
-                                                         --}}
-                                                        {{-- <div class="price d-flex">
-                                                            <h5>Price: &nbsp;</h5>
-                                                            <p class="original-price">
-                                                                {{ format_price($product->price) }}</p>
-                                                            <p class="discounted-price ms-2"></p>
-                                                        </div> --}}
-                                                    @endif
-                                                @endforeach
-                                            @endif
                                             @foreach ($accessories as $accessory)
                                                 @if ($accessory->discounts->isNotEmpty())
                                                     @foreach ($accessory->discounts as $discount)
@@ -338,23 +308,15 @@
                                                         <div class="col-9">
                                                             <div class="promo">
                                                                 <div class="discount d-flex">
-                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}
-                                                                    </h4>
+                                                                    <h4>{{ $discount->discount_type == 'amount' ? format_price($discount->discount) : $discount->discount . '%' }}</h4>
                                                                     <p>OFF</p>
                                                                 </div>
                                                                 <div class="d-flex mt-10 mb-10">
                                                                     <div class="input-group">
-                                                                        <input type="text"
-                                                                            class="form-control promoCode"
-                                                                            name="code" placeholder="Promo Code"
-                                                                            id="accessory-{{ $accessory->id }}"
-                                                                            data-accessory-id="{{ $accessory->id }}">
-                                                                        <button class="btn btn-primary applyPromo"
-                                                                            type="button">Apply</button>
-                                                                        <div class="spinner-border text-primary ms-2 d-none"
-                                                                            role="status">
-                                                                            <span
-                                                                                class="visually-hidden">Loading...</span>
+                                                                        <input type="text" class="form-control promoCode" name="code" placeholder="Promo Code" id="accessory-{{ $accessory->id }}" data-accessory-id="{{ $accessory->id }}">
+                                                                        <button class="btn btn-primary applyPromo" type="button">Apply</button>
+                                                                        <div class="spinner-border text-primary ms-2 d-none" role="status">
+                                                                            <span class="visually-hidden">Loading...</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -365,8 +327,7 @@
                                                          --}}
                                                         {{-- <div class="price d-flex">
                                                             <h5>Price: &nbsp;</h5>
-                                                            <p class="original-price">
-                                                                {{ format_price($accessory->price) }}</p>
+                                                            <p class="original-price">{{ format_price($accessory->price) }}</p>
                                                             <p class="discounted-price ms-2"></p>
                                                         </div> --}}
                                                     @endforeach
@@ -378,6 +339,11 @@
                             </div>
                         </div>
                     </div>
+                @endif
+                
+
+
+                    
                     {{-- end --}}
                     <div class="row mt-2 mb-20">
                         <div class="col-9 text-end">
