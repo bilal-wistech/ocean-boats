@@ -179,41 +179,42 @@
         }
 
         function updateTotalPrice() {
-            var discountedPrice = boat_price + price; // This is already the discounted price
-            var originalPrice = discountedPrice;
+            var currentPrice = boat_price + price; // This is the current price
 
             // Get discount information from hidden fields
             var discountValue = $('#discount_value').val();
             var discountType = $('#discount_type').val();
-            var discountText = '';
+            var priceHtml = '';
 
             if (discountValue && discountType) {
+                var originalPrice = currentPrice;
                 if (discountType === 'percentage') {
                     var discountPercentage = parseFloat(discountValue);
-                    originalPrice = discountedPrice / (1 - discountPercentage / 100);
-                    discountText = `<br><small>(${discountValue}% off)</small>`;
-                } else if (discountType === 'amount') {
+                    originalPrice = currentPrice / (1 - discountPercentage / 100);
+                    priceHtml =
+                        `<s>${originalPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}</s> ${currentPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}<br><small>(${discountValue}% off)</small>`;
+                } else if (discountType === 'fixed') {
                     var discountAmount = parseFloat(discountValue);
-                    originalPrice = discountedPrice + discountAmount;
-                    discountText =
-                        `<br><small>(${discountAmount.toLocaleString('en-US')}${currency} off)</small>`;
+                    originalPrice = currentPrice + discountAmount;
+                    priceHtml =
+                        `<s>${originalPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}</s> ${currentPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}<br><small>(${discountAmount.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency} off)</small>`;
                 }
+            } else {
+                // No discount applied, just show the current price
+                priceHtml = `${currentPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}`;
             }
-
-            var priceHtml =
-                `<s>${originalPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}</s> ${discountedPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}${currency}${discountText}`;
 
             $('.sub-total').html(priceHtml);
 
-            vat_price = (discountedPrice * 5) / 100;
+            vat_price = (currentPrice * 5) / 100;
             $('.vat-price').text(vat_price.toLocaleString('en-US', {
                 maximumFractionDigits: 2
             }) + currency);
-            vat_total = discountedPrice + vat_price;
+            vat_total = currentPrice + vat_price;
             $('.vat-total').text(vat_total.toLocaleString('en-US', {
                 maximumFractionDigits: 2
             }) + currency);
-            $('input[name="total_price"]').val(discountedPrice);
+            $('input[name="total_price"]').val(currentPrice);
         }
 
         // Event handler for radio buttons
