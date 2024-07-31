@@ -1911,10 +1911,10 @@ label.form-check-label.color-box:not(:first-child) {
     margin-left: 1px;
     font-size: 12px;
     margin-top: -6px;
-    color: green;
+    color: #176b33 !important
 }
 .discount h4{
-    color: green
+    color: #176b33 !important
 }
 .spinner-border {
     width: 1.5rem;
@@ -1936,4 +1936,18 @@ label.form-check-label.color-box:not(:first-child) {
 .sub-total s {
     color: grey;
     margin-right: 5px;
+}
+.original-price{
+    color: grey !important;
+    font-size: 14px !important;
+    margin-left: 5px;
+}
+.discount-display{
+    color: #176b33 !important;
+    margin-left: 5px;
+    font-size: 16px !important;
+    font-weight: bold !important;
+}
+.discounted-price{
+    display: block;
 }

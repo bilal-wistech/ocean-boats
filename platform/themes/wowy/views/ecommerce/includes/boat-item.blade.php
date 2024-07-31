@@ -40,8 +40,10 @@
                 STARTING AT
                 @if ($has_discount)
                     <span class="original-price"><s>{{ $formatted_original_price }}</s></span>
+                    <div class="d-flex justify-content-center">
                     <span class="discounted-price">{{ $formatted_discounted_price }}</span>
                     <span class="discount-display">({{ $discount_display }})</span>
+                    </div>
                 @else
                     <span>{{ $formatted_original_price }}</span>
                 @endif
