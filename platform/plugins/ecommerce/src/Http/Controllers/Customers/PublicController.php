@@ -3,44 +3,47 @@
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Arr;
+use Hash;
+use Theme;
+use RvMedia;
+use Exception;
+use SeoHelper;
+use OrderHelper;
+use Carbon\Carbon;
+use InvoiceHelper;
+use EcommerceHelper;
+use OrderReturnHelper;
+use Botble\ACL\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Botble\Media\Supports\Zipper;
+use Botble\Ecommerce\Notifications\BoatCreated;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
-use Botble\Ecommerce\Http\Requests\AddressRequest;
+use Botble\Media\Services\ThumbnailService;
+use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Requests\AvatarRequest;
+use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
+use Botble\Ecommerce\Http\Requests\AddressRequest;
+use NaeemAwan\PredefinedLists\Models\PredefinedList;
 use Botble\Ecommerce\Http\Requests\EditAccountRequest;
 use Botble\Ecommerce\Http\Requests\OrderReturnRequest;
-use Botble\Ecommerce\Http\Requests\UpdatePasswordRequest;
-use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
-use Botble\Media\Services\ThumbnailService;
-use Botble\Media\Supports\Zipper;
-use Botble\Payment\Enums\PaymentStatusEnum;
-use Carbon\Carbon;
-use EcommerceHelper;
-use Exception;
-use Hash;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
-use InvoiceHelper;
-use NaeemAwan\PredefinedLists\Models\BoatEnquiry;
 use NaeemAwan\PredefinedLists\Models\BoatEnquiryDetail;
-use NaeemAwan\PredefinedLists\Models\PredefinedList;
+use Botble\Ecommerce\Http\Requests\UpdatePasswordRequest;
+use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
+use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
+use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatEnquiryInterface;
-use OrderHelper;
-use OrderReturnHelper;
-use RvMedia;
-use SeoHelper;
-use Theme;
 
 class PublicController extends Controller
 {
@@ -103,6 +106,8 @@ class PublicController extends Controller
     {
         if (cache()->has('boat_data')) {
             $boatData = cache()->get('boat_data');
+
+            // Create a new BoatEnquiry
             $enquiry = new BoatEnquiry;
             $enquiry->user_id = auth('customer')->id();
             $enquiry->message = $boatData['message'];
@@ -121,6 +126,9 @@ class PublicController extends Controller
 
             $enquiry->save();
 
+            // Log the successful creation of the enquiry
+            Log::info('Boat enquiry created successfully with ID: ' . $enquiry->id);
+
             foreach ($boatData['option'] as $key => $value) {
                 $detail = new BoatEnquiryDetail;
                 $detail->enquiry_id = $enquiry->id;
@@ -137,14 +145,27 @@ class PublicController extends Controller
                 $detail->save();
             }
 
+            // Notify admin about the new boat creation via email
+            $admin = User::where('super_user', 1)->first();
+            if ($admin) {
+                $admin->notify(new BoatCreated($boatData));
+                Log::info('Email notification sent to admin for new boat creation with ID: ' . $boatData['boat_id']);
+            } else {
+                // Log an error if no admin is found
+                Log::error('No admin user found to notify for new boat creation.');
+            }
+
             // Clear the session data
             session()->forget('applied_discounts');
             cache()->forget('boat_data');
 
             if ($boatData['redirect_url_pay']) {
-                //return redirect to payment page directly
+                // Redirect to payment page directly
                 return redirect()->route('ngenius.transaction.id', ['id' => $enquiry->id]);
             }
+        } else {
+            // Log an error if no boat data is found in cache
+            Log::error('No boat data found in cache.');
         }
 
         SeoHelper::setTitle(__('Account information'));
