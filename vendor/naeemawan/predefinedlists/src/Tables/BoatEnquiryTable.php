@@ -58,8 +58,8 @@ class BoatEnquiryTable extends TableAbstract
             })
             ->editColumn('is_finished', function ($item) {
                 return $item->is_finished 
-                    ? '<span class="label label-success">Yes</span>' 
-                    : '<span class="label label-danger">No</span>';
+                    ? '<span class="label label-success">Paid</span>' 
+                    : '<span class="label label-danger">Saved Boat</span>';
             })
             ->rawColumns(['is_finished']) // Ensure the HTML is rendered            
             ->editColumn('checkbox', function ($item) {
