@@ -29,7 +29,20 @@
                                             @endif
                                         </span>
                                     @endif
-                                <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
+                                <p>
+                                    @php
+                                        $discounted_price = $value->enquiry_option->price - $value->discount_amount;
+                                    @endphp
+                                    <b>Price</b> :
+                                    {{ format_price($value->enquiry_option->price) }}
+                                    @if ($value->has_discount == 1)
+                                        <br>
+                                        <b>Discounted Price</b> :
+                                        {{ format_price($discounted_price) }} - <small>
+                                            (coupon: {{ $value->discount_code }})
+                                        </small>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     @endforeach
@@ -47,12 +60,35 @@
         </div>
     </div>
     <!-- end -->
+    @php
+        $discount = 0;
+        $discount_type = '';
+        foreach ($boat_enquiry->boat->discounts as $boat_discount) {
+            $discount = $boat_discount->discount;
+            $discount_type = $boat_discount->discount_type;
+        }
+        // Calculate the final price after applying the discount
+        $original_price = $boat_enquiry->boat->price;
+
+        if ($discount_type == 'percentage') {
+            $discounted_price = $original_price - $original_price * ($discount / 100);
+        } elseif ($discount_type == 'amount') {
+            $discounted_price = $original_price - $discount;
+        } else {
+            $discounted_price = $original_price; // No discount
+        }
+        $formatted_price = format_price($discounted_price);
+    @endphp
     <div class="card-footer">
         <div class="row m-2">
             <div class="col text-end">
                 <hr />
                 <p><b>Boat Price</b>: <span class="sub-total">{{ format_price($boat_enquiry->boat->price) }}</span>
                 </p>
+                @if ($discount)
+                    <p><b>Discount Boat Price</b>: <span class="sub-total">{{ $formatted_price }}</span>
+                    </p>
+                @endif
                 <p><b>Total Price</b>: <span class="sub-total">{{ format_price($boat_enquiry->total_price) }}</span>
                 </p>
                 <p><b>Total Price with 5% Vat</b>: <span

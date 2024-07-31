@@ -75,12 +75,15 @@ class BoatEnquiryController extends BaseController
             ->orderBy('c.sort_order', 'ASC')
             ->select(
                 'c.id',
-                'boat_enquiry_details.option_id',
                 'c.ltitle',
                 'c.image',
                 'c.color',
                 'c.is_standard_option',
-                'boat_enquiry_details.subcat_slug'
+                'boat_enquiry_details.option_id',
+                'boat_enquiry_details.subcat_slug',
+                'boat_enquiry_details.has_discount',
+                'boat_enquiry_details.discount_code',
+                'boat_enquiry_details.discount_amount',
             )
             ->with('enquiry_option')
             ->get();
