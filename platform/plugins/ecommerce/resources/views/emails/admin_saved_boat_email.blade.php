@@ -34,7 +34,7 @@
                                             <tr>
                                                 <td style="min-height: 400px; padding: 15px; font-size: 13px;">
 
-                                                    <h2>A boat has been booked!</h2>
+                                                    <h2>A boat has been saved!</h2>
 
                                                     <p>Hi Admin,</p>
 
