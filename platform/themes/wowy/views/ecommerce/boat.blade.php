@@ -173,7 +173,7 @@
                                             class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                     </p>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     @php
                                         $currencies = get_all_currencies() ?? [];
                                         $selectedCurrency =
@@ -198,7 +198,7 @@
                                         </ul>
                                     </div>
 
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         <div class="customboat-card-footer d-flex justify-content-between flex-row">
