@@ -198,6 +198,12 @@ class PublicProductController
         $totalPrice = $request->input('total_price');
         session(['total_price' => $totalPrice]);
 
+        // Check if the accessory is selected
+        $selectedOptions = $request->input('selected_options', []);
+        if (!in_array($accessoryId, $selectedOptions)) {
+            return $response->setError()->setMessage('Accessory not selected.');
+        }
+
         // Find the discount in the database
         $discount = BoatDiscount::where('code', $code)
             ->where('list_id', $accessoryId)
@@ -243,5 +249,6 @@ class PublicProductController
                 'discount_amount' => $discountAmount,
             ]);
     }
+
 
 }

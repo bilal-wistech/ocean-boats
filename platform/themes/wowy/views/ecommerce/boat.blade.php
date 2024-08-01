@@ -771,6 +771,22 @@
             let vatPrice = parseFloat($('.vat-price').text().replace(currency, '').replace(',', ''));
             let vatTotal = parseFloat($('.vat-total').text().replace(currency, '').replace(',', ''));
             let totalPrice = parseFloat($('input[name="total_price"]').val());
+
+            // Collect selected accessory IDs
+            let selectedOptions = [];
+            $('input[type="checkbox"], input[type="radio"]').each(function() {
+                if ($(this).is(':checked')) {
+                    selectedOptions.push($(this).val());
+                }
+            });
+
+            // Check if the accessory is selected
+            if (!selectedOptions.includes(accessoryId.toString())) {
+                window.showAlert('alert-danger',
+                    'Please select the accessory before applying the promo code.');
+                return; // Exit the function if the accessory is not selected
+            }
+
             spinner.removeClass('d-none');
 
             $.ajax({
@@ -780,6 +796,7 @@
                     code: code,
                     accessory_id: accessoryId,
                     total_price: totalPrice,
+                    selected_options: selectedOptions,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
@@ -787,7 +804,6 @@
                         console.log(response.message);
                         window.showAlert('alert-danger', response.message);
                     } else {
-
                         // Update the total price display
                         $('.sub-total').text(response.data.new_total.toLocaleString(
                             'en-US') + currency);
@@ -812,7 +828,7 @@
                     }
                 }.bind(
                     this
-                ), // Ensure 'this' refers to the correct context inside success callback
+                    ), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
                     window.showAlert('alert-danger',
@@ -823,6 +839,5 @@
                 }
             });
         });
-
     });
 </script>
