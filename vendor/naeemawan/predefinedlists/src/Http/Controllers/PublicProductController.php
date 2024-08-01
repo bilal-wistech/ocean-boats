@@ -249,6 +249,4 @@ class PublicProductController
                 'discount_amount' => $discountAmount,
             ]);
     }
-
-
 }
