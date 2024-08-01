@@ -447,15 +447,20 @@
                     </div>
                     <div class="col-4">
                         <!-- Custom Currency Dropdown -->
-                        <div class="dropdown currency">
+                        <div class="dropdown my-dropdown currency">
                             <button class="dropdown-toggle" type="button" id="currencyDropdown"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                AED
+                                {{ $selectedCurrency }}
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
-                                <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
-                                <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
+                                @foreach ($currencies as $currency)
+                                    @if ($currency->id !== get_application_currency_id())
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
                         </div>
                     </div>
                 </div>
