@@ -99,7 +99,6 @@
         $.ajax({
             url: href,
             success: function(data) {
-                console.log(data);
                 $(".list-content-loading").show();
                 $('.products-listing').empty();
                 $('.products-listing').append(data['data']);
@@ -158,7 +157,6 @@
                 price += optionPrice;
                 addToSummary($(this), value, typename, type, optionPrice);
             });
-
             updateTotalPrice();
         }
 
@@ -238,7 +236,13 @@
             if (selectedOptions[type]) {
                 var prevElement = $(`input[value="${selectedOptions[type]}"]`);
                 handleUnchecked(prevElement, type, prevElement.val());
+            } else {
+                var standardOption = $(`input[name="option[${type}]"][data-waschecked="true"]`);
+                if (standardOption.length && standardOption.val() !== value) {
+                    handleUnchecked(standardOption, type, standardOption.val());
+                }
             }
+
             if (element.attr('data-waschecked') == 'true') {
                 var optionPrice = parseFloat(element.data('price'));
                 addToSummary(element, value, typename, type, optionPrice);
@@ -332,6 +336,7 @@
             element.attr('data-waschecked', 'false');
             element.prop('checked', false);
         }
+
 
         function updateImages(data, parent) {
             if (data['preview_enabled']) {
