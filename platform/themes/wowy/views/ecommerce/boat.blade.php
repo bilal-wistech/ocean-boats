@@ -495,6 +495,37 @@
 
         const loadingIndicator = document.getElementById('loader');
         container.addEventListener('mousemove', onMouseMove, false);
+        container.addEventListener('dblclick', onDoubleClick, false);
+        let isZoomedIn = false;
+        function onDoubleClick(event) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+
+        if (!isZoomedIn) {
+            // Zoom in on the intersected object
+            const targetPosition = new THREE.Vector3().copy(intersectedObject.position);
+            camera.position.lerp(targetPosition, 0.2);
+
+            // Update the camera lookAt to the intersected object
+            controls.target.copy(targetPosition);
+            controls.update();
+            isZoomedIn = true;
+        } else {
+            // Zoom out to the original position
+            camera.position.set(0, 0, 6); // Adjust as necessary
+            controls.target.set(0, 0, 0); // Adjust as necessary
+            controls.update();
+            isZoomedIn = false;
+        }
+    }
+}
 
         function onMouseMove(event) {
             const rect = container.getBoundingClientRect();
@@ -548,7 +579,7 @@
         }
 
         function calculateTargetSize() {
-            return window.innerWidth < 768 ? 6 : 12;
+            return window.innerWidth < 768 ? 6 : 9;
         }
 
         loadingIndicator.style.display = 'block';
@@ -720,18 +751,22 @@
         }
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.rotateSpeed = 0.4; 
+        controls.enablePan = false; 
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 3;
+        controls.dampingFactor = 0.1;
+        controls.minDistance = 5;
         controls.maxDistance = 10;
-        controls.enabled = false;
-        container.addEventListener('pointerenter', () => {
-            controls.enabled = true;
-        });
-        container.addEventListener('pointerleave', () => {
-            controls.enabled = false;
-        });
-
+        controls.enabled = true;
+       
+        function centerModel() {
+    if (baseModel) {
+        const box = new THREE.Box3().setFromObject(baseModel);
+        const center = box.getCenter(new THREE.Vector3());
+        baseModel.position.sub(center);
+        scene.position.add(center);
+    }
+}
         function animate() {
             requestAnimationFrame(animate);
 
@@ -745,6 +780,7 @@
             }
 
             controls.update();
+            centerModel(); 
             renderer.render(scene, camera);
         }
 

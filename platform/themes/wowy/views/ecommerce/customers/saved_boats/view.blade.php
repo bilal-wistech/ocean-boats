@@ -87,8 +87,10 @@
                                                 @if ($value->slug->parent)
                                                     <span>
                                                         @if ($value->color)
-                                                            <span
-                                                                style="background-color: {{ $value->color }};">{{ $value->ltitle }}</span>
+                                                        <div class="color-title-container">
+                                                            <span>{{ $value->ltitle }}</span>
+                                                            <div class="color-rounded" style="background-color: {{ $value->color }};"></div>
+                                                            </div>
                                                         @else
                                                             {{ $value->ltitle }}
                                                         @endif
@@ -294,7 +296,7 @@
                             const newMaterial = new THREE.MeshStandardMaterial({
                                 color: child.material.color,
                                 metalness: 0.5,
-                                roughness: 0.5
+                                roughness: 0.3
                             });
                             child.material = newMaterial;
                         }

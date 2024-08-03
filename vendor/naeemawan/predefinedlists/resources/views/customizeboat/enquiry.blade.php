@@ -19,8 +19,10 @@
                                     @if ($value->slug->parent)
                                         <span>
                                             @if ($value->color)
-                                                <span
-                                                    style="background-color: {{ $value->color }};">{{ $value->ltitle }}</span>
+                                            <div class="color-title-container">
+                                                <span>{{ $value->ltitle }}</span>
+                                                <div class="color-rounded" style="background-color: {{ $value->color }};"></div>
+                                                </div>
                                             @else
                                                 {{ $value->ltitle }}
                                             @endif
@@ -139,6 +141,16 @@
         border-top: 0;
         transform: rotate(45deg);
     }
+    .color-title-container{
+    display:flex;
+}
+.color-rounded{
+    margin-left: 10px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    margin-top:-5px;
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
