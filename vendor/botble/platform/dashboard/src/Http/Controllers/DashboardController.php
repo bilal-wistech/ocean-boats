@@ -2,15 +2,18 @@
 
 namespace Botble\Dashboard\Http\Controllers;
 
+
 use Assets;
-use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Exception;
+use Illuminate\Http\Request;
+use NaeemAwan\PredefinedLists\Models\BoatView;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
-use Exception;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Http\Request;
+use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
+use NaeemAwan\PredefinedLists\Repositories\Interfaces\BoatViewInterface;
+use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
 
 class DashboardController extends BaseController
 {
@@ -20,14 +23,18 @@ class DashboardController extends BaseController
 
     protected UserInterface $userRepository;
 
+    protected BoatViewInterface $boatViewRepository;
+
     public function __construct(
         DashboardWidgetSettingInterface $widgetSettingRepository,
         DashboardWidgetInterface $widgetRepository,
-        UserInterface $userRepository
+        UserInterface $userRepository,
+        BoatViewInterface $boatViewRepository
     ) {
         $this->widgetSettingRepository = $widgetSettingRepository;
         $this->widgetRepository = $widgetRepository;
         $this->userRepository = $userRepository;
+        $this->boatViewRepository = $boatViewRepository;
     }
 
     public function getDashboard(Request $request)
@@ -63,8 +70,8 @@ class DashboardController extends BaseController
 
         $statWidgets = collect($widgetData)->where('type', '!=', 'widget')->pluck('view')->all();
         $userWidgets = collect($widgetData)->where('type', 'widget')->pluck('view')->all();
-
-        return view('core/dashboard::list', compact('widgets', 'userWidgets', 'statWidgets'));
+        $boatViews = BoatView::paginate(10);
+        return view('core/dashboard::list', compact('widgets', 'userWidgets', 'statWidgets','boatViews'));
     }
 
     public function postEditWidgetSettingItem(Request $request, BaseHttpResponse $response)

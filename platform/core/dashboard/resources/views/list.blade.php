@@ -1,9 +1,11 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 @section('content')
     <div class="d-none" id="dashboard-alerts">
-        <verify-license-component verify-url="{{ route('settings.license.verify') }}" setting-url="{{ route('settings.options') }}"></verify-license-component>
+        <verify-license-component verify-url="{{ route('settings.license.verify') }}"
+            setting-url="{{ route('settings.options') }}"></verify-license-component>
         @if (config('core.base.general.enable_system_updater') && Auth::user()->isSuperUser())
-            <check-update-component check-update-url="{{ route('system.check-update') }}" setting-url="{{ route('system.updater') }}"></check-update-component>
+            <check-update-component check-update-url="{{ route('system.check-update') }}"
+                setting-url="{{ route('system.updater') }}"></check-update-component>
         @endif
     </div>
     {!! apply_filters(DASHBOARD_FILTER_ADMIN_NOTIFICATIONS, null) !!}
@@ -14,6 +16,33 @@
         @foreach ($statWidgets as $widget)
             {!! $widget !!}
         @endforeach
+    </div>
+    <div class="col-md-12">
+        <h6>Boat Views</h6>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($boatViews as $item)
+                        <tr>
+                            <td>{{ $item->option->ltitle ?? '' }}</td>
+                            <td>{{ $item->entity_type ?? '' }}</td>
+                            <td>{{ $item->total_count ?? 0 }}</td </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination links -->
+        <div class="d-flex justify-content-center">
+            {{ $boatViews->links() }}
+        </div>
     </div>
     <div id="list_widgets" class="row">
         @foreach ($userWidgets as $widget)
