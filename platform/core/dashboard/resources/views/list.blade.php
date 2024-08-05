@@ -17,7 +17,7 @@
     {!! $widget !!}
     @endforeach
 </div>
-<div class="col-md-12">
+{{-- <div class="col-md-12">
     <h6>Boat Views</h6>
     <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
@@ -43,7 +43,7 @@
     <div class="d-flex justify-content-center">
         {{ $boatViews->links() }}
     </div>
-</div>
+</div> --}}
 <div class="col-12">
     <div id="main-view">
         <h6>Boat Views</h6>
