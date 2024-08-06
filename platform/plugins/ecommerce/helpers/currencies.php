@@ -29,6 +29,11 @@ if (!function_exists('format_price')) {
         }
         $currencyTitle = $currency->title;
 
+        // Check if the currency is the default currency
+        if ($currencyTitle === $defaultCurrency) {
+            return $withoutCurrency ? human_price_text($price, $currency) : human_price_text($price, $currency) . ' ' . $currency->symbol;
+        }
+
         // Try to get the conversion rate from cache or API
         $cacheKey = "exchange_rate_{$defaultCurrency}_{$currencyTitle}";
         $conversionRate = Cache::get($cacheKey);
@@ -42,7 +47,7 @@ if (!function_exists('format_price')) {
 
                 if ($data['result'] === 'success') {
                     if (isset($data['conversion_rates'][$currencyTitle])) {
-                        $conversionRate = $data['conversion_rates'][$currencyTitle];
+                        $conversionRate = ($data['conversion_rates'][$currencyTitle]);
                         Cache::put($cacheKey, $conversionRate, 3600); // Cache for 1 hour
                     } else {
                         throw new Exception("Conversion rate for {$currencyTitle} not found.");
@@ -57,7 +62,7 @@ if (!function_exists('format_price')) {
         }
 
         // Perform the price conversion
-        $price = ($price - 0.05) * $conversionRate;
+        $price = $price * ($conversionRate - 0.0005);
 
         // Format the output
         if ($withoutCurrency) {
