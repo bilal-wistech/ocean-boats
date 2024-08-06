@@ -211,14 +211,12 @@ li.breadcrumb-item a {
 
 .banner-text {
     position: absolute;
-    top: 48%;
-    left: 50%;
+    top: 35%;
+    left: 53%;
     width: 100%;
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 
 .banner-text.mob {
@@ -228,21 +226,21 @@ li.breadcrumb-item a {
 .heading1 {
     font-weight: bold;
     color: #fff;
-    text-align: center;
+    text-align: left;
     font-size: 55px;
 }
 
 .text1 {
     width: 60%;
     color: #fff;
-    text-align: center;
-    font-size: 18px;
+    text-align: left;
+    font-size: 16px;
     line-height: 2;
 }
 
 .btn.explore {
-    padding: 17px 20px;
-    font-size: 17px;
+    padding: 13px;
+    font-size: 15px;
     border-radius: 0px;
 }
 
@@ -477,11 +475,11 @@ footer .btn.subscribe:hover {
     }
 
     .banner-text {
-        top: 45%;
+        top: 35%;
     }
 
     .heading1 {
-        font-size: 50px;
+        font-size: 40px;
     }
 
     .header-action-2 .header-action-icon-2>a img {
@@ -489,11 +487,11 @@ footer .btn.subscribe:hover {
     }
 
     .text1 {
-        margin-top: 20px !important;
+        margin-top: 15px !important;
     }
 
     .btn.explore {
-        margin-top: 20px !important;
+        margin-top: 15px !important;
     }
 
     #standard-3 .search-txt-input {
@@ -629,7 +627,7 @@ footer .btn.subscribe:hover {
     }
 
     .logo1 img {
-        width: 100px;
+        width: 135px;
     }
 
     #header-top1 {
@@ -806,7 +804,10 @@ footer .btn.subscribe:hover {
     }
 
     .banner-text .heading1 {
-        font-size: 35px;
+        font-size: 30px;
+    }
+    .btn.explore {
+        margin-top: 20px !important;
     }
 
     .header-navbar-nav-right {
@@ -871,7 +872,7 @@ footer .btn.subscribe:hover {
     }
 
     .text1 {
-        font-size: 17px;
+        font-size: 15px;
     }
 
     .mobile-social-icon {
@@ -1954,4 +1955,33 @@ label.form-check-label.color-box:not(:first-child) {
 .btn-primary:disabled {
     background-color: grey !important;
     border-color: grey !important;
+}
+#scroll-down-button {
+    position: relative;
+    bottom: 112px;
+    left: 82%;
+    transform: translateX(-50%);
+    background-color: #2d8ec5;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+#scroll-down-button i {
+    font-size: 22px;
+    color: white;
+}
+.color-title-container{
+    display:flex;
+}
+.color-rounded{
+    margin-left: 10px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
 }

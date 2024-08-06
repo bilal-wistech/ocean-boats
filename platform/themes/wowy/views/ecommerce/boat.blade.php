@@ -59,6 +59,8 @@
                     <p>Loading Model...</p>
                 </div>
                 <div id="Three-model" style="width: 100%; height: 500px; overflow:hidden"></div>
+               
+                <div id="scroll-down-button" class="d-md-none"><i class="fal fa-long-arrow-down"></i></div>
             </div>
             @php
                 $boat_price = 0;
@@ -444,6 +446,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const scrollDownButton = document.getElementById('scroll-down-button');
+    if (scrollDownButton) {
+        scrollDownButton.addEventListener('click', function() {
+            const submitForm = document.getElementById('submit-form');
+            if (submitForm) {
+                submitForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
         const modelPath = '{{ asset('storage/' . $modelPath) }}';
         const container = document.getElementById('Three-model');
         const raycaster = new THREE.Raycaster();
@@ -496,8 +507,11 @@
         const loadingIndicator = document.getElementById('loader');
         container.addEventListener('mousemove', onMouseMove, false);
         container.addEventListener('dblclick', onDoubleClick, false);
-        let isZoomedIn = false;
-        function onDoubleClick(event) {
+       
+        let originalFOV;
+let isZoomedIn = false;
+
+function onDoubleClick(event) {
     const rect = container.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
     mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
@@ -507,25 +521,25 @@
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
         const intersectedObject = intersects[0].object;
-
         if (!isZoomedIn) {
-            // Zoom in on the intersected object
-            const targetPosition = new THREE.Vector3().copy(intersectedObject.position);
-            camera.position.lerp(targetPosition, 0.2);
+            originalFOV = camera.fov;
+            camera.fov = originalFOV * 0.75;
+            camera.updateProjectionMatrix();
+            controls.target.copy(intersectedObject.position);
 
-            // Update the camera lookAt to the intersected object
-            controls.target.copy(targetPosition);
             controls.update();
             isZoomedIn = true;
         } else {
-            // Zoom out to the original position
-            camera.position.set(0, 0, 6); // Adjust as necessary
-            controls.target.set(0, 0, 0); // Adjust as necessary
+            camera.fov = originalFOV;
+            camera.updateProjectionMatrix();
+            controls.target.set(0, 0, 0);
+
             controls.update();
             isZoomedIn = false;
         }
     }
 }
+
 
         function onMouseMove(event) {
             const rect = container.getBoundingClientRect();
