@@ -57,7 +57,7 @@ if (!function_exists('format_price')) {
         }
 
         // Perform the price conversion
-        $price = $price * $conversionRate - 0.02;
+        $price = ($price - 0.05) * $conversionRate;
 
         // Format the output
         if ($withoutCurrency) {
