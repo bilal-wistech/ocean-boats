@@ -3,7 +3,7 @@
         $discount = 0;
         $discount_type = '';
         $discount_on_boat = false;
-        foreach ($product->discounts as $boat_discount) {
+        foreach ($product->boat_discounts as $boat_discount) {
             $discount = $boat_discount->discount;
             $discount_type = $boat_discount->discount_type;
             if ($boat_discount->code == 'BOAT' || empty($boat_discount->code) || empty($boat_discount->accessory_id)) {

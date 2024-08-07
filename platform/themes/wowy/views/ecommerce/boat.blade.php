@@ -34,8 +34,8 @@
                 $discountValue = 0;
                 $discountType = '';
 
-                if ($product->discounts->isNotEmpty()) {
-                    foreach ($product->discounts as $discount) {
+                if ($product->boat_discounts->isNotEmpty()) {
+                    foreach ($product->boat_discounts as $discount) {
                         if ($discount->code === 'BOAT' || empty($discount->code)) {
                             $boat_total = $product->price;
 
@@ -59,7 +59,7 @@
                     <p>Loading Model...</p>
                 </div>
                 <div id="Three-model" style="width: 100%; height: 500px; overflow:hidden"></div>
-               
+
                 <div id="scroll-down-button" class="d-md-none"><i class="fal fa-long-arrow-down"></i></div>
             </div>
             @php
@@ -175,32 +175,6 @@
                                             class="vat-total">{{ format_price($product->price + ($product->price * 5) / 100) }}</span>
                                     </p>
                                 </div>
-                                {{-- <div class="col-4">
-                                    @php
-                                        $currencies = get_all_currencies() ?? [];
-                                        $selectedCurrency =
-                                            $currencies->firstWhere('id', get_application_currency_id())->title ??
-                                            'Select Currency';
-                                    @endphp
-
-                                    <div class="currency-dropdown dropdown">
-                                        <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $selectedCurrency }}
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                            @foreach ($currencies as $currency)
-                                                @if ($currency->id !== get_application_currency_id())
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
-                                                    </li>
-                                                @endif
-                                            @endforeach
-                                        </ul>
-                                    </div>
-
-                                </div> --}}
                             </div>
                         </div>
                         <div class="customboat-card-footer d-flex justify-content-between flex-row">
@@ -292,9 +266,11 @@
                     {{-- Discount --}}
                     @php
                         $hasAccessoryDiscounts = false;
-
                         foreach ($accessories as $accessory) {
-                            if ($accessory->discounts->isNotEmpty()) {
+                            if ($accessory->boat_discounts->isNotEmpty()) {
+                                $hasAccessoryDiscounts = true;
+                                break;
+                            } elseif ($accessory->accessory_discounts->isNotEmpty()) {
                                 $hasAccessoryDiscounts = true;
                                 break;
                             }
@@ -308,9 +284,9 @@
                                     <div class="card mx-auto">
                                         <div class="discount-card d-flex justify-content-center">
                                             <div class="row">
-                                                @if ($product->discounts->isNotEmpty())
-                                                    @foreach ($product->discounts as $discount)
-                                                        @if ($discount->code !== 'BOAT' && !empty($discount->code))
+                                                @if ($product->boat_discounts->isNotEmpty())
+                                                    @foreach ($product->boat_discounts as $discount)
+                                                        @if ($discount->code === 'BOAT' || empty($discount->code) || empty($discount->accessory_id))
                                                             <div class="col-3 align-items-center d-flex">
                                                                 <div class="access-name">
                                                                     <h5>{{ $discount->list->ltitle }}</h5>
@@ -353,11 +329,11 @@
                                                     @endforeach
                                                 @endif
                                                 @foreach ($accessories as $accessory)
-                                                    @if ($accessory->discounts->isNotEmpty())
-                                                        @foreach ($accessory->discounts as $discount)
+                                                    @if ($accessory->accessory_discounts->isNotEmpty())
+                                                        @foreach ($accessory->accessory_discounts as $discount)
                                                             <div class="col-3 align-items-center d-flex">
                                                                 <div class="access-name">
-                                                                    <h5>{{ $discount->list->ltitle }}</h5>
+                                                                    <h5>{{ $discount->accessory->ltitle }}</h5>
                                                                 </div>
                                                             </div>
                                                             <div class="col-9">
@@ -447,14 +423,16 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const scrollDownButton = document.getElementById('scroll-down-button');
-    if (scrollDownButton) {
-        scrollDownButton.addEventListener('click', function() {
-            const submitForm = document.getElementById('submit-form');
-            if (submitForm) {
-                submitForm.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    }
+        if (scrollDownButton) {
+            scrollDownButton.addEventListener('click', function() {
+                const submitForm = document.getElementById('submit-form');
+                if (submitForm) {
+                    submitForm.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        }
         const modelPath = '{{ asset('storage/' . $modelPath) }}';
         const container = document.getElementById('Three-model');
         const raycaster = new THREE.Raycaster();
@@ -507,38 +485,38 @@
         const loadingIndicator = document.getElementById('loader');
         container.addEventListener('mousemove', onMouseMove, false);
         container.addEventListener('dblclick', onDoubleClick, false);
-       
+
         let originalFOV;
-let isZoomedIn = false;
+        let isZoomedIn = false;
 
-function onDoubleClick(event) {
-    const rect = container.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+        function onDoubleClick(event) {
+            const rect = container.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
+            raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObjects(scene.children, true);
-    if (intersects.length > 0) {
-        const intersectedObject = intersects[0].object;
-        if (!isZoomedIn) {
-            originalFOV = camera.fov;
-            camera.fov = originalFOV * 0.75;
-            camera.updateProjectionMatrix();
-            controls.target.copy(intersectedObject.position);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            if (intersects.length > 0) {
+                const intersectedObject = intersects[0].object;
+                if (!isZoomedIn) {
+                    originalFOV = camera.fov;
+                    camera.fov = originalFOV * 0.75;
+                    camera.updateProjectionMatrix();
+                    controls.target.copy(intersectedObject.position);
 
-            controls.update();
-            isZoomedIn = true;
-        } else {
-            camera.fov = originalFOV;
-            camera.updateProjectionMatrix();
-            controls.target.set(0, 0, 0);
+                    controls.update();
+                    isZoomedIn = true;
+                } else {
+                    camera.fov = originalFOV;
+                    camera.updateProjectionMatrix();
+                    controls.target.set(0, 0, 0);
 
-            controls.update();
-            isZoomedIn = false;
+                    controls.update();
+                    isZoomedIn = false;
+                }
+            }
         }
-    }
-}
 
 
         function onMouseMove(event) {
@@ -765,22 +743,23 @@ function onDoubleClick(event) {
         }
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.rotateSpeed = 0.4; 
-        controls.enablePan = false; 
+        controls.rotateSpeed = 0.4;
+        controls.enablePan = false;
         controls.enableDamping = true;
         controls.dampingFactor = 0.1;
         controls.minDistance = 5;
         controls.maxDistance = 10;
         controls.enabled = true;
-       
+
         function centerModel() {
-    if (baseModel) {
-        const box = new THREE.Box3().setFromObject(baseModel);
-        const center = box.getCenter(new THREE.Vector3());
-        baseModel.position.sub(center);
-        scene.position.add(center);
-    }
-}
+            if (baseModel) {
+                const box = new THREE.Box3().setFromObject(baseModel);
+                const center = box.getCenter(new THREE.Vector3());
+                baseModel.position.sub(center);
+                scene.position.add(center);
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -794,7 +773,7 @@ function onDoubleClick(event) {
             }
 
             controls.update();
-            centerModel(); 
+            centerModel();
             renderer.render(scene, camera);
         }
 
@@ -878,7 +857,7 @@ function onDoubleClick(event) {
                     }
                 }.bind(
                     this
-                    ), // Ensure 'this' refers to the correct context inside success callback
+                ), // Ensure 'this' refers to the correct context inside success callback
                 error: function() {
                     console.log('An error occurred. Please try again.');
                     window.showAlert('alert-danger',
