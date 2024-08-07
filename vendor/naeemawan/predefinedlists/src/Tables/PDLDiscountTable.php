@@ -43,10 +43,10 @@ class PDLDiscountTable extends TableAbstract
                 return $item->code;
             })
             ->editColumn('list_id', function ($item) {
-                return $item->list->ltitle;
+                return $item->list->ltitle ?? '';
             })
             ->editColumn('accessory_id', function ($item) {
-                return $item->accessory->ltitle;
+                return $item->accessory->ltitle ?? '-';
             })
             ->editColumn('discount', function ($item) {
                 if ($item->discount_type == 'amount') {
