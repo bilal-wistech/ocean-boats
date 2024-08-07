@@ -24,7 +24,7 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
   Route::match(['post', 'get'], '/apply-discount', [
     'as' => 'public.apply-discount',
     'uses' => 'PublicProductController@applyDiscount',
-]);
+  ]);
   // payments
   Route::match(['post', 'get'], '/transaction/success', [
     'as' => 'ngenius.transaction.success',
@@ -219,6 +219,11 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
     Route::delete('/delete/{id}', [
       'as' => 'custom-boat-discounts.destroy',
       'uses' => 'PDLDiscountController@destroy',
+      'permission' => 'plugins.ecommerce',
+    ]);
+    Route::match(['post', 'get'], '/get-accessories', [
+      'as' => 'custom-boat-discounts.get-accessories',
+      'uses' => 'PDLDiscountController@getAccessories',
       'permission' => 'plugins.ecommerce',
     ]);
   });

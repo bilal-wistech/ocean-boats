@@ -14,6 +14,7 @@ class BoatDiscount extends BaseModel
   protected $fillable = [
     'code',
     'list_id',
+    'accessory_id',
     'discount',
     'discount_type',
     'valid_from',
@@ -22,7 +23,11 @@ class BoatDiscount extends BaseModel
   ];
 
   public function list()
-    {
-        return $this->belongsTo(PredefinedList::class, 'list_id');
-    }
+  {
+    return $this->belongsTo(PredefinedList::class, 'list_id');
+  }
+  public function accessory()
+  {
+    return $this->belongsTo(PredefinedList::class, 'accessory_id');
+  }
 }
