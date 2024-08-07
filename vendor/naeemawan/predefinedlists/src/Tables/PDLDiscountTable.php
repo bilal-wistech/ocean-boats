@@ -45,6 +45,9 @@ class PDLDiscountTable extends TableAbstract
             ->editColumn('list_id', function ($item) {
                 return $item->list->ltitle;
             })
+            ->editColumn('accessory_id', function ($item) {
+                return $item->accessory->ltitle;
+            })
             ->editColumn('discount', function ($item) {
                 if ($item->discount_type == 'amount') {
                     return format_price($item->discount);
@@ -80,6 +83,7 @@ class PDLDiscountTable extends TableAbstract
             'id',
             'code',
             'list_id',
+            'accessory_id',
             'discount',
             'discount_type',
             'valid_from',
@@ -106,7 +110,12 @@ class PDLDiscountTable extends TableAbstract
             ],
             'list_id' => [
                 'name' => 'list_id',
-                'title' => 'Predefined List',
+                'title' => 'Boat',
+                'class' => 'text-start',
+            ],
+            'accessory_id' => [
+                'name' => 'accessory_id',
+                'title' => 'Accessory',
                 'class' => 'text-start',
             ],
             'discount' => [
