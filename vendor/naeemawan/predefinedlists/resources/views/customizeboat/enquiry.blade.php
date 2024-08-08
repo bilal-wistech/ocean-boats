@@ -19,9 +19,10 @@
                                     @if ($value->slug->parent)
                                         <span>
                                             @if ($value->color)
-                                            <div class="color-title-container">
-                                                <span>{{ $value->ltitle }}</span>
-                                                <div class="color-rounded" style="background-color: {{ $value->color }};"></div>
+                                                <div class="color-title-container">
+                                                    <span>{{ $value->ltitle }}</span>
+                                                    <div class="color-rounded"
+                                                        style="background-color: {{ $value->color }};"></div>
                                                 </div>
                                             @else
                                                 {{ $value->ltitle }}
@@ -65,9 +66,13 @@
     @php
         $discount = 0;
         $discount_type = '';
-        foreach ($boat_enquiry->boat->discounts as $boat_discount) {
+        $discount_on_boat = false;
+        foreach ($boat_enquiry->boat->boat_discounts as $boat_discount) {
             $discount = $boat_discount->discount;
             $discount_type = $boat_discount->discount_type;
+            if ($boat_discount->code == 'BOAT' || empty($boat_discount->code) || empty($boat_discount->accessory_id)) {
+                $discount_on_boat = true;
+            }
         }
         // Calculate the final price after applying the discount
         $original_price = $boat_enquiry->boat->price;
@@ -87,7 +92,7 @@
                 <hr />
                 <p><b>Boat Price</b>: <span class="sub-total">{{ format_price($boat_enquiry->boat->price) }}</span>
                 </p>
-                @if ($discount)
+                @if ($discount && $discount_on_boat)
                     <p><b>Discount Boat Price</b>: <span class="sub-total">{{ $formatted_price }}</span>
                     </p>
                 @endif
@@ -141,16 +146,18 @@
         border-top: 0;
         transform: rotate(45deg);
     }
-    .color-title-container{
-    display:flex;
-}
-.color-rounded{
-    margin-left: 10px;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    margin-top:-5px;
-}
+
+    .color-title-container {
+        display: flex;
+    }
+
+    .color-rounded {
+        margin-left: 10px;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        margin-top: -5px;
+    }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>

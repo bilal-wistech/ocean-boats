@@ -207,6 +207,7 @@ class PublicProductController
         // Find the discount in the database
         $discount = BoatDiscount::where('code', $code)
             ->where('list_id', $accessoryId)
+            ->orWhere('accessory_id',$accessoryId)
             ->where(function ($query) {
                 $query->where('valid_to', '>=', now())
                     ->orWhere('never_expires', 1);

@@ -71,9 +71,13 @@ class PredefinedList extends BaseModel
     {
         return $this->hasOne(PredefinedList::class, 'parent_id');
     }
-    public function discounts()
+    public function boat_discounts()
     {
         return $this->hasMany(BoatDiscount::class, 'list_id');
+    }
+    public function accessory_discounts()
+    {
+        return $this->hasMany(BoatDiscount::class, 'accessory_id');
     }
 
 }

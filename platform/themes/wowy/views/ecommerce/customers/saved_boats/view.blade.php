@@ -43,9 +43,17 @@
                             @php
                                 $discount = 0;
                                 $discount_type = '';
-                                foreach ($boat->boat->discounts as $boat_discount) {
+                                $discount_on_boat = false;
+                                foreach ($boat->boat->boat_discounts as $boat_discount) {
                                     $discount = $boat_discount->discount;
                                     $discount_type = $boat_discount->discount_type;
+                                    if (
+                                        $boat_discount->code == 'BOAT' ||
+                                        empty($boat_discount->code) ||
+                                        empty($boat_discount->accessory_id)
+                                    ) {
+                                        $discount_on_boat = true;
+                                    }
                                 }
                                 // Calculate the final price after applying the discount
                                 $original_price = $boat->boat->price;
@@ -60,7 +68,7 @@
 
                                 $formatted_price = format_price($discounted_price);
                             @endphp
-                            @if ($discount)
+                            @if ($discount && $discount_on_boat)
                                 <div>
                                     <span class="d-inline-block">{{ __('Discount Boat Price') }}:</span>
                                     <strong class="order-detail-value"> {{ $formatted_price }} </strong>

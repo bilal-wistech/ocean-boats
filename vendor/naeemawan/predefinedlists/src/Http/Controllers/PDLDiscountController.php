@@ -14,14 +14,17 @@ use NaeemAwan\PredefinedLists\Tables\PDLDiscountTable;
 use NaeemAwan\PredefinedLists\Http\Requests\PDLDiscountRequest;
 use NaeemAwan\PredefinedLists\Http\Requests\PredefinedCategoryRequest;
 use NaeemAwan\PredefinedLists\Repositories\Interfaces\PDLDiscountInterface;
+use NaeemAwan\PredefinedLists\Repositories\Interfaces\PredefinedListInterface;
 
 class PDLDiscountController extends BaseController
 {
     protected PDLDiscountInterface $pdlDiscountRepository;
+    protected PredefinedListInterface $predefinedListRepository;
 
-    public function __construct(PDLDiscountInterface $pdlDiscountRepository)
+    public function __construct(PDLDiscountInterface $pdlDiscountRepository, PredefinedListInterface $predefinedListRepository)
     {
         $this->pdlDiscountRepository = $pdlDiscountRepository;
+        $this->predefinedListRepository = $predefinedListRepository;
     }
 
     public function index(PDLDiscountTable $table)
@@ -37,15 +40,29 @@ class PDLDiscountController extends BaseController
 
     public function store(PDLDiscountRequest $request, BaseHttpResponse $response)
     {
-        $pdlDiscount = $this->pdlDiscountRepository->createOrUpdate($request->input());
+        // Extracting the list_id values from the request
+        $input = $request->all();
+        $listIds = $input['list_id'];
+        unset($input['list_id']); // Remove list_id from input since we'll handle it separately
 
-        event(new CreatedContentEvent(ADS_MODULE_SCREEN_NAME, $request, $pdlDiscount));
+        $discounts = [];
+        foreach ($listIds as $listId) {
+            $input['list_id'] = $listId; // Set the current list_id
+            $discounts[] = $this->pdlDiscountRepository->createOrUpdate($input); // Create or update the discount
+        }
+
+        foreach ($discounts as $pdlDiscount) {
+            event(new CreatedContentEvent(ADS_MODULE_SCREEN_NAME, $request, $pdlDiscount));
+        }
 
         return $response
             ->setPreviousUrl(route('custom-boat-discounts'))
-            ->setNextUrl(route('custom-boat-discounts.create', $pdlDiscount->id))
+            ->setNextUrl(route('custom-boat-discounts.create'))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
+
+
+
     public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $pdlDiscount = $this->pdlDiscountRepository->findOrFail($id);
@@ -59,19 +76,29 @@ class PDLDiscountController extends BaseController
 
     public function update(int $id, PDLDiscountRequest $request, BaseHttpResponse $response)
     {
-        $pdlDiscount = $this->pdlDiscountRepository->findOrFail($id);
+        // Extracting the list_id values from the request
+        $input = $request->all();
+        $listIds = $input['list_id'];
+        unset($input['list_id']); // Remove list_id from input since we'll handle it separately
 
-        $pdlDiscount->fill($request->input());
+        // Find and delete the existing discount records for the given id
+        $this->pdlDiscountRepository->deleteBy(['discount_id' => $id]);
 
-        $this->pdlDiscountRepository->createOrUpdate($pdlDiscount);
+        // Create new discount records for the updated list of list_id values
+        $discounts = [];
+        foreach ($listIds as $listId) {
+            $input['list_id'] = $listId;
+            $discounts[] = $this->pdlDiscountRepository->createOrUpdate($input);
+        }
 
-        event(new UpdatedContentEvent(ADS_MODULE_SCREEN_NAME, $request, $pdlDiscount));
+        foreach ($discounts as $pdlDiscount) {
+            event(new UpdatedContentEvent(ADS_MODULE_SCREEN_NAME, $request, $pdlDiscount));
+        }
 
         return $response
-            ->setPreviousUrl(route('custom-boat-discounts', $pdlDiscount->id))
+            ->setPreviousUrl(route('custom-boat-discounts', $id))
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
-
     public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
@@ -88,4 +115,59 @@ class PDLDiscountController extends BaseController
                 ->setMessage($exception->getMessage());
         }
     }
+    public function getAccessories(Request $request)
+    {
+        $boatIds = $request->input('boats', []);
+
+        if (empty($boatIds)) {
+            return response()->json(['success' => false, 'message' => 'No boats selected.']);
+        }
+
+        $accessories = [];
+        foreach ($boatIds as $boatId) {
+            $boat = $this->predefinedListRepository->findById($boatId);
+
+            if (!$boat) {
+                return response()->json(['success' => false, 'message' => "Boat with ID $boatId not found."]);
+            }
+
+            $boat_cats = $boat->childitems_display();
+
+            foreach ($boat_cats as $boat_cat) {
+                $boat_cat_data = [
+                    'id' => $boat_cat->id,
+                    'ltitle' => $boat_cat->ltitle,
+                    'sub_categories' => []
+                ];
+            
+                foreach ($boat_cat->childitems() as $boat_sub_cat) {
+                    $boat_sub_cat_data = [
+                        'id' => $boat_sub_cat->id,
+                        'ltitle' => $boat_sub_cat->ltitle,
+                        'sub_sub_categories' => []
+                    ];
+            
+                    foreach ($boat_sub_cat->childitems() as $boat_sub_sub_cat) {
+                        $boat_sub_sub_cat_data = [
+                            'id' => $boat_sub_sub_cat->id,
+                            'ltitle' => $boat_sub_sub_cat->ltitle,
+                        ];
+            
+                        $boat_sub_cat_data['sub_sub_categories'][] = $boat_sub_sub_cat_data;
+                    }
+            
+                    $boat_cat_data['sub_categories'][] = $boat_sub_cat_data;
+                }
+            
+                $accessories[] = $boat_cat_data;
+            }
+            
+        }
+
+        return response()->json([
+            'success' => true,
+            'accessories' => $accessories,
+        ]);
+    }
+
 }

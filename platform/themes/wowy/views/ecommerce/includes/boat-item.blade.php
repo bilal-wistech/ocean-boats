@@ -2,9 +2,14 @@
     @php
         $discount = 0;
         $discount_type = '';
-        foreach ($product->discounts as $boat_discount) {
+        $discount_on_boat = false;
+        foreach ($product->boat_discounts as $boat_discount) {
             $discount = $boat_discount->discount;
             $discount_type = $boat_discount->discount_type;
+            if ($boat_discount->code == 'BOAT' || empty($boat_discount->code) || empty($boat_discount->accessory_id)) {
+                $discount_on_boat = true;
+            }
+            
         }
         // Calculate the final price after applying the discount
         $original_price = $product->price;
@@ -22,7 +27,7 @@
         }
 
         $formatted_discounted_price = format_price($discounted_price);
-        $has_discount = $discount > 0 && ($discount_type == 'percentage' || $discount_type == 'amount');
+        $has_discount = $discount > 0 && ($discount_type == 'percentage' || $discount_type == 'amount') && $discount_on_boat;
     @endphp
     <div class="product-cart-wrap boat-custom mb-30">
         <div class="product-img-action-wrap">
