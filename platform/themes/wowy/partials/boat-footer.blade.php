@@ -359,12 +359,22 @@
             }
         }
 
-        $('body').on('click', '.view-summary', function() {
-            $('#summary-end').show();
-            $('html, body').animate({
-                scrollTop: $('#summary-end').offset().top
-            }, 1000);
-        });
+        // $('body').on('click', '.view-summary', function() {
+        //     $('#summary-end').show();
+        //     $('html, body').animate({
+        //         scrollTop: $('#summary-end').offset().top
+        //     }, 1000);
+        // });
+        const viewSummaryButton = document.getElementById('view-summary');
+            if (viewSummaryButton) {
+                viewSummaryButton.addEventListener('click', function() {
+                    const summaryEnd = document.getElementById('summary-end');
+                    if (summaryEnd) {
+                        summaryEnd.style.display = 'block'; 
+                        summaryEnd.scrollIntoView({ behavior: 'smooth' }); 
+                    }
+                });
+            }
 
         $('body').on('click', '.submit-btn', function() {
             $("input[name='redirect_url_pay']").val(1);

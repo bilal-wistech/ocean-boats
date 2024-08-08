@@ -1805,12 +1805,12 @@ label.form-check-label.color-box:not(:first-child) {
     list-style: initial !important;
     margin-left: 1rem;
 }
-
+.customboat-card {
+    height:630px;
+    overflow-x: scroll;
+}
 @media only screen and (min-width: 1000px) {
-    .customboat-card {
-        height:630px;
-        overflow-x: scroll;
-    }
+   
     .bg-video {
         width: 100%;
         height: 100%;
@@ -1898,9 +1898,9 @@ label.form-check-label.color-box:not(:first-child) {
     font-size: 12px;
     height: 40px;
 }
-.discount-area .card{
+/* .discount-area .card{
     width: 520px;
-}
+} */
 .discount-card .btn{
     font-size: 12px;
     padding: 10px 25px;

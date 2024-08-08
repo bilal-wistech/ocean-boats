@@ -73,6 +73,10 @@
                             $modelPath = $boat->boat->file;
                         @endphp
                         <div class="row">
+                            <div id="loader">
+                                <div class="spinner"></div>
+                                <p>Loading Model...</p>
+                            </div>
                             {{-- 3d model div starts --}}
                             <div id="3d-model" style="width: 100%; height: 500px; overflow:hidden"></div>
                             {{-- 3d model div ends --}}
@@ -87,9 +91,10 @@
                                                 @if ($value->slug->parent)
                                                     <span>
                                                         @if ($value->color)
-                                                        <div class="color-title-container">
-                                                            <span>{{ $value->ltitle }}</span>
-                                                            <div class="color-rounded" style="background-color: {{ $value->color }};"></div>
+                                                            <div class="color-title-container">
+                                                                <span>{{ $value->ltitle }}</span>
+                                                                <div class="color-rounded"
+                                                                    style="background-color: {{ $value->color }};"></div>
                                                             </div>
                                                         @else
                                                             {{ $value->ltitle }}
@@ -101,8 +106,7 @@
                                                 @endif
                                             <p>
                                                 @php
-                                                    $discounted_price =
-                                                        $value->enquiry_option->price - $value->discount_amount;
+                                                    $discounted_price = $value->enquiry_option->price - $value->discount_amount;
                                                 @endphp
                                                 <b>Price</b> :
                                                 {{ format_price($value->enquiry_option->price) }}
@@ -155,8 +159,11 @@
                     '{{ asset('storage/' . $value->file) }}',
                 @endforeach
             ];
-
+            const loadingIndicator = document.getElementById('loader');
             const container = document.getElementById('3d-model');
+            loadingIndicator.style.display = 'block';
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1,
                 1000);
@@ -175,6 +182,7 @@
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
+            renderer.render(scene, camera);
 
             const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             directionalLight.position.set(5, 5, 5).normalize();
@@ -202,10 +210,90 @@
             let originalColors = {};
             let modelsToLoad = accessoryModelPaths.length + 1;
             let loadedModels = 0;
+            container.addEventListener('mousemove', onMouseMove, false);
+            container.addEventListener('dblclick', onDoubleClick, false);
+
+            let originalFOV;
+            let isZoomedIn = false;
+
+            function onDoubleClick(event) {
+                const rect = container.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                if (intersects.length > 0) {
+                    const intersectedObject = intersects[0].object;
+                    if (!isZoomedIn) {
+                        originalFOV = camera.fov;
+                        camera.fov = originalFOV * 0.75;
+                        camera.updateProjectionMatrix();
+                        controls.target.copy(intersectedObject.position);
+
+                        controls.update();
+                        isZoomedIn = true;
+                    } else {
+                        camera.fov = originalFOV;
+                        camera.updateProjectionMatrix();
+                        controls.target.set(0, 0, 0);
+
+                        controls.update();
+                        isZoomedIn = false;
+                    }
+                }
+            }
+
+
+            function onMouseMove(event) {
+                const rect = container.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+            }
+
 
             function onAllModelsLoaded() {
                 applyColors();
+                loadingIndicator.style.display = 'none';
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.rotateSpeed = 0.4;
+                controls.enablePan = false;
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.1;
+                controls.minDistance = 5;
+                controls.maxDistance = 10;
+                controls.enabled = true;
+
+                function centerModel() {
+                    if (baseModel) {
+                        const box = new THREE.Box3().setFromObject(baseModel);
+                        const center = box.getCenter(new THREE.Vector3());
+                        baseModel.position.sub(center);
+                        scene.position.add(center);
+                    }
+                }
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    raycaster.setFromCamera(mouse, camera);
+
+                    const intersects = raycaster.intersectObjects(scene.children, true);
+                    if (intersects.length > 0) {
+                        container.style.cursor = 'pointer';
+                    } else {
+                        container.style.cursor = 'default';
+                    }
+
+                    controls.update();
+                    centerModel();
+                    renderer.render(scene, camera);
+                }
+
+                animate();
             }
+
+
 
             function incrementLoadedModels() {
                 loadedModels++;
@@ -228,20 +316,12 @@
                     }
                 });
 
-                // console.log('Color Map:', colorMap);
-                // console.log('Other Options:', otherOptions);
-
                 Object.keys(colorMap).forEach(firstWord => {
-                    // console.log(`Processing color map entry: ${firstWord}, Color: ${colorMap[firstWord]}`);
-
                     let modelFound = false;
                     otherOptions.forEach(option => {
                         if (option.subcat_slug.startsWith(firstWord)) {
-                            console.log(`Option found for ${firstWord}: ${option.subcat_slug}`);
-
                             additionalModels.forEach((model, index) => {
                                 if (model.userData.path.includes(option.file)) {
-                                    // console.log("File found in additional models");
                                     model.traverse(child => {
                                         if (child.isMesh) {
                                             child.material.color.set(colorMap[
@@ -255,12 +335,9 @@
                     });
 
                     if (!modelFound) {
-                        // console.log(`No matching option found for ${firstWord} in otherOptions`);
-                        // console.log(`Checking base model children for ${firstWord}`);
                         baseModel.traverse(child => {
                             if (child.name) {
                                 const childName = child.name.trim().toLowerCase();
-
                                 if (childName.includes(firstWord)) {
                                     child.traverse(child => {
                                         if (child.isMesh && child.material) {
@@ -268,15 +345,9 @@
                                             modelFound = true;
                                         }
                                     });
-                                    basePartFound = true;
                                 }
                             }
                         });
-
-                    }
-
-                    if (!modelFound) {
-                        console.log(`No matching parts found in base model for ${firstWord}`);
                     }
                 });
             }
@@ -316,7 +387,6 @@
                     model.position.y -= center.y;
                     model.position.z -= center.z;
 
-
                     if (baseModel) {
                         model.position.copy(baseModel.position);
                         model.scale.copy(baseModel.scale);
@@ -344,29 +414,10 @@
                         scene.add(accessoryModel);
                     });
                 });
-
-                const controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = false;
-                controls.minDistance = 5;
-                controls.maxDistance = 13;
-                controls.enabled = false;
-                container.addEventListener('pointerenter', () => {
-                    controls.enabled = true;
-                });
-                container.addEventListener('pointerleave', () => {
-                    controls.enabled = false;
-                });
-
-                function animate() {
-                    requestAnimationFrame(animate);
-                    renderer.render(scene, camera);
-                    controls.update();
-                }
-
-                animate();
             });
         });
     </script>
+
 
 
 
