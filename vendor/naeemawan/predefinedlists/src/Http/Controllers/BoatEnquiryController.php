@@ -38,18 +38,24 @@ class BoatEnquiryController extends BaseController
 
     public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
-        $boat_enquiry = BoatEnquiry::where(['boat_enquiries.id' => $id, 'boat_enquiries.user_id' => auth('customer')->id()])
-            ->join('predefined_list as p', 'p.id', '=', 'boat_enquiries.boat_id')
+        $query = BoatEnquiry::join('predefined_list as p', 'p.id', '=', 'boat_enquiries.boat_id')
             ->select('boat_enquiries.*', 'p.ltitle')
-            ->with('details')
-            ->first();
+            ->with('details');
+
+        if (!auth()->user()->super_user) {
+            $query->where(['boat_enquiries.id' => $id, 'boat_enquiries.user_id' => auth('customer')->id()]);
+        } else {
+            $query->where('boat_enquiries.id', $id);
+        }
+
+        $boat_enquiry = $query->first();
 
         if (!$boat_enquiry) {
             abort(404);
         }
 
         foreach ($boat_enquiry->details as $details) {
-            $opt = PredefinedList::where(['id' => $details->option_id])
+            $opt = PredefinedList::where('id', $details->option_id)
                 ->select(
                     'predefined_list.id',
                     'predefined_list.ltitle',
@@ -83,7 +89,7 @@ class BoatEnquiryController extends BaseController
                 'boat_enquiry_details.subcat_slug',
                 'boat_enquiry_details.has_discount',
                 'boat_enquiry_details.discount_code',
-                'boat_enquiry_details.discount_amount',
+                'boat_enquiry_details.discount_amount'
             )
             ->with('enquiry_option')
             ->get();
@@ -92,8 +98,11 @@ class BoatEnquiryController extends BaseController
 
         page_title()->setTitle("View Enquiry");
 
-        return $formBuilder->create(BoatEnquiryForm::class, ['model' => $boat_enquiry])->setFormOption('url', route('custom-boat-enquiries.update', $id))->renderForm();
+        return $formBuilder->create(BoatEnquiryForm::class, ['model' => $boat_enquiry])
+            ->setFormOption('url', route('custom-boat-enquiries.update', $id))
+            ->renderForm();
     }
+
 
     public function update(int $id, Request $request, BaseHttpResponse $response)
     {
