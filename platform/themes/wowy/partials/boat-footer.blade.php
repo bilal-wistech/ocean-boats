@@ -160,21 +160,46 @@
             updateTotalPrice();
         }
 
-        function addToSummary(element, value, typename, type, optionPrice) {
-            var html = `<div id="${value}" class="shadow card m-2 ${type}">
-                        <div class="head-cat card-header">
-                            <p class="text-center"><b>${typename}</b></p>
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="spacing">
-                                <p>${element.next('label').text()}</p>
-                                <p><b>Price</b> : <span class="price">${Math.trunc(optionPrice).toLocaleString('en-US')}${currency}</span></p>
-                            </div>
-                        </div>
-                    </div>`;
+        // function addToSummary(element, value, typename, type, optionPrice) {
+        //     var html = `<div id="${value}" class="shadow card m-2 ${type}">
+        //                 <div class="head-cat card-header">
+        //                     <p class="text-center"><b>${typename}</b></p>
+        //                 </div>
+        //                 <div class="card-body text-center">
+        //                     <div class="spacing">
+        //                         <p>${element.next('label').text()}</p>
+        //                         <p><b>Price</b> : <span class="price">${Math.trunc(optionPrice).toLocaleString('en-US')}${currency}</span></p>
+        //                     </div>
+        //                 </div>
+        //             </div>`;
 
-            $('#summary-end .summary-card').append(html);
-        }
+        //     $('#summary-end .summary-card').append(html);
+        // }
+        function addToSummary(element, value, typename, type, optionPrice) {
+    var color = element.next('label').css('background-color');
+    var colorHtml = '';
+    var colorName = element.next('label').find('.color-name').text();
+
+    if (color && colorName) {
+        colorHtml = `<div class="color-rounded" style="background-color: ${color}; display: inline-block; width: 30px; height: 30px; border-radius: 50%; margin-left: 5px;"></div>`;
+    }
+
+    var html = `<div id="${value}" class="shadow card m-2 ${type}">
+                    <div class="head-cat card-header">
+                        <p class="text-center"><b>${typename}</b></p>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="spacing">
+                            <p>${element.next('label').text()}</p>
+                            ${colorHtml}
+                            <p><b>Price</b> : <span class="price">${Math.trunc(optionPrice).toLocaleString('en-US')}${currency}</span></p>
+                        </div>
+                    </div>
+                </div>`;
+
+    $('#summary-end .summary-card').append(html);
+}
+
 
         function updateTotalPrice() {
             var currentPrice = boat_price + price; // This is the current price
