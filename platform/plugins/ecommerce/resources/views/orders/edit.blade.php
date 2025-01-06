@@ -4,10 +4,19 @@
 if($order->shipping_method_name==''){
     $order->shipping_method_name= 'DHL Express';
 }
+
 ?>
     <div class="max-width-1200" id="main-order-content">
         <div class="ui-layout">
             <div class="flexbox-layout-sections">
+                <!-- Add Generate AWB Slip Button -->
+            <div class="ui-layout__section">
+                <div class="ui-layout__item">
+                    <a class="btn btn-primary" id="generate-awb-slip-btn" href="{{ url('/create-awb-slip/'.$order->id) }}">
+                        Download Air Way Bill
+                    </a>
+                </div>
+            </div>
                 @if ($order->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
                     <div class="ui-layout__section">
                         <div class="ui-layout__item">
@@ -85,7 +94,6 @@ if($order->shipping_method_name==''){
                                                     ],
                                                 ]);
                                             @endphp
-
                                             <tr>
                                                 <td class="width-60-px min-width-60-px vertical-align-t">
                                                     <div class="wrap-img"><img
@@ -222,7 +230,7 @@ if($order->shipping_method_name==''){
                                                 <tr>
                                                     <td class="text-end mt10">
                                                         <p class="mb0 color-subtext">{{ trans('plugins/ecommerce::order.total_amount') }}</p>
-                                                        @if ($order->payment->id)
+                                                        @if ($order->payment->id && $order->payment->payment_channel->label())
                                                             <p class="mb0  font-size-12px"><a
                                                                     href="{{ route('payment.show', $order->payment->id) }}"
                                                                     target="_blank">{{ $order->payment->payment_channel->label() }}</a>

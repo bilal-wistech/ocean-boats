@@ -14,11 +14,11 @@
                 <div class="col-lg-6">
                     <p class="float-md-left font-sm mb-0">{{ theme_option('copyright') }} {{ __('All rights reserved.') }}</p>
                 </div>
-                {{-- <div class="col-lg-6">
-                    <p class="text-lg-end text-start font-sm mb-0">
-                        Made with <i class="fa fa-heart" style="color:red"></i> Wisdom
-                    </p>
-                </div> --}}
+                <!--<div class="col-lg-6">-->
+                <!--    <p class="text-lg-end text-start font-sm mb-0">-->
+                <!--        Made with <i class="fa fa-heart" style="color:red"></i> Wisdom-->
+                <!--    </p>-->
+                <!--</div>-->
             </div>
         </div>
     </footer>
@@ -108,13 +108,13 @@
             var url="<?php echo url('/'); ?>";
 
             $(document).ready(function() {
-                // $('.dropdown-item').on('click', function() {
-                //     $('.dropdown-item').removeClass('active');
-                //     $(this).addClass('active');
-                //     $('.dropdown-toggle').text($(this).text());
-                //     $('.tab-pane').removeClass('show active');
-                //     $($(this).data('bs-target')).addClass('show active');
-                // });
+                $('.dropdown-item').on('click', function() {
+                    $('.dropdown-item').removeClass('active');
+                    $(this).addClass('active');
+                    $('.dropdown-toggle').text($(this).text());
+                    $('.tab-pane').removeClass('show active');
+                    $($(this).data('bs-target')).addClass('show active');
+                });
 
                 $('body').on('click','.card-btn',function(){
                     val=$(this).data('value');
@@ -129,19 +129,8 @@
                     }
                     $('.cat-'+val).addClass('selected'); 
                 });
-                $('.dropdown').hover(function() {
-                $(this).find('.dropdown-menu').addClass('show');
-                $(this).find('.dropdown-toggle').attr('aria-expanded', 'true');
-                }, function() {
-                $(this).find('.dropdown-menu').removeClass('show');
-                $(this).find('.dropdown-toggle').attr('aria-expanded', 'false');
-                });
-                $('.dropdown-menu').mouseleave(function() {
-                $(this).removeClass('show');
-                $(this).prev('.dropdown-toggle').attr('aria-expanded', 'false');
-                });
 
-             // $('body').on('click','input[type="radio"]',function(){
+                // $('body').on('click','input[type="radio"]',function(){
                 //     var src=url+'/storage/'+'transparent-pic-150x150.png';
                 //     var value = $(this).val();
                 //     var parent = $(this).data('parent');

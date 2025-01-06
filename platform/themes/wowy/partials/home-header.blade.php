@@ -64,40 +64,46 @@
 
  <!-- maryam -->
 @php
-$parallelslider=\Botble\Theme\Models\ParallelSlider::where('status',1)->get();
+$parallelslider = Botble\Theme\Models\ParallelSlider::where('status', 1)->first();
+$videoBackground = Botble\Theme\Models\VideoBackground::where('status', 1)->where('id', 2)->first();
+$videoMobile = Botble\Theme\Models\VideoBackground::where('status', 1)->where('id', 1)->first();
 @endphp
- <div id="fullpage">
-    @foreach($parallelslider as $key=>$value)
-    <div class="section hero">
-      <img class="w-100 h-100" src="{{ RvMedia::getImageUrl($value->image)}}" alt="Ocean Boats Banner Image">
-      <div class="banner-text">
-        <h1 class="heading1">{{$value->title}}</h1>
-        <p class="text1 d-none d-md-block mt-40">{{$value->description}}</p>
-        <a href="{{url('/'.$value->action)}}"><button type="button" class="btn explore mt-40">{{$value->action_title}}</button></a>
-      </div>
-    </div>
-    @endforeach
 
-</div>
-@php
-$videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
-@endphp
- <div class = "video-banner">
-    @foreach($videoBackground as $key=>$value)
-    <div class="section hero">
-        <video class="bg-video" autoplay muted loop>
-            <source src="{{ RvMedia::getImageUrl($value->image) }}" type="video/mp4">
+   
+    @if ($videoBackground)
+    <div class="video-banner" style="width: 100%; height:100vh; overflow:hidden">
+            <div class="section hero">
+                <video class="bg-video desktop-video" autoplay muted loop>
+                    <source src="{{ RvMedia::getImageUrl($videoBackground->image) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                 <video class="bg-video mobile-video" autoplay muted loop>
+            <source src="{{ RvMedia::getImageUrl($videoMobile->image) }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-        <div class="banner-text">
-            <h1 class="heading1">{{$value->title}}</h1>
-            <p class="text1 d-none d-md-block mt-40">{{$value->description}}</p>
-            <a href="{{url('/'.$value->action)}}"><button type="button" class="btn explore mt-40">{{$value->action_title}}</button></a>
+                <div class="banner-text">
+                    <h1 class="heading1">{{ $videoBackground->title }}</h1>
+                    <p class="text1 d-none d-md-block mt-40">{{ $videoBackground->description }}</p>
+                    <a href="{{ url('/' . $videoBackground->action) }}"><button type="button" class="btn explore mt-40">{{ $videoBackground->action_title }}</button></a>
+                </div>
+            </div>
         </div>
-    </div>
-@endforeach
+    @else ($parallelslider)
+        <div id="img-banner">
+            <div class="img hero" style="position: relative; width: 100%; height: 100vh; overflow: hidden; background-image: url('{{ RvMedia::getImageUrl($parallelslider->image) }}'); background-size: cover; background-position: left; background-repeat: no-repeat;">
+                <div class="banner-text" style="position: absolute; margin-top: 50px; margin-left: 30px; color: white;">
+                    <h1 class="heading1">{{ $parallelslider->title }}</h1>
+                    <p class="text1 d-none d-md-block mt-40">{{ $parallelslider->description }}</p>
+                    <a href="{{ url('/' . $parallelslider->action) }}"><button type="button" class="btn explore mt-40">{{ $parallelslider->action_title }}</button></a>
+                </div>
+            </div>
+        </div>
+    @endif
 
-</div>
+
+
+
+
 
  <header class="header-areac {{ $headerStyle }}">
         <div class="header-laptop">
@@ -114,9 +120,9 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         @if (theme_option('phone'))
                             <li><a href="">{{ theme_option('phone') }}</a></li>
                         @endif
-                        @if (theme_option('contact_email'))
-                            <li><a href="">{{ theme_option('contact_email') }}</a></li>
-                        @endif
+                        <!--@if (theme_option('contact_email'))-->
+                        <!--    <li><a href="">{{ theme_option('contact_email') }}</a></li>-->
+                        <!--@endif-->
                         <li><form id="standard-3" action="{{ route('public.products') }}" id="form2">
                         <input type="text" class="search-txt-input" name="q" maxlength="100" placeholder="Search...">
                         <button type="submit" form="form2"  class="search-button">
@@ -124,26 +130,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                        </form></li>
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav d-flex">
-                        @php
-                            $currencies = get_all_currencies() ?? [];
-                            $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
-                        @endphp
-                                <!-- Currency Dropdown -->
-                        <div class="dropdown my-dropdown currency">
-                            <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ $selectedCurrency }}
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                @foreach ($currencies as $currency)
-                                    @if ($currency->id !== get_application_currency_id())
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
-                                        </li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                        </div>
+                      
                         @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
                             @if (count($socialLink) == 4)
                                 <li><a href="{{ $socialLink[2]['value'] }}" target="_blank"><i
@@ -184,7 +171,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
 
                 </div>
                 @if (auth('customer')->check())
-                    <li><a href="{{ route('customer.overview') }}"><img alt="{{ __('Sign In') }}" src="{{ Theme::asset()->url('images/icons/icon-user-white.svg') }}" style="width: 18%;position: absolute;float: right;"></a></li>
+                    <li><a href="{{ route('customer.overview') }}"><img alt="{{ __('Sign In') }}" src="{{ Theme::asset()->url('images/icons/icon-user-white.svg') }}" style="width: 16%;position: absolute;float: right;"></a></li>
                     @else
                     <li><a href="{{ route('customer.login') }}"><button type="button" class="btn login">Log In</button></li>
                     @endif
@@ -199,9 +186,9 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         @if (theme_option('phone'))
                             <li><a href="">{{ theme_option('phone') }}</a></li>
                         @endif
-                        @if (theme_option('contact_email'))
-                            <li><a href="">{{ theme_option('contact_email') }}</a></li>
-                        @endif
+                        <!--@if (theme_option('contact_email'))-->
+                        <!--    <li><a href="">{{ theme_option('contact_email') }}</a></li>-->
+                        <!--@endif-->
                     </ul>
                     <ul class="header-navbar-nav-right header-navbar-nav">
 
@@ -370,18 +357,7 @@ $videoBackground=\Botble\Theme\Models\VideoBackground::where('status',1)->get();
                         </form>
                     </div>
                             </div>
-                            <div class="col-4">
-                                  <!-- Custom Currency Dropdown -->
-                                  <div class="dropdown currency">
-                                    <button class="dropdown-toggle" type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                AED
-                               </button>
-                              <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                              <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
-                              <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
-                              <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
-                                    </div>
-                            </div>
+
                         </div>
 
 

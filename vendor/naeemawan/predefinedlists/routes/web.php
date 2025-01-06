@@ -17,10 +17,6 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
   Route::match(['post','get'],'/customize-type-content', [
     'uses' => 'PublicProductController@getTypeContent',
   ]);
-  Route::get('/customize-boat/add-view/{id}/{type}', [
-    'as' => 'public.customize-boat.add-view',  // Route name
-    'uses' => 'PublicProductController@addViewCount',  // Controller method
-  ]);
   // payments
   Route::match(['post','get'],'/transaction/success', [
     'as' => 'ngenius.transaction.success',
@@ -46,6 +42,12 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
     'as' => 'create.shipment',
     'uses' => 'DHLController@shipment',
   ]);
+
+    Route::match(['post','get'],'/create-awb-slip/{id}', [
+    'as' => 'awb_slip.create',
+    'uses' => 'DHLController@generateAWBSlip',
+  ]);
+  
   Route::match(['post','get'],'/track-order/{id}', [
     'as' => 'track.order',
     'uses' => 'DHLController@track',
@@ -148,9 +150,6 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'uses' => 'PredefinedCategoryController@deletes',
           'permission' => 'plugins.ecommerce',
         ]);
-
-        
-
     });
 
     //enquiries
@@ -160,7 +159,6 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'uses' => 'BoatEnquiryController@index',
           'permission' => 'plugins.ecommerce',
         ]);
-        
         Route::match(['post','get'],'/edit/{id}', [
           'as' => 'custom-boat-enquiries.edit',
           'uses' => 'BoatEnquiryController@edit',
@@ -182,12 +180,6 @@ Route::group(['namespace' => 'NaeemAwan\PredefinedLists\Http\Controllers', 'midd
           'permission' => 'plugins.ecommerce',
         ]);
     });
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(). '/custom-boat-views' , 'middleware' => 'auth'], function () {
-    Route::match(['post','get'],'/', [
-          'as' => 'custom-boat-views',
-          'uses' => 'BoatEnquiryController@botViews',
-          'permission' => 'plugins.ecommerce',
-        ]);
-});
+
 });
 

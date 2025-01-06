@@ -10,15 +10,26 @@
 	    <div class="card card-custom">
 	      <div class="card-body summary-card justify-content-center d-flex flex-row flex-wrap">
 	      	@if($boat_enquiry->details)
-			@foreach($boat_enquiry->details as $key=>$value)
+			<!--
+            @foreach($boat_enquiry->details as $key=>$value)
 	      	<div class="card m-1">
 	      		<div class="card-body text-center">
 	      			<p><b>{{$value->slug->ltitle ?? ''}}: </b>{{$value->slug->parent->ltitle ?? ''}}</p>
 	      			<p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
 	      		</div>
 	      	</div>
-			@endforeach
-	      	@endif
+			@endforeach -->
+	      	
+            @foreach($boat_enquiry->details as $key=>$value)
+                        <div class="card m-1">
+                            <div class="card-body text-center">
+                                <p><b>{{$value->slug->ltitle}}: </b>{{$value->slug->parent ? $value->ltitle : ''}}</p>
+                                <p><b>Price</b> : {{ format_price($value->enquiry_option->price) }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+
+            @endif
 	      </div>
 	    </div>
 		<!-- Final image -->

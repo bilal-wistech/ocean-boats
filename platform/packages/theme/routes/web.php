@@ -103,7 +103,6 @@ Route::group(['namespace' => 'Botble\Theme\Http\Controllers', 'middleware' => ['
               'as' => 'video-background.deletes',
               'uses' => 'VideoBackgroundController@deletes',
             ]);
-
         });
 
         Route::group(['prefix' => 'theme/custom-css'], function () {

@@ -19,13 +19,17 @@ use Auth;
 use DateTime;
 use Botble\Ecommerce\Events\OrderConfirmedEvent;
 use Botble\Payment\Models\Payment;
+use GuzzleHttp\Client;
 
 class DHLController extends BaseController{
     
     protected $API_KEY = 'YXBPMGNBNmdPN3dUOHM6UiE4eU5eNnZaIzVlRCEyYQ=='; // new credentials
-    protected $url = 'https://express.api.dhl.com/mydhlapi/test';    
+    
+    //protected $url = 'https://express.api.dhl.com/mydhlapi/test';   // developer
+    protected $url = 'https://express.api.dhl.com/mydhlapi';   // production
+    
     protected $accountnumber = '454583766'; // new credential
-    protected $basicAuth ='YXBPMGNBNmdPN3dUOHM6UiE4eU5eNnZaIzVlRCEyYQ=='; // new credentials
+    
     
     protected $apiUserName = 'apO0cA6gO7wT8s'; // new credential
     protected $apiPassword = 'R!8yN^6vZ#5eD!2a'; // new credential
@@ -54,6 +58,8 @@ class DHLController extends BaseController{
         $formattedDate = $date->format('Y-m-d');
         
         $details = 'accountNumber='.$this->accountnumber.'&weight='.$request->weight.'&length='.$request->length.'&width='.$request->width.'&height='.$request->height.'&plannedShippingDate='.$formattedDate.'&isCustomsDeclarable=false&unitOfMeasurement=metric&originCountryCode='.get_ecommerce_setting('store_country').'&originPostalCode='.get_ecommerce_setting('store_postal_code').'&originCityName='.get_ecommerce_setting('store_city').'&destinationCountryCode='.$request->country.'&destinationPostalCode='.urlencode($request->postal_code).'&destinationCityName='.urlencode($request->city).'';       
+       
+      
         
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -70,29 +76,59 @@ class DHLController extends BaseController{
               'Cookie: BIGipServer~WSB~pl_wsb-express-cbj.dhl.com_443=326904007.64288.0000'
             ),
         ));
-        $output = json_decode(curl_exec($curl));
-
+        
+        $temp = curl_exec($curl);
+        $output = json_decode($temp);
         curl_close($curl);
         if(isset($output->products)){
-            $shipping['price'] = $output->products[0]->totalPrice[0]->price;
-            $shipping['currency'] = $output->products[0]->totalPrice[0]->priceCurrency;
-            $shipping['product_code']=$output->products[0]->productCode;
-            $shipping['local_product_code']=$output->products[0]->localProductCode;
+        	
+            $product = $this->findNodeByProductCode($temp, "D") ;
+        	if(!empty($product)){
+        		$shipping['price'] = $product["totalPrice"][0]["price"];
+            		$shipping['currency'] = $product["totalPrice"][0]["priceCurrency"];
+            		$shipping['product_code'] = $product["productCode"];
+            		$shipping['local_product_code'] = $product["localProductCode"];
+        	}
+        	else{        	
+        	
+            	$shipping['price'] = $output->products[0]->totalPrice[0]->price;
+            	$shipping['currency'] = $output->products[0]->totalPrice[0]->priceCurrency;
+            	$shipping['product_code']=$output->products[0]->productCode;
+            	$shipping['local_product_code']=$output->products[0]->localProductCode;
+		}
+		
 
             $sessionCheckoutData = OrderHelper::getOrderSessionData($request->token);
             $sessionCheckoutData['shipping_method'] = 100;
             $sessionCheckoutData['shipping_option'] = 100;        
             $sessionCheckoutData['shipping_amount'] = $shipping['price'];
             $sessionCheckoutData['country'] = $request->country;
-            // \Log::info("DHL Controller Session: --- ".print_r($sessionCheckoutData, true));
+           
             OrderHelper::setOrderSessionData($request->token, $sessionCheckoutData);
             
         }
         else{
             $shipping['message'] = "Shipping amount is not available at this moment";
         }
+        
         return response()->json($shipping);
     }
+    
+    
+public function findNodeByProductCode($jsonString, $productCode) {
+    $data = json_decode($jsonString, true);
+
+    if (isset($data['products'])) {
+        foreach ($data['products'] as $product) {
+            if (isset($product['productCode']) && $product['productCode'] === $productCode) {
+                return $product;
+            }
+        }
+    }
+
+    return null; // Return null if no matching node is found
+}
+
 
     public function shipment(Request $request,BaseHttpResponse $response){
         $order = $this->orderRepository->findOrFail($request->input('order_id'));
@@ -109,7 +145,17 @@ class DHLController extends BaseController{
 
         $dimensions=getPackageDimensions($order->weight);
 
+       
+		        
         if($request->pickup){
+            
+             $customerReferences = [
+	    		[
+			        "value" => $order->code,                            
+                   
+	    		    ]
+		        ];
+		        
             $shipment=array(
                 "plannedPickupDateAndTime" => $formattedDate,
                 "closeTime" => $request->time,
@@ -121,9 +167,9 @@ class DHLController extends BaseController{
                     "shipperDetails" => array(
                         "postalAddress" => array(
                             "postalCode" => get_ecommerce_setting('store_postal_code'),
-                            "cityName" => get_ecommerce_setting('store_city'),
-                            "countryCode" => get_ecommerce_setting('store_country'),
-                            "addressLine1" => get_ecommerce_setting('store_address')
+                            "cityName" => 'Dubai',
+                            "countryCode" => 'AE',
+                            "addressLine1" => 'Dubai, UAE'
                         ),
                         "contactInformation" => array(
                             "email" => "nooruliman.rizwan@gmail.com", //website ka email lyngy yahan
@@ -150,6 +196,7 @@ class DHLController extends BaseController{
                 "shipmentDetails" => [array(
                     "packages" => [array(
                         "weight" => (float)$order->weight,
+                        "customerReferences" => $customerReferences,
                         "dimensions" => array(
                             "length" => $dimensions[0]/10,
                             "width" => $dimensions[1]/10,
@@ -163,7 +210,16 @@ class DHLController extends BaseController{
                 )]
             );
             $url = $this->url.'/pickups';
+            
         }else{
+            
+             $customerReferences = [
+	    		[
+			        "value" => $order->code,                            
+                    "typeCode" => "CU"
+	    		    ]
+		        ];
+		        
             $shipment=array(
                 "plannedShippingDateAndTime" => $formattedDate,
                 "pickup" => array(
@@ -179,9 +235,9 @@ class DHLController extends BaseController{
                     "shipperDetails" => array(
                         "postalAddress" => array(
                             "postalCode" => get_ecommerce_setting('store_postal_code'),
-                            "cityName" => get_ecommerce_setting('store_city'),
-                            "countryCode" => get_ecommerce_setting('store_country'),
-                            "addressLine1" => get_ecommerce_setting('store_address')
+                            "cityName" => 'Dubai',
+                            "countryCode" => 'AE',
+                            "addressLine1" => 'Dubai, UAE'
                         ),
                         "contactInformation" => array(
                             "email" => "nooruliman.rizwan@gmail.com", //website ka email lyngy yahan
@@ -208,6 +264,7 @@ class DHLController extends BaseController{
                 "content" => array(
                     "packages" => [array(
                         "weight" => (float)$order->weight,
+                        "customerReferences" => $customerReferences,
                         "dimensions" => array(
                             "length" => $dimensions[0]/10,
                             "width" => $dimensions[1]/10,
@@ -222,7 +279,7 @@ class DHLController extends BaseController{
                     "typeCode" => "email",
                     "receiverId" => Auth::user()->email, // yahan admin ki email ay gi
                     "languageCode" => "eng",
-                    "languageCountryCode" => get_ecommerce_setting('store_country'),
+                    "languageCountryCode" => 'AE',
                     "bespokeMessage" => "message to be included in the shipment"
                 )]
             );
@@ -246,6 +303,9 @@ class DHLController extends BaseController{
             ),
         ));
         $output = json_decode(curl_exec($curl));
+        
+        \Log::info(print_r($output,true));
+        
         curl_close($curl);
         if(isset($output->shipmentTrackingNumber) || isset($output->dispatchConfirmationNumbers)){
             $order->dhl_tracking_number = isset($output->shipmentTrackingNumber) ? $output->shipmentTrackingNumber : null;
@@ -304,4 +364,134 @@ class DHLController extends BaseController{
             return redirect()->back();
         }
     }
+    
+    /**
+     * @param Request $request
+     * @param BaseHttpResponse $response
+     * 
+     * @return [type]
+     */
+    public function generateAWBSlip($order_id)
+    {
+        $order = $this->orderRepository->findOrFail($order_id);
+        // $request->validate([
+        //     'time'   => 'required_if:pickup,1',
+        // ]);
+
+        $date = new DateTime;
+        $date->modify('+5 days');
+        if ($date->format('w') === '0') {
+            $date->modify('+1 day'); // Move to the next date
+        }
+        $formattedDate = $date->format('Y-m-d\TH:i:s \G\M\TP');
+
+        $dimensions = getPackageDimensions($order->weight);
+
+
+        $customerReferencesLatest = [
+            [
+                "value" => $order->code,
+                "typeCode" => "CU"
+            ]
+        ];
+
+        $shipmentLatest = array(
+            "plannedShippingDateAndTime" => $formattedDate,
+            "pickup" => array(
+                "isRequested" => false
+            ),
+            "productCode" => $order->product_code,
+            "localProductCode" => $order->local_product_code,
+            "accounts" => [array(
+                "typeCode" => "shipper",
+                "number" => $this->accountnumber
+            )],
+            "customerDetails" => array(
+                "shipperDetails" => array(
+                    "postalAddress" => array(
+                            "postalCode" => get_ecommerce_setting('store_postal_code'),
+                            "cityName" => 'Dubai',
+                            "countryCode" => 'AE',
+                            "addressLine1" => 'Dubai, UAE'
+                        ),
+                    "contactInformation" => array(
+                        "email" => "nooruliman.rizwan@gmail.com", //website email
+                        "phone" => "+971508415576", //website phone
+                        "companyName" => "Ocean Boats",
+                        "fullName" => Auth::user()->first_name
+                    )
+                ),
+                "receiverDetails" => array(
+                    "postalAddress" => array(
+                        "postalCode" => $order->shippingAddress->postal_code,
+                        "cityName" => $order->shippingAddress->city,
+                        "countryCode" => $order->shippingAddress->country,
+                        "addressLine1" => $order->shippingAddress->area.' '.$order->shippingAddress->address.' '.$order->shippingAddress->building,
+                    ),
+                    "contactInformation" => array(
+                        "email" => $order->user->email ?: $order->address->email,
+                        "phone" => $order->user->phone ?: $order->address->phone,
+                        "companyName" => "Ocean Boats",
+                        "fullName" => $order->user->name ?: $order->address->name
+                    )
+                )
+            ),
+            "content" => array(
+                "packages" => [array(
+                    "weight" => (float)$order->weight,
+                    "customerReferences" => $customerReferencesLatest,
+                    "dimensions" => array(
+                        "length" => $dimensions[0] / 10,
+                        "width" => $dimensions[1] / 10,
+                        "height" => $dimensions[2] / 10
+                    )
+                )],
+                "isCustomsDeclarable" => false,
+                "unitOfMeasurement" => "metric",
+                "description" => "shipment"
+            ),
+            "shipmentNotification" => [array(
+                "typeCode" => "email",
+                "receiverId" => Auth::user()->email, // admin email
+                "languageCode" => "eng",
+                "languageCountryCode" => 'AE',
+                "bespokeMessage" => "message to be included in the shipment"
+            )]
+        );
+
+        $json = json_encode($shipmentLatest);
+
+        $client = new Client();
+        $responseTracking = $client->post($this->url . '/shipments', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($this->apiUserName . ':' . $this->apiPassword),
+                'Content-Type' => 'application/json',
+            ],
+            'json' => $shipmentLatest, // This is the correct variable to send
+        ]);
+        
+        $responseLatest =  json_decode($responseTracking->getBody()->getContents(), true);
+
+        // Extract the base64 content from the response
+        $base64Content = $responseLatest['documents'][0]['content'];
+
+        // Decode the base64 content
+        $pdfContent = base64_decode($base64Content);
+
+        // Define a path where you want to save the PDF file
+        $filePath = storage_path('app/public/shipping_labels/shipping_label_' . $responseLatest['shipmentTrackingNumber'] . '.pdf');
+
+        // Ensure the directory exists
+        if (!file_exists(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        // Save the PDF file
+        file_put_contents($filePath, $pdfContent);
+
+        // Optionally, return the file to the user as a download
+        return response()->download($filePath)->deleteFileAfterSend(true);
+    }
+    
+    
 }

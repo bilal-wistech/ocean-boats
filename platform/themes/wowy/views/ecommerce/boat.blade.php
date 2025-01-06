@@ -22,6 +22,9 @@
                 <a class="customboat-nav-link" data-value="{{$product->id}}" data-type="summary">Summary</a>
             </li>
         </ul>
+        @php
+            $modelPath = $product->file;
+        @endphp
         <div class="row">
             <div id="carouselExampleControls" class="custom-boat carousel slide">
                 <div class="carousel-inner">
@@ -222,29 +225,7 @@
                                             class="vat-total">{{ format_price($product->price + (($product->price * 5)/100)) }}</span>
                                 </p>
                             </div>
-                            <div class="col-4">
-                                @php
-                                    $currencies = get_all_currencies() ?? [];
-                                    $selectedCurrency = $currencies->firstWhere('id', get_application_currency_id())->title ?? 'Select Currency';
-                                @endphp
-
-                                <div class="currency-dropdown dropdown">
-                                    <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                        {{ $selectedCurrency }}
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                        @foreach ($currencies as $currency)
-                                            @if ($currency->id !== get_application_currency_id())
-                                                <li>
-                                                    <a class="dropdown-item" href="{{ route('public.change-currency', $currency->title) }}">{{ $currency->title }}</a>
-                                                </li>
-                                            @endif
-                                        @endforeach
-                                    </ul>
-                                </div>
-
-                            </div>
+            
                         </div>
 
                     </div>
@@ -343,19 +324,7 @@
                                     class="vat-total">{{ format_price($product->price + (($product->price * 5)/100)) }}</span>
                         </p>
                     </div>
-                    <div class="col-3">
-                        <div class="currency-dropdown dropdown">
-                            <button class="dropdown-toggle" type="button" id="currencyDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                AED
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="currencyDropdown">
-                                <li><a class="dropdown-item" href="#" data-currency="AED">AED</a></li>
-                                <li><a class="dropdown-item" href="#" data-currency="EUR">Euro</a></li>
-                                <li><a class="dropdown-item" href="#" data-currency="USD">USD</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                 
                 </div>
 
             </div>
@@ -363,15 +332,14 @@
     </div>
 </div>
 </div>
-
 <!-- scrolling -->
+<!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    jQuery(function ($) {
-        var offset = $('#custom-boat-container').offset().top - 50;
+    jQuery(function($) {
+        var offset = $('#custom-boat-container').offset().top - 1;
         $('html, body').animate({
             scrollTop: offset
         }, 'slow');
     });
 </script>
-
