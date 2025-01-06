@@ -1,0 +1,2 @@
+<?php echo $__env->make(Theme::getThemeNamespace() . '::views.templates.posts', compact('posts'), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php /**PATH /home/oceanboats/public_html/platform/themes/wowy/views/category.blade.php ENDPATH**/ ?>
